@@ -16,6 +16,8 @@ function Analyze() {
   const [error, setError] = useState(null);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [lastFinanzierung, setLastFinanzierung] = useState(null);
+  const [lastVerwendungszweck, setLastVerwendungszweck] = useState(null);
   const { token } = useAuth();
   const { profile: investorProfile, isProfileComplete } = useUserProfile();
 
@@ -57,6 +59,11 @@ function Analyze() {
     setStep('analyzing');
     setLoadingMessage('Immobilie wird bewertet...');
 
+    // Speichere für spätere Neu-Analyse
+    setLastVerwendungszweck(verwendungszweck);
+    setLastFinanzierung(finanzierung);
+    setPropertyData(formData);
+
     try {
       const response = await fetch(`${API_BASE}/analyze`, {
         method: 'POST',
@@ -86,6 +93,46 @@ function Analyze() {
       setStep('form');
     }
   }, [token]);
+
+  // Neu-Analyse mit anderem Verwendungszweck
+  const handleSwitchVerwendungszweck = useCallback(async (newVerwendungszweck) => {
+    if (!propertyData || !lastFinanzierung) return;
+
+    setError(null);
+    setStep('analyzing');
+    setLoadingMessage(newVerwendungszweck === 'kapitalanlage'
+      ? 'Bewerte als Kapitalanlage...'
+      : 'Bewerte als Eigennutzung...');
+    setLastVerwendungszweck(newVerwendungszweck);
+
+    try {
+      const response = await fetch(`${API_BASE}/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          property_data: propertyData,
+          verwendungszweck: newVerwendungszweck,
+          eigenkapital: lastFinanzierung.eigenkapital,
+          zinssatz: lastFinanzierung.zinssatz,
+          tilgung: lastFinanzierung.tilgung,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Fehler bei der Analyse');
+      }
+
+      const result = await response.json();
+      setAnalysisResult(result);
+      setStep('result');
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [propertyData, lastFinanzierung, token]);
 
   const handleReset = useCallback(() => {
     setStep('upload');
@@ -216,6 +263,7 @@ function Analyze() {
               propertyData={propertyData}
               onNewAnalysis={handleReset}
               onEditData={handleBackToForm}
+              onSwitchVerwendungszweck={handleSwitchVerwendungszweck}
             />
           )}
         </main>

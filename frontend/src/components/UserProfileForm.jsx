@@ -66,11 +66,11 @@ function UserProfileForm({ profile, onProfileChange }) {
               placeholder="z.B. 60000"
               className={inputClass}
             />
-            <p className="text-xs text-text-muted mt-1">Wichtig fur Forderungsgrenzen</p>
+            <p className="text-xs text-text-muted mt-1">Wichtig für Förderungsgrenzen</p>
           </div>
 
           <div>
-            <label className={labelClass}>Verfugbares Eigenkapital (EUR)</label>
+            <label className={labelClass}>Verfügbares Eigenkapital (EUR)</label>
             <input
               type="number"
               name="eigenkapital"
@@ -79,7 +79,7 @@ function UserProfileForm({ profile, onProfileChange }) {
               placeholder="z.B. 50000"
               className={inputClass}
             />
-            <p className="text-xs text-text-muted mt-1">Bargeld + kurzfristig verfugbar</p>
+            <p className="text-xs text-text-muted mt-1">Bargeld + kurzfristig verfügbar</p>
           </div>
 
           <div>
@@ -121,7 +121,7 @@ function UserProfileForm({ profile, onProfileChange }) {
 
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className={labelClass}>Beschaftigungsart</label>
+            <label className={labelClass}>Beschäftigungsart</label>
             <select
               name="beruf"
               value={formData.beruf}
@@ -130,7 +130,7 @@ function UserProfileForm({ profile, onProfileChange }) {
             >
               <option value="angestellt">Angestellt (unbefristet)</option>
               <option value="beamte">Beamte/r</option>
-              <option value="selbststaendig">Selbststandig/Freiberufler</option>
+              <option value="selbststaendig">Selbstständig/Freiberufler</option>
               <option value="befristet">Befristet angestellt</option>
               <option value="rentner">Rentner/in</option>
             </select>
@@ -148,7 +148,7 @@ function UserProfileForm({ profile, onProfileChange }) {
                 <option key={bl} value={bl}>{bl}</option>
               ))}
             </select>
-            <p className="text-xs text-text-muted mt-1">Fur Landesforderung + Grunderwerbsteuer</p>
+            <p className="text-xs text-text-muted mt-1">Für Landesförderung + Grunderwerbsteuer</p>
           </div>
         </div>
 
@@ -198,20 +198,20 @@ function UserProfileForm({ profile, onProfileChange }) {
               <option value={3}>3 Kinder</option>
               <option value={4}>4+ Kinder</option>
             </select>
-            <p className="text-xs text-neon-green mt-1">Wichtig! Kinder erhohen KfW-Forderung erheblich</p>
+            <p className="text-xs text-neon-green mt-1">Wichtig! Kinder erhöhen KfW-Förderung erheblich</p>
           </div>
         </div>
       </div>
 
-      {/* Bestehendes Vermogen */}
+      {/* Bestehendes Vermögen */}
       <div className="glass-card rounded-2xl p-6 border border-accent/20">
         <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
           <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl border border-accent/30">📊</span>
-          <span className="text-accent">Bestehendes Vermogen (EK-Ersatz)</span>
+          <span className="text-accent">Bestehendes Vermögen (EK-Ersatz)</span>
         </h3>
 
         <p className="text-text-secondary text-sm mb-6">
-          Diese Werte konnen als Eigenkapital-Ersatz dienen und verbessern Ihre Kreditchancen
+          Diese Werte können als Eigenkapital-Ersatz dienen und verbessern Ihre Kreditchancen
         </p>
 
         <div className="space-y-6">
@@ -237,7 +237,7 @@ function UserProfileForm({ profile, onProfileChange }) {
                   placeholder="Depotwert in EUR"
                   className={inputClass}
                 />
-                <p className="text-xs text-neon-blue mt-1">Lombardkredit moglich: bis 70% beleihbar</p>
+                <p className="text-xs text-neon-blue mt-1">Lombardkredit möglich: bis 70% beleihbar</p>
               </div>
             )}
           </div>
@@ -261,10 +261,10 @@ function UserProfileForm({ profile, onProfileChange }) {
                   name="lvRueckkaufswert"
                   value={formData.lvRueckkaufswert}
                   onChange={handleChange}
-                  placeholder="Ruckkaufswert in EUR"
+                  placeholder="Rückkaufswert in EUR"
                   className={inputClass}
                 />
-                <p className="text-xs text-neon-purple mt-1">Policendarlehen moglich: bis 100% beleihbar</p>
+                <p className="text-xs text-neon-purple mt-1">Policendarlehen möglich: bis 100% beleihbar</p>
               </div>
             )}
           </div>

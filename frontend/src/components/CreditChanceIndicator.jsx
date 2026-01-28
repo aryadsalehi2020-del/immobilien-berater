@@ -28,33 +28,33 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
       faktoren.push({ text: 'Niedrige EK-Quote (<10%)', effekt: -5, typ: 'negativ' });
       tipps.push({
         icon: '💡',
-        titel: 'Eigenkapital erhohen',
-        text: 'Mit bestehendem Vermogen (Depot, LV, Riester) konnen Sie Ihr EK aufstocken'
+        titel: 'Eigenkapital erhöhen',
+        text: 'Mit bestehendem Vermögen (Depot, LV, Riester) können Sie Ihr EK aufstocken'
       });
     } else {
       basisChance -= 15;
       faktoren.push({ text: 'Kein Eigenkapital', effekt: -15, typ: 'negativ' });
       tipps.push({
         icon: '🏦',
-        titel: '100% Finanzierung moglich',
-        text: 'Einige Banken finanzieren 100% bei guter Bonitat. KfW-Kredit als EK-Ersatz pruefen!'
+        titel: '100% Finanzierung möglich',
+        text: 'Einige Banken finanzieren 100% bei guter Bonität. KfW-Kredit als EK-Ersatz prüfen!'
       });
     }
 
     // 2. Berufsgruppe
     if (profile.beruf === 'beamte') {
       basisChance += 15;
-      faktoren.push({ text: 'Beamtenstatus (beste Bonitat)', effekt: +15, typ: 'positiv' });
+      faktoren.push({ text: 'Beamtenstatus (beste Bonität)', effekt: +15, typ: 'positiv' });
     } else if (profile.beruf === 'angestellt') {
       basisChance += 10;
       faktoren.push({ text: 'Unbefristete Anstellung', effekt: +10, typ: 'positiv' });
     } else if (profile.beruf === 'selbststaendig') {
       basisChance -= 5;
-      faktoren.push({ text: 'Selbststandig (3 Jahre Steuerbescheide notig)', effekt: -5, typ: 'neutral' });
+      faktoren.push({ text: 'Selbstständig (3 Jahre Steuerbescheide nötig)', effekt: -5, typ: 'neutral' });
       tipps.push({
         icon: '📊',
-        titel: 'Selbststandigen-freundliche Banken',
-        text: 'ING, Sparda-Banken und KfW haben keine Aufschlage fur Selbststandige!'
+        titel: 'Selbstständigen-freundliche Banken',
+        text: 'ING, Sparda-Banken und KfW haben keine Aufschläge für Selbstständige!'
       });
     } else if (profile.beruf === 'befristet') {
       basisChance -= 10;
@@ -73,7 +73,7 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
       tipps.push({
         icon: '⚠️',
         titel: 'Nach Probezeit warten',
-        text: 'Die meisten Banken lehnen wahrend der Probezeit ab. Warten Sie wenn moglich.'
+        text: 'Die meisten Banken lehnen während der Probezeit ab. Warten Sie wenn möglich.'
       });
     }
 
@@ -90,7 +90,7 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
       tipps.push({
         icon: '📋',
         titel: 'SCHUFA bereinigen',
-        text: 'Nicht mehr genutzte Konten kundigen, Kreditkarten reduzieren, Selbstauskunft prufen'
+        text: 'Nicht mehr genutzte Konten kündigen, Kreditkarten reduzieren, Selbstauskunft prüfen'
       });
     } else if (profile.schufa === 'schlecht') {
       basisChance -= 25;
@@ -98,14 +98,14 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
       tipps.push({
         icon: '🔧',
         titel: 'SCHUFA verbessern',
-        text: 'Erst alte Eintrage loschen lassen (nach 3 Jahren automatisch). Von Essen Bank akzeptiert auch schwache SCHUFA.'
+        text: 'Erst alte Einträge löschen lassen (nach 3 Jahren automatisch). Von Essen Bank akzeptiert auch schwache SCHUFA.'
       });
     }
 
     // 5. Bestehende Kredite
     const bestehendeKredite = parseFloat(profile.bestehendeKredite) || 0;
     const einkommen = parseFloat(profile.jahreseinkommen) || 0;
-    const monatlichesNetto = einkommen * 0.6 / 12; // Grobe Schatzung
+    const monatlichesNetto = einkommen * 0.6 / 12; // Grobe Schätzung
 
     if (bestehendeKredite > 0 && monatlichesNetto > 0) {
       const kreditBelastung = (bestehendeKredite / monatlichesNetto) * 100;
@@ -114,8 +114,8 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
         faktoren.push({ text: 'Hohe bestehende Kreditbelastung', effekt: -15, typ: 'negativ' });
         tipps.push({
           icon: '💳',
-          titel: 'Kredite ablosen',
-          text: 'Bestehende Kredite vor Immobilienkauf ablosen oder umschulden. Verbessert Bonitat erheblich!'
+          titel: 'Kredite ablösen',
+          text: 'Bestehende Kredite vor Immobilienkauf ablösen oder umschulden. Verbessert Bonität erheblich!'
         });
       } else if (kreditBelastung > 10) {
         basisChance -= 5;
@@ -123,7 +123,7 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
       }
     }
 
-    // 6. Zusatzliches Vermogen (EK-Ersatz)
+    // 6. Zusätzliches Vermögen (EK-Ersatz)
     let zusatzEK = 0;
     if (profile.hatDepot && profile.depotWert) {
       zusatzEK += parseFloat(profile.depotWert) * 0.7; // 70% beleihbar
@@ -137,7 +137,7 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
     }
     if (profile.hatRiester && profile.riesterGuthaben) {
       zusatzEK += parseFloat(profile.riesterGuthaben);
-      faktoren.push({ text: 'Wohn-Riester verfugbar', effekt: +3, typ: 'positiv' });
+      faktoren.push({ text: 'Wohn-Riester verfügbar', effekt: +3, typ: 'positiv' });
       basisChance += 3;
     }
     if (profile.hatBausparvertrag && profile.bausparGuthaben) {
@@ -146,17 +146,17 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
       basisChance += 5;
     }
 
-    // 7. Kinder + Einkommen = KfW-Forderung
+    // 7. Kinder + Einkommen = KfW-Förderung
     const kinder = parseInt(profile.kinder) || 0;
     if (kinder > 0 && einkommen > 0) {
       const kfwGrenze = 90000 + (kinder * 10000);
       if (einkommen <= kfwGrenze) {
         basisChance += 10;
-        faktoren.push({ text: `KfW-Forderung moglich (${kinder} Kind${kinder > 1 ? 'er' : ''})`, effekt: +10, typ: 'positiv' });
+        faktoren.push({ text: `KfW-Förderung möglich (${kinder} Kind${kinder > 1 ? 'er' : ''})`, effekt: +10, typ: 'positiv' });
         tipps.push({
           icon: '🎉',
-          titel: 'KfW 300 "Wohneigentum fur Familien"',
-          text: `Sie erfullen die Voraussetzungen! Kredit bis ${170000 + (Math.min(kinder, 5) * 20000)}EUR zu nur 1,12% Zins!`
+          titel: 'KfW 300 "Wohneigentum für Familien"',
+          text: `Sie erfüllen die Voraussetzungen! Kredit bis ${170000 + (Math.min(kinder, 5) * 20000)}€ zu nur 1,12% Zins!`
         });
       }
     }
@@ -164,7 +164,7 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
     // 8. Verheiratet = bessere Chancen
     if (profile.verheiratet) {
       basisChance += 5;
-      faktoren.push({ text: 'Zwei Kreditnehmer moglich', effekt: +5, typ: 'positiv' });
+      faktoren.push({ text: 'Zwei Kreditnehmer möglich', effekt: +5, typ: 'positiv' });
     }
 
     // Begrenzung auf 0-100
@@ -175,7 +175,7 @@ function CreditChanceIndicator({ profile, kaufpreis }) {
       tipps.push({
         icon: '🏦',
         titel: 'Vermittler einschalten',
-        text: 'Interhyp, Dr. Klein oder Baufi24 haben 500+ Bankpartner und finden auch fur schwierige Falle Losungen'
+        text: 'Interhyp, Dr. Klein oder Baufi24 haben 500+ Bankpartner und finden auch für schwierige Fälle Lösungen'
       });
     }
 

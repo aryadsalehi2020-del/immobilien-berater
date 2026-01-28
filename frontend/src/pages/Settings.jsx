@@ -229,7 +229,7 @@ function Settings() {
                   <div className="text-sm">
                     <p className="text-neon-blue font-semibold mb-1">Info</p>
                     <p className="text-text-secondary leading-relaxed">
-                      Die Gesamtrate (Zins + Tilgung) von <span className="text-neon-blue font-bold">{(formData.default_zinssatz + formData.default_tilgung).toFixed(2)}%</span> wird fur Cashflow-Berechnungen verwendet. Sie konnen diese Werte jederzeit bei einzelnen Analysen anpassen.
+                      Die Gesamtrate (Zins + Tilgung) von <span className="text-neon-blue font-bold">{(formData.default_zinssatz + formData.default_tilgung).toFixed(2)}%</span> wird für Cashflow-Berechnungen verwendet. Sie können diese Werte jederzeit bei einzelnen Analysen anpassen.
                     </p>
                   </div>
                 </div>

@@ -253,11 +253,11 @@ function InteractiveSliders({ initialValues, kaufpreis, monatlicheMiete, nebenko
                   </span>
                 </div>
                 <p className="text-xs text-text-muted mt-1">
-                  {calculatedCashflow.eigenkapitalRendite > 5
+                  {calculatedCashflow.eigenkapitalRendite > 3
                     ? '✅ Gute Rendite auf eingesetztes Kapital'
                     : calculatedCashflow.eigenkapitalRendite > 0
-                      ? '⚠️ Moderate Rendite'
-                      : '❌ Negative Rendite - Immobilie kostet Geld'}
+                      ? '🟡 Moderate Rendite - akzeptabel'
+                      : '⚠️ Negative Rendite - Zuzahlung nötig'}
                 </p>
               </div>
             )}

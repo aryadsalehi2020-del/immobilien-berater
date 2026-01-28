@@ -32,18 +32,20 @@ function ScoreCircle({ score, adjustedScore = null, showAdjusted = false }) {
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (displayScore / 100) * circumference;
 
+  // Angepasste Schwellen: +10 positiver
   const getScoreColor = (score) => {
-    if (score >= 70) return '#10b981'; // green
-    if (score >= 50) return '#f59e0b'; // yellow
-    if (score >= 30) return '#f97316'; // orange
+    if (score >= 60) return '#10b981'; // green (war 70)
+    if (score >= 45) return '#f59e0b'; // yellow (war 50)
+    if (score >= 30) return '#f97316'; // orange (war 30)
     return '#ef4444'; // red
   };
 
+  // Angepasste Labels: +10 positiver
   const getScoreLabel = (score) => {
-    if (score >= 80) return 'Exzellent';
-    if (score >= 65) return 'Sehr gut';
-    if (score >= 50) return 'Gut';
-    if (score >= 35) return 'Akzeptabel';
+    if (score >= 75) return 'Exzellent';     // war 80
+    if (score >= 60) return 'Sehr gut';       // war 65
+    if (score >= 45) return 'Gut';            // war 50
+    if (score >= 30) return 'Akzeptabel';     // war 35
     return 'Kritisch';
   };
 
@@ -103,17 +105,18 @@ function ScoreCircle({ score, adjustedScore = null, showAdjusted = false }) {
 }
 
 function CriterionBar({ criterion, weightDiff = null, showAdjusted = false }) {
+  // Angepasste Schwellen: +10 positiver
   const getBarColor = (score) => {
-    if (score >= 70) return 'from-green-400 to-emerald-500';
-    if (score >= 50) return 'from-yellow-400 to-orange-400';
-    if (score >= 30) return 'from-orange-400 to-red-400';
+    if (score >= 60) return 'from-green-400 to-emerald-500';   // war 70
+    if (score >= 45) return 'from-yellow-400 to-orange-400';   // war 50
+    if (score >= 30) return 'from-orange-400 to-red-400';      // war 30
     return 'from-red-500 to-rose-600';
   };
 
   const getScoreEmoji = (score) => {
-    if (score >= 70) return '\u{1F7E2}';
-    if (score >= 50) return '\u{1F7E1}';
-    if (score >= 30) return '\u{1F7E0}';
+    if (score >= 60) return '\u{1F7E2}';  // war 70
+    if (score >= 45) return '\u{1F7E1}';  // war 50
+    if (score >= 30) return '\u{1F7E0}';  // war 30
     return '\u{1F534}';
   };
 
@@ -198,7 +201,7 @@ const TABS = [
   { id: 'vergleich', label: 'Vergleich', icon: '\u{2696}\u{FE0F}' }
 ];
 
-function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
+function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwitchVerwendungszweck }) {
   const [activeTab, setActiveTab] = useState('uebersicht');
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [showPersonalized, setShowPersonalized] = useState(true);
@@ -264,13 +267,32 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
 
           <div className="flex-1 text-center md:text-left">
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full">
-                <span className="text-2xl">
-                  {result.verwendungszweck === 'kapitalanlage' ? '\u{1F4B0}' : '\u{1F3E0}'}
-                </span>
-                <span className="text-accent font-semibold">
-                  {result.verwendungszweck === 'kapitalanlage' ? 'Kapitalanlage' : 'Eigennutzung'}
-                </span>
+              {/* Verwendungszweck Toggle */}
+              <div className="inline-flex items-center rounded-full border border-white/20 p-1">
+                <button
+                  onClick={() => onSwitchVerwendungszweck && result.verwendungszweck !== 'kapitalanlage' && onSwitchVerwendungszweck('kapitalanlage')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    result.verwendungszweck === 'kapitalanlage'
+                      ? 'bg-neon-blue/20 text-neon-blue'
+                      : 'text-text-muted hover:text-white cursor-pointer'
+                  }`}
+                  disabled={!onSwitchVerwendungszweck}
+                >
+                  <span className="text-lg">💰</span>
+                  <span className="font-semibold text-sm">Kapitalanlage</span>
+                </button>
+                <button
+                  onClick={() => onSwitchVerwendungszweck && result.verwendungszweck !== 'eigennutzung' && onSwitchVerwendungszweck('eigennutzung')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                    result.verwendungszweck === 'eigennutzung'
+                      ? 'bg-neon-purple/20 text-neon-purple'
+                      : 'text-text-muted hover:text-white cursor-pointer'
+                  }`}
+                  disabled={!onSwitchVerwendungszweck}
+                >
+                  <span className="text-lg">🏠</span>
+                  <span className="font-semibold text-sm">Eigennutzung</span>
+                </button>
               </div>
               {isProfileComplete && profile && (
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-neon-purple/10 border border-neon-purple/30 rounded-full">

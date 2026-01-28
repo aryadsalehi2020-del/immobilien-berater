@@ -87,42 +87,68 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Zuruck
+            Zurück
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Verwendungszweck */}
-          <div className="mb-10">
-            <label className={labelClass}>Verwendungszweck</label>
+          {/* Verwendungszweck - WICHTIG: Ändert die Bewertungskriterien */}
+          <div className="mb-10 p-6 glass-card rounded-2xl border-2 border-accent/30">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">⚡</span>
+              <div>
+                <label className="text-lg font-bold text-white">Verwendungszweck wählen</label>
+                <p className="text-sm text-text-muted">Die KI-Bewertung ändert sich je nach Ziel!</p>
+              </div>
+            </div>
             <div className="grid md:grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => setVerwendungszweck('kapitalanlage')}
-                className={`py-5 px-6 rounded-2xl border-2 font-semibold transition-all text-lg
+                className={`py-5 px-6 rounded-2xl border-2 font-semibold transition-all text-left
                   ${verwendungszweck === 'kapitalanlage'
-                    ? 'border-neon-blue bg-neon-blue/20 text-neon-blue shadow-neon-blue'
-                    : 'border-white/20 text-text-secondary hover:border-neon-blue/50 hover:text-neon-blue'}`}
+                    ? 'border-neon-blue bg-neon-blue/20 text-white shadow-neon-blue'
+                    : 'border-white/20 text-text-secondary hover:border-neon-blue/50'}`}
               >
-                <span className="flex items-center justify-center gap-3">
+                <span className="flex items-center gap-3 text-lg mb-2">
                   <span className="text-2xl">💰</span>
-                  Kapitalanlage
+                  <span className={verwendungszweck === 'kapitalanlage' ? 'text-neon-blue' : ''}>Kapitalanlage</span>
                 </span>
+                <div className={`text-xs space-y-1 ${verwendungszweck === 'kapitalanlage' ? 'text-neon-blue/80' : 'text-text-muted'}`}>
+                  <p>• Cashflow & Rendite: 30% Gewichtung</p>
+                  <p>• Lage: 20% | Preis/m²: 15%</p>
+                  <p>• Fokus auf Vermietbarkeit</p>
+                </div>
               </button>
               <button
                 type="button"
                 onClick={() => setVerwendungszweck('eigennutzung')}
-                className={`py-5 px-6 rounded-2xl border-2 font-semibold transition-all text-lg
+                className={`py-5 px-6 rounded-2xl border-2 font-semibold transition-all text-left
                   ${verwendungszweck === 'eigennutzung'
-                    ? 'border-neon-purple bg-neon-purple/20 text-neon-purple shadow-neon-purple'
-                    : 'border-white/20 text-text-secondary hover:border-neon-purple/50 hover:text-neon-purple'}`}
+                    ? 'border-neon-purple bg-neon-purple/20 text-white shadow-neon-purple'
+                    : 'border-white/20 text-text-secondary hover:border-neon-purple/50'}`}
               >
-                <span className="flex items-center justify-center gap-3">
+                <span className="flex items-center gap-3 text-lg mb-2">
                   <span className="text-2xl">🏠</span>
-                  Eigennutzung
+                  <span className={verwendungszweck === 'eigennutzung' ? 'text-neon-purple' : ''}>Eigennutzung</span>
                 </span>
+                <div className={`text-xs space-y-1 ${verwendungszweck === 'eigennutzung' ? 'text-neon-purple/80' : 'text-text-muted'}`}>
+                  <p>• Lage: 25% | Grundriss: 20%</p>
+                  <p>• Zustand: 15% | Zukunft: 15%</p>
+                  <p>• Fokus auf Wohnqualität</p>
+                </div>
               </button>
             </div>
+            {verwendungszweck === 'kapitalanlage' && (
+              <p className="mt-3 text-xs text-neon-blue bg-neon-blue/10 px-3 py-2 rounded-lg">
+                💡 Bei Kapitalanlage wird Cashflow, Rendite und Mietpotenzial priorisiert
+              </p>
+            )}
+            {verwendungszweck === 'eigennutzung' && (
+              <p className="mt-3 text-xs text-neon-purple bg-neon-purple/10 px-3 py-2 rounded-lg">
+                💡 Bei Eigennutzung wird Wohnqualität, Lage und Zustand priorisiert
+              </p>
+            )}
           </div>
 
           {/* Hauptdaten */}
@@ -140,7 +166,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
               />
             </div>
             <div>
-              <label className={labelClass}>Wohnflache (m2) *</label>
+              <label className={labelClass}>Wohnfläche (m²) *</label>
               <input
                 type="number"
                 name="wohnflaeche"
@@ -201,7 +227,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 name="adresse"
                 value={formData.adresse}
                 onChange={handleChange}
-                placeholder="z.B. Musterstrasse 12"
+                placeholder="z.B. Musterstraße 12"
                 className={inputClass}
               />
             </div>
@@ -243,7 +269,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 onChange={handleChange}
                 className={selectClass}
               >
-                <option value="">Bitte wahlen</option>
+                <option value="">Bitte wählen</option>
                 <option value="Eigentumswohnung">Eigentumswohnung</option>
                 <option value="Einfamilienhaus">Einfamilienhaus</option>
                 <option value="Doppelhaushalfte">Doppelhaushalfte</option>
@@ -259,7 +285,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 onChange={handleChange}
                 className={selectClass}
               >
-                <option value="">Bitte wahlen</option>
+                <option value="">Bitte wählen</option>
                 <option value="Neubau">Neubau</option>
                 <option value="Neuwertig">Neuwertig</option>
                 <option value="Modernisiert">Modernisiert</option>
@@ -283,7 +309,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 onChange={handleChange}
                 className={selectClass}
               >
-                <option value="">Bitte wahlen</option>
+                <option value="">Bitte wählen</option>
                 <option value="A+">A+</option>
                 <option value="A">A</option>
                 <option value="B">B</option>
@@ -326,14 +352,14 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
               />
             </div>
             <div>
-              <label className={labelClass}>Verkaufertyp</label>
+              <label className={labelClass}>Verkäufertyp</label>
               <select
                 name="verkaufertyp"
                 value={formData.verkaufertyp}
                 onChange={handleChange}
                 className={selectClass}
               >
-                <option value="">Bitte wahlen</option>
+                <option value="">Bitte wählen</option>
                 <option value="Privat">Privat</option>
                 <option value="Makler">Makler</option>
               </select>

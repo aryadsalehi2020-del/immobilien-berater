@@ -31,7 +31,7 @@ function LoadingState({ message }) {
         <div className="flex items-center justify-between text-sm mb-4">
           <span className="flex flex-col items-center gap-2">
             <span className="w-4 h-4 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full animate-pulse shadow-neon-blue"></span>
-            <span className="font-medium text-neon-blue">Daten prufen</span>
+            <span className="font-medium text-neon-blue">Daten prüfen</span>
           </span>
           <span className="flex flex-col items-center gap-2">
             <span className="w-4 h-4 bg-white/20 rounded-full"></span>

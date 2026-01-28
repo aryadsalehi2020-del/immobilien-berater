@@ -74,11 +74,11 @@ export const GOAL_WEIGHT_MODIFIERS = {
   }
 };
 
-// Risikoprofil-Modifikatoren
+// Risikoprofil-Modifikatoren (angepasste Schwellen: +10 positiver)
 export const RISK_MODIFIERS = {
   konservativ: {
     name: 'Konservativ',
-    scoreThreshold: 65,       // Nur bei Score > 65 empfehlen
+    scoreThreshold: 55,       // war 65 -> jetzt 55
     warningMultiplier: 1.5,   // Mehr Warnungen anzeigen
     modifiers: {
       lage: +5,
@@ -89,13 +89,13 @@ export const RISK_MODIFIERS = {
   },
   ausgewogen: {
     name: 'Ausgewogen',
-    scoreThreshold: 50,
+    scoreThreshold: 40,       // war 50 -> jetzt 40
     warningMultiplier: 1.0,
     modifiers: {}  // Keine Änderungen
   },
   risikofreudig: {
     name: 'Risikofreudig',
-    scoreThreshold: 35,
+    scoreThreshold: 25,       // war 35 -> jetzt 25
     warningMultiplier: 0.5,   // Weniger Warnungen
     modifiers: {
       zukunftspotenzial: +5,
@@ -307,13 +307,14 @@ export function generatePersonalizedWarnings(analysisResult, profile) {
 }
 
 /**
- * Gibt die Empfehlung basierend auf Profil zurück
+ * Gibt die Empfehlung basierend auf Profil zurück (positivere Schwellen)
  */
 export function getProfileBasedRecommendation(score, profile) {
   const { riskProfile, goal, experience } = profile;
-  const threshold = RISK_MODIFIERS[riskProfile]?.scoreThreshold || 50;
+  const threshold = RISK_MODIFIERS[riskProfile]?.scoreThreshold || 40;
 
-  if (score >= threshold + 20) {
+  // Angepasste Empfehlungen: insgesamt positiver
+  if (score >= threshold + 15) {
     return {
       action: 'invest',
       emoji: '🟢',
@@ -324,23 +325,23 @@ export function getProfileBasedRecommendation(score, profile) {
     return {
       action: 'consider',
       emoji: '🟡',
-      text: 'Prüfenswert - passt zu deinem Profil',
+      text: 'Gutes Potenzial - passt zu deinem Profil',
       color: 'accent'
     };
-  } else if (score >= threshold - 15) {
+  } else if (score >= threshold - 10) {
     return {
       action: 'caution',
       emoji: '🟠',
       text: experience === 'anfaenger'
-        ? 'Eher nicht für Anfänger geeignet'
-        : 'Mit Vorsicht betrachten',
+        ? 'Mit Begleitung prüfenswert'
+        : 'Genauer analysieren',
       color: 'orange-500'
     };
   } else {
     return {
       action: 'avoid',
       emoji: '🔴',
-      text: 'Passt nicht zu deinem Profil',
+      text: 'Nicht optimal für dein Profil',
       color: 'red-500'
     };
   }

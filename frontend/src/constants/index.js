@@ -70,19 +70,19 @@ export const BUNDESLAENDER = [
 // Energy classes
 export const ENERGY_CLASSES = ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-// Score thresholds
+// Score thresholds (optimiert für positivere Bewertung)
 export const SCORE_THRESHOLDS = {
-  EXCELLENT: 80,
-  VERY_GOOD: 65,
-  GOOD: 50,
-  ACCEPTABLE: 35
+  EXCELLENT: 75,   // war 80 -> jetzt 75
+  VERY_GOOD: 60,   // war 65 -> jetzt 60
+  GOOD: 45,        // war 50 -> jetzt 45
+  ACCEPTABLE: 30   // war 35 -> jetzt 30
 };
 
-// Score color helper
+// Score color helper (angepasste Schwellen: +10 positiver)
 export const getScoreColor = (score) => {
-  if (score >= 70) return { color: 'neon-green', hex: '#22c55e', label: 'Sehr gut' };
-  if (score >= 50) return { color: 'accent', hex: '#fbbf24', label: 'Gut' };
-  if (score >= 30) return { color: 'orange-400', hex: '#f97316', label: 'Schwierig' };
+  if (score >= 60) return { color: 'neon-green', hex: '#22c55e', label: 'Sehr gut' };  // war 70
+  if (score >= 45) return { color: 'accent', hex: '#fbbf24', label: 'Gut' };           // war 50
+  if (score >= 30) return { color: 'orange-400', hex: '#f97316', label: 'Okay' };      // war 30, Label geändert
   return { color: 'red-400', hex: '#ef4444', label: 'Kritisch' };
 };
 
