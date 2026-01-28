@@ -67,7 +67,7 @@ def startup_event():
 # CORS für lokale Entwicklung
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"],
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:5173", "https://immobilien-berater-frontend.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -246,33 +246,33 @@ def calculate_investment_metrics(
     kaufpreisfaktor = kaufpreis / jahreskaltmiete
     bruttorendite = (jahreskaltmiete / kaufpreis) * 100
 
-    # Bewertung Kaufpreisfaktor
-    if kaufpreisfaktor < 20:
+    # Bewertung Kaufpreisfaktor (positivere Schwellen)
+    if kaufpreisfaktor < 22:
         kpf_bewertung = "Sehr gut"
         kpf_score = 90
-    elif kaufpreisfaktor < 25:
+    elif kaufpreisfaktor < 27:
         kpf_bewertung = "Gut"
-        kpf_score = 70
-    elif kaufpreisfaktor < 30:
-        kpf_bewertung = "Mittel"
-        kpf_score = 50
+        kpf_score = 75
+    elif kaufpreisfaktor < 32:
+        kpf_bewertung = "Akzeptabel"
+        kpf_score = 55
     else:
-        kpf_bewertung = "Schlecht"
-        kpf_score = 30
+        kpf_bewertung = "Hoch"
+        kpf_score = 35
 
-    # Bewertung Bruttorendite
-    if bruttorendite >= 5:
+    # Bewertung Bruttorendite (positivere Schwellen)
+    if bruttorendite >= 4.5:
         br_bewertung = "Sehr gut"
         br_score = 90
-    elif bruttorendite >= 4:
+    elif bruttorendite >= 3.5:
         br_bewertung = "Gut"
-        br_score = 70
-    elif bruttorendite >= 3:
-        br_bewertung = "Mittel"
-        br_score = 50
+        br_score = 75
+    elif bruttorendite >= 2.5:
+        br_bewertung = "Akzeptabel"
+        br_score = 55
     else:
-        br_bewertung = "Schlecht"
-        br_score = 30
+        br_bewertung = "Niedrig"
+        br_score = 35
 
     result = {
         "kaufpreisfaktor": round(kaufpreisfaktor, 2),
@@ -834,18 +834,24 @@ def calculate_cashflow(
     else:
         eigenkapitalrendite = None  # Nicht berechenbar bei 100% Finanzierung
 
-    # Bewertung
-    if monatlicher_cashflow > 200:
+    # Bewertung (positivere Schwellen)
+    if monatlicher_cashflow > 150:
+        cashflow_bewertung = "Exzellent"
+        cashflow_score = 95
+    elif monatlicher_cashflow > 50:
         cashflow_bewertung = "Sehr gut"
-        cashflow_score = 90
+        cashflow_score = 85
     elif monatlicher_cashflow > 0:
         cashflow_bewertung = "Gut (cashflow-positiv)"
         cashflow_score = 75
     elif monatlicher_cashflow >= -100:
-        cashflow_bewertung = "Mittel (fast selbsttragend)"
+        cashflow_bewertung = "Akzeptabel (fast selbsttragend)"
         cashflow_score = 60
+    elif monatlicher_cashflow >= -200:
+        cashflow_bewertung = "Mäßig (überschaubare Zuzahlung)"
+        cashflow_score = 45
     else:
-        cashflow_bewertung = "Schlecht (hoher Negativcashflow)"
+        cashflow_bewertung = "Niedrig (hohe Zuzahlung nötig)"
         cashflow_score = 30
 
     return {
@@ -1929,25 +1935,28 @@ Antworte NUR mit dem JSON."""
                 begründung=criterion["begründung"]
             ))
 
-        # Gesamtscore (auf 100 normalisiert)
-        gesamtscore = round(total_weighted, 1)
+        # Gesamtscore (auf 100 normalisiert) + 10 Basis-Bonus für positivere Bewertung
+        gesamtscore = min(100, round(total_weighted + 10, 1))
 
-        # EMPFEHLUNG basierend auf No-Gos, Score und Warnsignalen
+        # EMPFEHLUNG basierend auf No-Gos, Score und Warnsignalen (positivere Schwellen)
         if no_go_check["no_go"]:
             empfehlung = "ABLEHNEN"
             empfehlung_text = f"❌ NICHT INVESTIEREN - No-Go-Kriterien: {', '.join(no_go_check['gründe'])}"
-        elif gesamtscore >= 75:
+        elif gesamtscore >= 65:  # war 75
             if warnsignale["kritisch"]:
                 empfehlung = "PRÜFEN"
                 empfehlung_text = f"⚠️ GENAU PRÜFEN - Guter Score ({gesamtscore}), aber kritische Warnsignale vorhanden"
             else:
                 empfehlung = "INVESTIEREN"
                 empfehlung_text = f"✅ EMPFEHLENSWERT - Score: {gesamtscore}/100"
-        elif gesamtscore >= 60:
+        elif gesamtscore >= 50:  # war 60
             empfehlung = "PRÜFEN"
-            empfehlung_text = f"⚠️ GENAU PRÜFEN - Mittelmäßiger Score ({gesamtscore}/100)"
+            empfehlung_text = f"🔍 PRÜFENSWERT - Solider Score ({gesamtscore}/100)"
             if warnsignale["anzahl"] > 0:
                 empfehlung_text += f", {warnsignale['anzahl']} Warnsignal(e)"
+        elif gesamtscore >= 35:  # NEU: Zwischenstufe
+            empfehlung = "VORSICHT"
+            empfehlung_text = f"⚠️ MIT VORSICHT - Unterdurchschnittlicher Score ({gesamtscore}/100)"
         else:
             empfehlung = "ABLEHNEN"
             empfehlung_text = f"❌ NICHT EMPFOHLEN - Schwacher Score ({gesamtscore}/100)"
