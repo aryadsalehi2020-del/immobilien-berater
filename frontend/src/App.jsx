@@ -10,6 +10,8 @@ import Analyze from './pages/Analyze';
 import Library from './pages/Library';
 import LibraryDetail from './pages/LibraryDetail';
 import Settings from './pages/Settings';
+import Profile from './pages/Profile';
+import Tools from './pages/Tools';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -102,6 +104,26 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <Settings />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Profile />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tools"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Tools />
                 </DashboardLayout>
               </ProtectedRoute>
             }

@@ -1,4 +1,1674 @@
-# Immobilien-Berater – Claude Code Projektanweisungen (ULTIMATE EDITION)
+# Immobilien-Berater – Claude Code Projektanweisungen (ULTIMATE EDITION V3.0)
+
+## ⚠️ KRITISCHE ANWEISUNG: LIVE-RECHERCHE!
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔴 BEI JEDER IMMOBILIEN-ANALYSE ZUERST LIVE RECHERCHIEREN!                 │
+│                                                                             │
+│ NIEMALS nur auf statische Daten in dieser Datei verlassen!                 │
+│                                                                             │
+│ Statisch: "Hamburg = 6.000€/m²" ← FALSCH (zu ungenau!)                     │
+│ Live:     "Poppenbüttel Reihenhaus = 4.941€/m²" ← RICHTIG!                 │
+│                                                                             │
+│ WORKFLOW:                                                                   │
+│ 1. User nennt Adresse/Stadtteil + Immobilientyp                            │
+│ 2. → SOFORT Web-Suche für €/m² Kaufpreise                                  │
+│ 3. → SOFORT Web-Suche für €/m² Mietpreise                                  │
+│ 4. → Dann erst Bewertung mit Live-Daten berechnen                          │
+│                                                                             │
+│ Siehe Abschnitt "LIVE-RECHERCHE FÜR MARKTWERT" für Details!                │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔍 LIVE-MARKTDATEN-RECHERCHE (PFLICHT!)
+
+### Das Problem mit statischen Daten
+
+```
+❌ FALSCH (alte Methode):
+const PREISE = { 'hamburg': 6000 };  // Veraltet, zu ungenau!
+
+✅ RICHTIG (neue Methode):
+→ KI recherchiert LIVE für jeden Stadtteil + Immobilientyp!
+```
+
+**Warum Live-Recherche?**
+- Hamburg hat ~100 Stadtteile mit KOMPLETT unterschiedlichen Preisen
+- Poppenbüttel ≠ Harburg ≠ Blankenese (Faktor 2-4x Unterschied!)
+- Reihenhaus ≠ Wohnung ≠ Einfamilienhaus (verschiedene €/m²)
+- Preise ändern sich quartalsweise
+
+---
+
+### 🚀 LIVE-RECHERCHE-PROTOKOLL
+
+**Bei JEDER Immobilien-Analyse MUSS die KI zuerst recherchieren!**
+
+```javascript
+async function recherchiereMarktdaten(immobilie) {
+  const { stadtteil, stadt, typ, wohnflaeche } = immobilie;
+  
+  // ═══════════════════════════════════════════════════════════════
+  // SCHRITT 1: KAUFPREISE RECHERCHIEREN
+  // ═══════════════════════════════════════════════════════════════
+  
+  const kaufpreisQuery = buildSearchQuery({
+    terms: [stadtteil, stadt, typ, 'kaufen', 'Quadratmeterpreis', '€/m²', '2025'],
+    beispiel: 'Poppenbüttel Hamburg Reihenhaus kaufen Quadratmeterpreis 2025'
+  });
+  
+  // Suche ausführen und Ergebnisse parsen
+  const kaufpreisErgebnisse = await webSearch(kaufpreisQuery);
+  
+  // ═══════════════════════════════════════════════════════════════
+  // SCHRITT 2: MIETPREISE RECHERCHIEREN
+  // ═══════════════════════════════════════════════════════════════
+  
+  const mietpreisQuery = buildSearchQuery({
+    terms: [stadtteil, stadt, typ, 'mieten', 'Mietpreis', '€/m²', '2025'],
+    beispiel: 'Poppenbüttel Hamburg Haus mieten Mietpreis 2025'
+  });
+  
+  const mietpreisErgebnisse = await webSearch(mietpreisQuery);
+  
+  // ═══════════════════════════════════════════════════════════════
+  // SCHRITT 3: VERGLEICHSANGEBOTE FINDEN
+  // ═══════════════════════════════════════════════════════════════
+  
+  const vergleichQuery = buildSearchQuery({
+    terms: [stadtteil, stadt, typ, wohnflaeche + 'm²', 'kaufen'],
+    beispiel: 'Poppenbüttel Hamburg Reihenhaus 120m² kaufen'
+  });
+  
+  const vergleichsAngebote = await webSearch(vergleichQuery);
+  
+  return {
+    kaufpreise: parseKaufpreise(kaufpreisErgebnisse),
+    mietpreise: parseMietpreise(mietpreisErgebnisse),
+    vergleichsAngebote: parseAngebote(vergleichsAngebote)
+  };
+}
+```
+
+---
+
+### 📋 SUCH-QUERIES NACH IMMOBILIENTYP
+
+**Die KI MUSS den Immobilientyp in der Suche berücksichtigen!**
+
+| Immobilientyp | Such-Query Kaufpreis | Such-Query Miete |
+|---------------|---------------------|------------------|
+| **ETW** | "[Stadtteil] [Stadt] Eigentumswohnung kaufen €/m² 2025" | "[Stadtteil] Wohnung mieten Mietpreis" |
+| **Reihenhaus** | "[Stadtteil] [Stadt] Reihenhaus kaufen Quadratmeterpreis" | "[Stadtteil] Haus mieten €/m²" |
+| **Doppelhaushälfte** | "[Stadtteil] Doppelhaushälfte kaufen Preis" | "[Stadtteil] Haus mieten" |
+| **Einfamilienhaus** | "[Stadtteil] Einfamilienhaus kaufen €/m²" | "[Stadtteil] EFH mieten" |
+| **Mehrfamilienhaus** | "[Stadtteil] Mehrfamilienhaus kaufen Rendite" | "[Stadtteil] Mieteinnahmen MFH" |
+
+---
+
+### 🎯 DATENQUELLEN PRIORISIEREN
+
+**Vertrauenswürdige Quellen (in dieser Reihenfolge):**
+
+1. **ImmoScout24 Atlas** → `atlas.immobilienscout24.de` (beste Daten!)
+2. **Immoportal** → `immoportal.com/immobilienpreise/`
+3. **Homeday Preisatlas** → `homeday.de/de/preisatlas/`
+4. **Engel & Völkers** → `engelvoelkers.com/de-de/mietspiegel/`
+5. **Kleinanzeigen** → Für echte Angebote zum Vergleich
+
+**Was aus den Quellen extrahieren:**
+
+```javascript
+const EXTRAHIERE = {
+  // Aus ImmoScout24:
+  'durchschnittlicher Kaufpreis': 'Ø X.XXX €/m²',
+  'Preisspanne': 'X.XXX - X.XXX €/m²',
+  'Preisentwicklung': '+X,X% zu Vorjahr',
+  
+  // Aus Mietspiegel:
+  'durchschnittliche Kaltmiete': 'Ø XX,XX €/m²',
+  'Mietspanne': 'XX - XX €/m²',
+  
+  // Aus Angeboten:
+  'konkrete Objekte': [
+    { preis: 'XXX.XXX€', flaeche: 'XXm²', zustand: '...', energie: '...' }
+  ]
+};
+```
+
+---
+
+### 📊 ERGEBNIS-VERARBEITUNG
+
+```javascript
+function verarbeiteRecherche(ergebnisse, userImmobilie) {
+  // ═══════════════════════════════════════════════════════════════
+  // 1. KAUFPREIS-BENCHMARK ERMITTELN
+  // ═══════════════════════════════════════════════════════════════
+  
+  const marktKaufpreisProQm = ergebnisse.kaufpreise.durchschnitt;
+  const marktKaufpreisSpanne = ergebnisse.kaufpreise.spanne;
+  
+  // Geschätzter Marktwert
+  const geschaetzterMarktwert = userImmobilie.wohnflaeche * marktKaufpreisProQm;
+  
+  // ═══════════════════════════════════════════════════════════════
+  // 2. MIET-BENCHMARK ERMITTELN
+  // ═══════════════════════════════════════════════════════════════
+  
+  const marktMieteProQm = ergebnisse.mietpreise.durchschnitt;
+  const geschaetzteMarktmiete = userImmobilie.wohnflaeche * marktMieteProQm;
+  
+  // ═══════════════════════════════════════════════════════════════
+  // 3. MIT USER-DATEN VERGLEICHEN
+  // ═══════════════════════════════════════════════════════════════
+  
+  const userKaufpreisProQm = userImmobilie.kaufpreis / userImmobilie.wohnflaeche;
+  const kaufpreisVergleich = {
+    userPreis: userKaufpreisProQm,
+    marktPreis: marktKaufpreisProQm,
+    differenz: marktKaufpreisProQm - userKaufpreisProQm,
+    differenzProzent: ((marktKaufpreisProQm - userKaufpreisProQm) / marktKaufpreisProQm) * 100,
+    bewertung: getBewertung(userKaufpreisProQm, marktKaufpreisProQm)
+  };
+  
+  const userMieteProQm = userImmobilie.kaltmiete / userImmobilie.wohnflaeche;
+  const mietVergleich = {
+    userMiete: userMieteProQm,
+    marktMiete: marktMieteProQm,
+    mietpotenzial: geschaetzteMarktmiete - userImmobilie.kaltmiete,
+    bewertung: userMieteProQm >= marktMieteProQm ? 'Auf Marktniveau' : 'Steigerungspotenzial!'
+  };
+  
+  return {
+    kaufpreis: kaufpreisVergleich,
+    miete: mietVergleich,
+    marktwert: geschaetzterMarktwert,
+    marktmiete: geschaetzteMarktmiete,
+    quellen: ergebnisse.quellen,
+    rechercheZeitpunkt: new Date().toISOString()
+  };
+}
+
+function getBewertung(userPreis, marktPreis) {
+  const diff = ((marktPreis - userPreis) / marktPreis) * 100;
+  
+  if (diff >= 20) return { ampel: '🟢🟢', text: 'SCHNÄPPCHEN!', beschreibung: '20%+ unter Marktwert!' };
+  if (diff >= 15) return { ampel: '🟢🟢', text: 'Sehr günstig', beschreibung: '15-20% unter Marktwert' };
+  if (diff >= 10) return { ampel: '🟢', text: 'Günstig', beschreibung: '10-15% unter Marktwert' };
+  if (diff >= 5) return { ampel: '🟢', text: 'Leicht günstig', beschreibung: '5-10% unter Marktwert' };
+  if (diff >= 0) return { ampel: '🟡', text: 'Marktpreis', beschreibung: 'Fairer Preis' };
+  if (diff >= -5) return { ampel: '🟠', text: 'Leicht teuer', beschreibung: 'Bis 5% über Markt' };
+  if (diff >= -10) return { ampel: '🔴', text: 'Teuer', beschreibung: '5-10% über Markt' };
+  return { ampel: '🔴🔴', text: 'Zu teuer!', beschreibung: '10%+ über Marktwert' };
+}
+```
+
+---
+
+### 🖥️ BEISPIEL: KOMPLETTE LIVE-ANALYSE
+
+**User-Eingabe:**
+```
+Adresse: Wesselstraße, Poppenbüttel, Hamburg
+Typ: Reihenhaus
+Wohnfläche: 120m²
+Kaufpreis: 520.000€
+Kaltmiete: 1.800€
+```
+
+**KI führt aus:**
+
+```
+🔍 LIVE-RECHERCHE GESTARTET...
+
+Suche 1: "Poppenbüttel Hamburg Reihenhaus kaufen Quadratmeterpreis 2025"
+→ Gefunden: ImmoScout24 Atlas - Ø 4.941 €/m² für Häuser
+→ Gefunden: Immoportal - 4.211 - 6.491 €/m² (Ø 5.351€)
+→ Gefunden: 3 aktuelle Angebote zum Vergleich
+
+Suche 2: "Poppenbüttel Hamburg Haus mieten Mietpreis 2025"
+→ Gefunden: ImmoScout24 - Ø 17,08 €/m² Kaltmiete
+→ Gefunden: Engel & Völkers - 18,89 €/m²
+
+✅ RECHERCHE ABGESCHLOSSEN (4 Quellen, Stand: Januar 2026)
+```
+
+**Analyse-Ergebnis:**
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+📊 MARKTPREIS-VERGLEICH: Wesselstraße, Poppenbüttel
+═══════════════════════════════════════════════════════════════════════════════
+
+🏠 KAUFPREIS-ANALYSE
+├─ Dein Kaufpreis: 520.000€ (4.333 €/m²)
+├─ Markt-Durchschnitt: 592.920€ (4.941 €/m²)
+├─ Markt-Spanne: 505.320€ - 778.920€
+├─ 
+├─ DIFFERENZ: 72.920€ UNTER MARKTWERT
+├─ Das sind: 12,3% unter Markt
+└─ BEWERTUNG: 🟢 Günstig!
+
+💰 INSTANT EQUITY
+├─ Du kaufst 72.920€ unter Marktwert
+├─ Bei 10 Jahren Haltedauer = 7.292€/Jahr = 608€/Monat virtueller Gewinn
+└─ Das gleicht negativen Cashflow aus!
+
+📈 MIET-ANALYSE
+├─ Deine Kaltmiete: 1.800€ (15,00 €/m²)
+├─ Markt-Durchschnitt: 2.050€ (17,08 €/m²)
+├─ 
+├─ MIETPOTENZIAL: +250€/Monat möglich!
+└─ Nach Mieterhöhung: Cashflow verbessert sich um 250€
+
+📊 KAUFPREISFAKTOR
+├─ Aktueller Faktor: 520.000 ÷ (1.800 × 12) = 24,1
+├─ Regional üblich: 24-28
+└─ BEWERTUNG: 🟢 Im Rahmen
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 DEAL-SCORE: 78/100 🟢 "Guter Deal!"
+
+├─ Unter Marktwert: 28/40 Punkte (12,3% Rabatt)
+├─ Kaufpreisfaktor: 14/20 Punkte (Faktor 24,1 OK)
+├─ Mietpotenzial: 12/15 Punkte (+250€ möglich)
+└─ Exit-Optionen: 12/15 Punkte (Reihenhaus gut verkäuflich)
+
+Quellen: ImmoScout24, Immoportal, Engel & Völkers (Stand: Jan 2026)
+
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+### ⚠️ FALLBACK WENN RECHERCHE FEHLSCHLÄGT
+
+```javascript
+function fallbackBeiRechercheFehlschlag(immobilie, fehler) {
+  return {
+    warnung: true,
+    meldung: `
+⚠️ LIVE-RECHERCHE NICHT MÖGLICH
+
+Grund: ${fehler}
+
+FALLBACK-OPTIONEN:
+1. Bitte gib den geschätzten Marktwert manuell ein
+2. Oder: Schau auf ImmoScout24 nach vergleichbaren Objekten in ${immobilie.stadtteil}
+   → Suche: "${immobilie.typ} ${immobilie.stadtteil} ${immobilie.wohnflaeche}m² kaufen"
+3. Oder: Wir nutzen den Stadt-Durchschnitt (UNGENAU!)
+
+Ohne genaue Marktdaten kann der Deal-Score nicht zuverlässig berechnet werden.
+    `,
+    optionen: {
+      manuell: 'User gibt Marktwert ein',
+      stadtDurchschnitt: getStadtDurchschnitt(immobilie.stadt),
+      ohneMarktwert: 'Nur Investment-Score berechnen (ohne Deal-Score)'
+    }
+  };
+}
+```
+
+---
+
+### 📱 FÜR DIE APP: API-ALTERNATIVEN
+
+**Wenn Web-Scraping nicht möglich ist:**
+
+| Option | Kosten | Genauigkeit | Aufwand |
+|--------|--------|-------------|---------|
+| **User gibt Marktwert ein** | Kostenlos | Hoch (wenn User recherchiert) | Gering |
+| **Sprengnetter API** | ~300€/Monat | Sehr hoch | Mittel |
+| **PriceHubble API** | Enterprise | Sehr hoch | Mittel |
+| **GREIX (kostenlos)** | Kostenlos | Mittel (nur Indizes) | Gering |
+| **Web Scraping** | Kostenlos | Hoch | Hoch |
+
+**Empfehlung für MVP:**
+1. User gibt geschätzten Marktwert ein
+2. ODER KI schlägt Recherche-Links vor (ImmoScout, Immoportal)
+3. Später: API-Integration
+
+---
+
+**Datum:** Januar 2026
+
+### Was wurde verbessert?
+
+| Bereich | Alt (V1) | Neu (V2) | Warum |
+|---------|----------|----------|-------|
+| **Cashflow-Bewertung** | 0€ = "Gut" (Score 70) | 0€ = "Grenzwertig" (Score 55) | Kapitalanleger brauchen Puffer! |
+| **Rendite-Bewertung** | Pauschal (4% = gut) | Regional angepasst | München ≠ Leipzig! |
+| **Risiko-Puffer** | Nicht vorhanden | 100€/Monat eingerechnet | Für Reparaturen, Leerstand |
+| **Worst-Case** | Nicht angezeigt | PFLICHT bei jeder Analyse | User muss Risiken kennen! |
+| **Denkmal-Bewertung** | -10 Punkte (Malus) | +3 Punkte (Bonus!) | 100% AfA in 12 Jahren! |
+| **Erbpacht** | -30 Punkte pauschal | Differenziert nach Restlaufzeit | 80 Jahre ≠ 30 Jahre |
+| **Kredit-Chance** | Nur EK-basiert | + Beruf, Alter, Objektqualität | Realistischere Einschätzung |
+| **Lage-Bewertung** | A/B/C/D pauschal | Mikrolage-Faktoren | ÖPNV, Infrastruktur, etc. |
+
+### 🆕 V3.0 UPDATE - PROFESSIONELLES DUAL-SCORE SYSTEM
+
+| Bereich | Alt (V2) | Neu (V3) | Warum |
+|---------|----------|----------|-------|
+| **Score-System** | Ein Score (0-100) | ZWEI Scores: Deal + Investment | Profis trennen "guter Preis" von "gutes Objekt" |
+| **Marktwert** | Nicht berücksichtigt | Automatische Schätzung + Vergleich | Unter Marktwert kaufen = sofortiger Gewinn! |
+| **Instant Equity** | Nicht vorhanden | Wird auf Haltedauer umgerechnet | €10k unter Marktwert = €83/Monat virtueller CF |
+| **Negative CF Regel** | Immer schlecht | Akzeptabel wenn Discount stimmt | €15-20k Discount pro €100/Monat neg. CF |
+| **4 Rendite-Quellen** | Nur Cashflow | CF + Tilgung + Wertsteigerung + Steuer | Komplette Vermögensbildung |
+
+---
+
+## 🏆 PROFESSIONELLES DUAL-SCORE BEWERTUNGSSYSTEM V3.0
+
+### Philosophie: Profis trennen DEAL von INVESTMENT!
+
+**Warren Buffett:** *"Price is what you pay, value is what you get."*
+
+Ein **guter Deal** (unter Marktwert kaufen) auf einem mittelmäßigen Objekt
+kann besser sein als ein **schlechter Deal** auf einem Top-Objekt!
+
+```
+BEISPIEL:
+┌─────────────────────────────────────────────────────────────┐
+│ OBJEKT A: Tolle Lage, aber zu teuer                        │
+│ • Marktwert: 300.000€ | Kaufpreis: 310.000€ (+3%)          │
+│ • Cashflow: +50€/Monat                                      │
+│ • Deal-Score: 25/100 ❌ | Investment-Score: 75/100 ✅       │
+│ → FINGER WEG - du zahlst drauf!                            │
+├─────────────────────────────────────────────────────────────┤
+│ OBJEKT B: Okay Lage, aber Schnäppchen                      │
+│ • Marktwert: 280.000€ | Kaufpreis: 238.000€ (-15%)         │
+│ • Cashflow: -80€/Monat                                      │
+│ • Deal-Score: 85/100 ✅ | Investment-Score: 55/100 🟡       │
+│ → KAUFEN! Instant Equity von 42.000€ deckt neg. CF 44 Jahre│
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📊 DIE ZWEI SCORES ERKLÄRT
+
+### Score 1: DEAL-SCORE (Transaktions-Qualität)
+
+**Fragt:** *"Ist das ein guter PREIS für dieses Objekt?"*
+
+| Komponente | Gewicht | Was wird bewertet |
+|------------|---------|-------------------|
+| **Unter Marktwert** | 35 Punkte | Der wichtigste Faktor! |
+| **Kaufpreisfaktor vs. Region** | 20 Punkte | Faktor 22 in Frankfurt = gut |
+| **Verhandlungspotenzial** | 15 Punkte | Steht lange, Verkäufer motiviert? |
+| **Transaktionskosten** | 10 Punkte | Makler sparen, Bundesland |
+| **Finanzierbarkeit** | 10 Punkte | Bank akzeptiert den Preis? |
+| **Exit-Optionen** | 10 Punkte | Wiederverkäuflichkeit |
+
+### Score 2: INVESTMENT-SCORE (Objekt-Qualität)
+
+**Fragt:** *"Ist das langfristig ein gutes Investment?"*
+
+| Komponente | Gewicht | Was wird bewertet |
+|------------|---------|-------------------|
+| **Lage-Qualität** | 25 Punkte | Mikrolage, nicht nur Stadt |
+| **Cashflow-Potenzial** | 20 Punkte | Inkl. Mietsteigerungspotenzial |
+| **Objektzustand** | 15 Punkte | Sanierungsbedarf, Energie |
+| **Wertsteigerungspotenzial** | 15 Punkte | Entwicklungsgebiet, Aufwertung |
+| **Mieter-/Nachfragequalität** | 15 Punkte | Leerstandsrisiko |
+| **Risikofaktoren** | 10 Punkte | WEG, Erbpacht, Altlasten |
+
+### GESAMT-SCORE Berechnung
+
+```javascript
+// Gewichtung je nach Strategie
+const STRATEGIE_GEWICHTUNG = {
+  'buy_and_hold': { deal: 0.40, investment: 0.60 },  // Langfrist-Investor
+  'value_add': { deal: 0.60, investment: 0.40 },     // Wertsteigerung
+  'cashflow': { deal: 0.35, investment: 0.65 },      // Einkommens-fokussiert
+  'flip': { deal: 0.70, investment: 0.30 },          // Schneller Verkauf
+  'default': { deal: 0.50, investment: 0.50 }        // Ausgewogen
+};
+
+function berechneGesamtScore(dealScore, investmentScore, strategie = 'default') {
+  const gewichtung = STRATEGIE_GEWICHTUNG[strategie];
+  return Math.round(
+    dealScore * gewichtung.deal + 
+    investmentScore * gewichtung.investment
+  );
+}
+```
+
+---
+
+## 💰 MARKTWERT-SCHÄTZUNG (Automatisch!)
+
+### Drei Methoden kombiniert
+
+```javascript
+function schaetzeMarktwert(immobilie) {
+  const ergebnisse = {};
+  
+  // ═══════════════════════════════════════════════════════════
+  // METHODE 1: ERTRAGSWERT (für Kapitalanleger am wichtigsten!)
+  // ═══════════════════════════════════════════════════════════
+  
+  const jahresreinertrag = (immobilie.kaltmiete * 12) - 
+    (immobilie.nichtUmlagefaehigesHausgeld * 12) -
+    (immobilie.instandhaltung || immobilie.wohnflaeche * 12); // 12€/m²/Jahr
+  
+  // Liegenschaftszins nach Region (Gutachterausschuss-Werte 2025)
+  const liegenschaftszins = LIEGENSCHAFTSZINSEN[immobilie.stadt] || 0.045;
+  
+  // Vereinfachte Ertragswertformel
+  const ertragswert = jahresreinertrag / liegenschaftszins;
+  
+  ergebnisse.ertragswert = {
+    wert: Math.round(ertragswert),
+    methode: 'Ertragswertverfahren',
+    erklaerung: `Reinertrag ${jahresreinertrag.toLocaleString()}€ ÷ ${(liegenschaftszins*100).toFixed(1)}% Liegenschaftszins`
+  };
+  
+  // ═══════════════════════════════════════════════════════════
+  // METHODE 2: VERGLEICHSWERT (€/m² der Region)
+  // ═══════════════════════════════════════════════════════════
+  
+  const regionPreis = getRegionalenQuadratmeterpreis(immobilie.stadt, immobilie.plz);
+  
+  // Anpassungsfaktoren
+  let anpassung = 1.0;
+  if (immobilie.zustand === 'Saniert' || immobilie.zustand === 'Neubau') anpassung += 0.10;
+  if (immobilie.zustand === 'Renovierungsbedürftig') anpassung -= 0.15;
+  if (['A', 'B', 'C'].includes(immobilie.energieKlasse)) anpassung += 0.05;
+  if (['F', 'G', 'H'].includes(immobilie.energieKlasse)) anpassung -= 0.10;
+  if (immobilie.balkon || immobilie.terrasse) anpassung += 0.03;
+  if (immobilie.aufzug) anpassung += 0.02;
+  if (immobilie.stellplatz) anpassung += 0.02;
+  
+  const vergleichswert = regionPreis * anpassung * immobilie.wohnflaeche;
+  
+  ergebnisse.vergleichswert = {
+    wert: Math.round(vergleichswert),
+    methode: 'Vergleichswertverfahren',
+    regionPreis: regionPreis,
+    anpassung: anpassung,
+    erklaerung: `${regionPreis.toLocaleString()}€/m² × ${anpassung.toFixed(2)} × ${immobilie.wohnflaeche}m²`
+  };
+  
+  // ═══════════════════════════════════════════════════════════
+  // METHODE 3: KAUFPREISFAKTOR-BASIERT
+  // ═══════════════════════════════════════════════════════════
+  
+  const regionFaktor = getRegionalenKaufpreisfaktor(immobilie.stadt);
+  const faktorBasiert = immobilie.kaltmiete * 12 * regionFaktor;
+  
+  ergebnisse.faktorBasiert = {
+    wert: Math.round(faktorBasiert),
+    methode: 'Kaufpreisfaktor-Methode',
+    faktor: regionFaktor,
+    erklaerung: `${(immobilie.kaltmiete * 12).toLocaleString()}€ Jahresmiete × Faktor ${regionFaktor}`
+  };
+  
+  // ═══════════════════════════════════════════════════════════
+  // GEWICHTETER DURCHSCHNITT
+  // ═══════════════════════════════════════════════════════════
+  
+  // Für Kapitalanleger: Ertragswert am wichtigsten
+  const gewichteterMarktwert = Math.round(
+    ergebnisse.ertragswert.wert * 0.45 +
+    ergebnisse.vergleichswert.wert * 0.35 +
+    ergebnisse.faktorBasiert.wert * 0.20
+  );
+  
+  return {
+    geschaetzterMarktwert: gewichteterMarktwert,
+    methoden: ergebnisse,
+    konfidenz: berechneKonfidenz(ergebnisse),
+    datenquellen: ['Liegenschaftszins aus Gutachterausschuss', 'Regionale €/m²-Preise', 'Marktübliche Faktoren']
+  };
+}
+
+// Regionale Liegenschaftszinsen (Gutachterausschuss 2025)
+const LIEGENSCHAFTSZINSEN = {
+  'muenchen': 0.028,      // 2.8% - sehr niedrig wegen hoher Nachfrage
+  'frankfurt': 0.032,     // 3.2%
+  'hamburg': 0.030,       // 3.0%
+  'berlin': 0.033,        // 3.3%
+  'duesseldorf': 0.035,   // 3.5%
+  'koeln': 0.035,         // 3.5%
+  'stuttgart': 0.032,     // 3.2%
+  'nuernberg': 0.040,     // 4.0%
+  'hannover': 0.040,      // 4.0%
+  'leipzig': 0.045,       // 4.5%
+  'dresden': 0.043,       // 4.3%
+  'dortmund': 0.050,      // 5.0%
+  'essen': 0.050,         // 5.0%
+  'duisburg': 0.055,      // 5.5%
+  'default': 0.045        // 4.5% Standard
+};
+
+// Regionale Durchschnittspreise €/m² (Stand Q1 2025)
+const REGIONALE_QM_PREISE = {
+  'muenchen': 8800,
+  'frankfurt': 5500,
+  'hamburg': 5800,
+  'berlin': 4800,
+  'duesseldorf': 4200,
+  'koeln': 4000,
+  'stuttgart': 4800,
+  'nuernberg': 3500,
+  'hannover': 3200,
+  'leipzig': 2800,
+  'dresden': 2600,
+  'dortmund': 2200,
+  'essen': 2100,
+  'duisburg': 1800,
+  'default': 3000
+};
+
+// Regionale Kaufpreisfaktoren (Marktüblich 2025)
+const REGIONALE_FAKTOREN = {
+  'muenchen': 32,
+  'frankfurt': 28,
+  'hamburg': 29,
+  'berlin': 27,
+  'duesseldorf': 26,
+  'koeln': 26,
+  'stuttgart': 28,
+  'nuernberg': 24,
+  'hannover': 23,
+  'leipzig': 20,
+  'dresden': 21,
+  'dortmund': 17,
+  'essen': 17,
+  'duisburg': 15,
+  'default': 22
+};
+```
+
+---
+
+## 🎯 INSTANT EQUITY - Der Schlüssel zur Bewertung!
+
+### Was ist Instant Equity?
+
+**Instant Equity** = Marktwert - Kaufpreis = Sofortiger Buchgewinn
+
+```
+BEISPIEL:
+Marktwert:  280.000€
+Kaufpreis:  238.000€
+─────────────────────
+Instant Equity: 42.000€ (15% unter Marktwert!)
+```
+
+### Instant Equity auf Cashflow umrechnen
+
+```javascript
+function berechneInstantEquityWert(kaufpreis, marktwert, haltedauerJahre = 10) {
+  const instantEquity = marktwert - kaufpreis;
+  const instantEquityProzent = (instantEquity / marktwert) * 100;
+  
+  // Auf Haltedauer umrechnen → "virtueller monatlicher Cashflow"
+  const jaehrlichEquivalent = instantEquity / haltedauerJahre;
+  const monatlichEquivalent = jaehrlichEquivalent / 12;
+  
+  return {
+    instantEquity,
+    instantEquityProzent: Math.round(instantEquityProzent * 10) / 10,
+    monatlichEquivalent: Math.round(monatlichEquivalent),
+    jaehrlichEquivalent: Math.round(jaehrlichEquivalent),
+    erklaerung: `${instantEquity.toLocaleString()}€ Instant Equity ÷ ${haltedauerJahre} Jahre = ${Math.round(monatlichEquivalent)}€/Monat virtueller Cashflow`
+  };
+}
+
+// BEISPIEL:
+// 42.000€ Instant Equity ÷ 10 Jahre = 4.200€/Jahr = 350€/Monat virtuell!
+// → Bei -80€ tatsächlichem Cashflow: Netto +270€/Monat Wertschöpfung!
+```
+
+---
+
+## 📏 NEGATIVE CASHFLOW SCHWELLE - Wann ist es noch OK?
+
+### Die Profi-Regel
+
+**Für jeden €100/Monat negativen Cashflow brauchst du €15.000-20.000 Instant Equity!**
+
+```javascript
+function bewerteNegativenCashflow(cashflowMonat, instantEquity) {
+  if (cashflowMonat >= 0) {
+    return {
+      akzeptabel: true,
+      bewertung: '🟢 Positiver Cashflow – kein Problem!',
+      benoetigt: 0
+    };
+  }
+  
+  const negativerCashflowJahr = Math.abs(cashflowMonat) * 12;
+  const benoetigteEquity = Math.abs(cashflowMonat) * 175; // €17.500 pro €100
+  
+  const deckung = instantEquity / benoetigteEquity;
+  
+  if (deckung >= 1.5) {
+    return {
+      akzeptabel: true,
+      bewertung: '🟢 Instant Equity deckt negativen CF mehr als genug!',
+      deckungsgrad: Math.round(deckung * 100),
+      erklaerung: `${instantEquity.toLocaleString()}€ Instant Equity deckt ${negativerCashflowJahr.toLocaleString()}€/Jahr negativen CF für ${Math.round(instantEquity / negativerCashflowJahr)} Jahre!`
+    };
+  }
+  
+  if (deckung >= 1.0) {
+    return {
+      akzeptabel: true,
+      bewertung: '🟡 Instant Equity deckt negativen CF – gerade so',
+      deckungsgrad: Math.round(deckung * 100),
+      warnung: 'Wenig Puffer für Unvorhergesehenes'
+    };
+  }
+  
+  if (deckung >= 0.5) {
+    return {
+      akzeptabel: false,
+      bewertung: '🟠 Instant Equity deckt negativen CF nur teilweise',
+      deckungsgrad: Math.round(deckung * 100),
+      empfehlung: `Preis um ${Math.round((benoetigteEquity - instantEquity) / 1000)}k verhandeln!`
+    };
+  }
+  
+  return {
+    akzeptabel: false,
+    bewertung: '🔴 Zu wenig Discount für den negativen Cashflow!',
+    deckungsgrad: Math.round(deckung * 100),
+    empfehlung: `Mindestens ${benoetigteEquity.toLocaleString()}€ unter Marktwert kaufen, aktuell nur ${instantEquity.toLocaleString()}€`
+  };
+}
+```
+
+---
+
+## 📊 DIE 4 RENDITE-QUELLEN (Komplett-Betrachtung!)
+
+### Profis schauen nicht nur auf Cashflow!
+
+```javascript
+function berechneGesamtRendite(immobilie, finanzierung, steuerInfo) {
+  const haltedauer = 10; // Jahre
+  
+  // ═══════════════════════════════════════════════════════════
+  // QUELLE 1: CASHFLOW
+  // ═══════════════════════════════════════════════════════════
+  const cashflowJahr = immobilie.cashflow * 12;
+  const cashflowGesamt = cashflowJahr * haltedauer;
+  
+  // ═══════════════════════════════════════════════════════════
+  // QUELLE 2: TILGUNG (Equity Buildup durch Schuldenabbau)
+  // ═══════════════════════════════════════════════════════════
+  const tilgungGesamt = berechneTilgungUeber(finanzierung, haltedauer);
+  
+  // ═══════════════════════════════════════════════════════════
+  // QUELLE 3: WERTSTEIGERUNG
+  // ═══════════════════════════════════════════════════════════
+  const wertsteigerungRate = getRegionaleWertsteigerung(immobilie.stadt); // z.B. 2%/Jahr
+  const endwert = immobilie.kaufpreis * Math.pow(1 + wertsteigerungRate, haltedauer);
+  const wertsteigerungGesamt = endwert - immobilie.kaufpreis;
+  
+  // ═══════════════════════════════════════════════════════════
+  // QUELLE 4: STEUERVORTEILE
+  // ═══════════════════════════════════════════════════════════
+  const steuerersparnisJahr = berechneSteuerersparnis(immobilie, finanzierung, steuerInfo);
+  const steuerersparnisGesamt = steuerersparnisJahr * haltedauer;
+  
+  // ═══════════════════════════════════════════════════════════
+  // QUELLE 5 (BONUS): INSTANT EQUITY
+  // ═══════════════════════════════════════════════════════════
+  const instantEquity = immobilie.marktwert - immobilie.kaufpreis;
+  
+  // ═══════════════════════════════════════════════════════════
+  // GESAMTRENDITE
+  // ═══════════════════════════════════════════════════════════
+  const gesamtWertschoepfung = 
+    cashflowGesamt + 
+    tilgungGesamt + 
+    wertsteigerungGesamt + 
+    steuerersparnisGesamt +
+    instantEquity;
+  
+  const eigenkapitalEinsatz = finanzierung.eigenkapital;
+  const equityMultiple = (eigenkapitalEinsatz + gesamtWertschoepfung) / eigenkapitalEinsatz;
+  
+  // IRR-Annäherung (vereinfacht)
+  const annualisierteRendite = Math.pow(equityMultiple, 1/haltedauer) - 1;
+  
+  return {
+    quellen: {
+      cashflow: { 
+        gesamt: Math.round(cashflowGesamt), 
+        proJahr: Math.round(cashflowJahr),
+        anteil: Math.round(cashflowGesamt / gesamtWertschoepfung * 100)
+      },
+      tilgung: { 
+        gesamt: Math.round(tilgungGesamt),
+        anteil: Math.round(tilgungGesamt / gesamtWertschoepfung * 100)
+      },
+      wertsteigerung: { 
+        gesamt: Math.round(wertsteigerungGesamt),
+        rate: wertsteigerungRate,
+        anteil: Math.round(wertsteigerungGesamt / gesamtWertschoepfung * 100)
+      },
+      steuerersparnis: { 
+        gesamt: Math.round(steuerersparnisGesamt),
+        proJahr: Math.round(steuerersparnisJahr),
+        anteil: Math.round(steuerersparnisGesamt / gesamtWertschoepfung * 100)
+      },
+      instantEquity: {
+        gesamt: Math.round(instantEquity),
+        prozent: Math.round((instantEquity / immobilie.marktwert) * 100),
+        anteil: Math.round(instantEquity / gesamtWertschoepfung * 100)
+      }
+    },
+    zusammenfassung: {
+      eigenkapitalEinsatz: Math.round(eigenkapitalEinsatz),
+      gesamtWertschoepfung: Math.round(gesamtWertschoepfung),
+      endVermoegen: Math.round(eigenkapitalEinsatz + gesamtWertschoepfung),
+      equityMultiple: Math.round(equityMultiple * 100) / 100,
+      annualisierteRendite: Math.round(annualisierteRendite * 1000) / 10,
+      bewertung: bewerteGesamtRendite(equityMultiple, annualisierteRendite)
+    }
+  };
+}
+
+function bewerteGesamtRendite(equityMultiple, annualisierteRendite) {
+  if (equityMultiple >= 2.5 || annualisierteRendite >= 0.15) {
+    return { ampel: '🟢🟢', text: 'Exzellent', beschreibung: 'Top-Investment!' };
+  }
+  if (equityMultiple >= 2.0 || annualisierteRendite >= 0.12) {
+    return { ampel: '🟢', text: 'Sehr gut', beschreibung: 'Überdurchschnittlich' };
+  }
+  if (equityMultiple >= 1.7 || annualisierteRendite >= 0.08) {
+    return { ampel: '🟡', text: 'Gut', beschreibung: 'Solide Rendite' };
+  }
+  if (equityMultiple >= 1.4 || annualisierteRendite >= 0.05) {
+    return { ampel: '🟠', text: 'Mäßig', beschreibung: 'Unter Durchschnitt' };
+  }
+  return { ampel: '🔴', text: 'Schlecht', beschreibung: 'Nicht empfehlenswert' };
+}
+```
+
+---
+
+## 🏆 DEAL-SCORE BERECHNUNG (Komplett!)
+
+```javascript
+function berechneDealScore(immobilie) {
+  let score = 0;
+  const details = {};
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 1: UNTER MARKTWERT (35 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  const marktwert = schaetzeMarktwert(immobilie).geschaetzterMarktwert;
+  const discount = (marktwert - immobilie.kaufpreis) / marktwert;
+  
+  let discountPunkte = 0;
+  if (discount >= 0.20) discountPunkte = 35;       // 20%+ unter Marktwert = Jackpot!
+  else if (discount >= 0.15) discountPunkte = 30;  // 15-20% = Sehr gut
+  else if (discount >= 0.10) discountPunkte = 24;  // 10-15% = Gut
+  else if (discount >= 0.05) discountPunkte = 16;  // 5-10% = OK
+  else if (discount >= 0) discountPunkte = 8;      // Marktwert = Neutral
+  else if (discount >= -0.05) discountPunkte = 4;  // Bis 5% über Marktwert
+  else discountPunkte = 0;                          // >5% über Marktwert = Schlecht
+  
+  details.unterMarktwert = {
+    punkte: discountPunkte,
+    maxPunkte: 35,
+    marktwert: marktwert,
+    kaufpreis: immobilie.kaufpreis,
+    discount: Math.round(discount * 100),
+    instantEquity: marktwert - immobilie.kaufpreis
+  };
+  score += discountPunkte;
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 2: KAUFPREISFAKTOR VS. REGION (20 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  const faktor = immobilie.kaufpreis / (immobilie.kaltmiete * 12);
+  const regionFaktor = REGIONALE_FAKTOREN[immobilie.stadt?.toLowerCase()] || 22;
+  const faktorDiff = regionFaktor - faktor;
+  
+  let faktorPunkte = 0;
+  if (faktor <= regionFaktor - 5) faktorPunkte = 20;     // 5+ unter Region
+  else if (faktor <= regionFaktor - 3) faktorPunkte = 16; // 3-5 unter Region
+  else if (faktor <= regionFaktor) faktorPunkte = 12;     // Bis Regional-Niveau
+  else if (faktor <= regionFaktor + 3) faktorPunkte = 6;  // Leicht drüber
+  else faktorPunkte = 0;                                   // Deutlich drüber
+  
+  details.kaufpreisfaktor = {
+    punkte: faktorPunkte,
+    maxPunkte: 20,
+    faktor: Math.round(faktor * 10) / 10,
+    regionFaktor: regionFaktor,
+    bewertung: faktor <= regionFaktor ? '✅ Unter/auf Regionalniveau' : '⚠️ Über Regionalniveau'
+  };
+  score += faktorPunkte;
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 3: VERHANDLUNGSPOTENZIAL (15 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  let verhandlungPunkte = 8; // Neutral
+  
+  if (immobilie.insertDauer > 90) verhandlungPunkte += 4;  // Lange online
+  if (immobilie.preisGesenkt) verhandlungPunkte += 3;      // Preis wurde schon gesenkt
+  if (immobilie.verkäuferMotiviert) verhandlungPunkte += 3; // Zeitdruck etc.
+  if (immobilie.mehrfachBieter) verhandlungPunkte -= 5;    // Konkurrenz
+  
+  details.verhandlung = {
+    punkte: Math.min(15, Math.max(0, verhandlungPunkte)),
+    maxPunkte: 15,
+    faktoren: []
+  };
+  score += Math.min(15, Math.max(0, verhandlungPunkte));
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 4: TRANSAKTIONSKOSTEN (10 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  let kostenPunkte = 5;
+  
+  const grstSatz = GRUNDERWERBSTEUER[immobilie.bundesland] || 0.05;
+  if (grstSatz <= 0.035) kostenPunkte += 3;  // Bayern/Sachsen
+  if (!immobilie.makler) kostenPunkte += 2;   // Kein Makler
+  
+  details.transaktionskosten = {
+    punkte: kostenPunkte,
+    maxPunkte: 10,
+    grstSatz: grstSatz,
+    makler: immobilie.makler
+  };
+  score += kostenPunkte;
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 5: FINANZIERBARKEIT (10 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  let finanzPunkte = 7;
+  
+  if (discount >= 0.10) finanzPunkte += 2;  // Bank liebt Unterwert-Käufe
+  if (['A', 'B'].includes(immobilie.lage)) finanzPunkte += 1;
+  if (immobilie.baujahr < 1960 && !immobilie.saniert) finanzPunkte -= 3;
+  if (immobilie.erbpacht) finanzPunkte -= 2;
+  
+  details.finanzierbarkeit = {
+    punkte: Math.max(0, finanzPunkte),
+    maxPunkte: 10
+  };
+  score += Math.max(0, finanzPunkte);
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 6: EXIT-OPTIONEN (10 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  let exitPunkte = 5;
+  
+  if (['A', 'B'].includes(immobilie.lage)) exitPunkte += 3;
+  if (immobilie.wohnflaeche >= 40 && immobilie.wohnflaeche <= 80) exitPunkte += 2; // Gängige Größe
+  if (immobilie.erbpacht) exitPunkte -= 2;
+  if (immobilie.sozialbindung) exitPunkte -= 2;
+  
+  details.exitOptionen = {
+    punkte: Math.max(0, Math.min(10, exitPunkte)),
+    maxPunkte: 10
+  };
+  score += Math.max(0, Math.min(10, exitPunkte));
+  
+  // ═══════════════════════════════════════════════════════════
+  // FINALE
+  // ═══════════════════════════════════════════════════════════
+  
+  return {
+    score: Math.min(100, Math.max(0, score)),
+    details,
+    kategorie: getDealKategorie(score)
+  };
+}
+
+function getDealKategorie(score) {
+  if (score >= 85) return { emoji: '🔥', text: 'SCHNÄPPCHEN!', aktion: 'Sofort zuschlagen!' };
+  if (score >= 70) return { emoji: '🟢', text: 'Guter Deal', aktion: 'Empfehlenswert' };
+  if (score >= 55) return { emoji: '🟡', text: 'Fairer Preis', aktion: 'Verhandeln lohnt' };
+  if (score >= 40) return { emoji: '🟠', text: 'Überteuert', aktion: 'Stark verhandeln!' };
+  return { emoji: '🔴', text: 'Zu teuer!', aktion: 'Finger weg oder -20% bieten' };
+}
+```
+
+---
+
+## 🏠 INVESTMENT-SCORE BERECHNUNG (Komplett!)
+
+```javascript
+function berechneInvestmentScore(immobilie, userProfil = {}) {
+  let score = 0;
+  const details = {};
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 1: LAGE-QUALITÄT (25 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  const lageBewertung = berechneMikrolagePunkteV2(immobilie);
+  details.lage = lageBewertung;
+  score += lageBewertung.punkte;
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 2: CASHFLOW-POTENZIAL (20 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  const cfBewertung = bewerteCashflowPotenzial(immobilie);
+  details.cashflow = cfBewertung;
+  score += cfBewertung.punkte;
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 3: OBJEKTZUSTAND (15 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  let zustandPunkte = {
+    'Neubau': 15, 'Kernsaniert': 14, 'Saniert': 12, 'Modernisiert': 10,
+    'Gepflegt': 8, 'Renovierungsbedürftig': 4, 'Sanierungsbedürftig': 2
+  }[immobilie.zustand] || 7;
+  
+  // Energie-Anpassung
+  if (['A', 'B', 'C'].includes(immobilie.energieKlasse)) zustandPunkte = Math.min(15, zustandPunkte + 1);
+  if (['G', 'H'].includes(immobilie.energieKlasse)) zustandPunkte = Math.max(0, zustandPunkte - 2);
+  
+  details.zustand = { punkte: zustandPunkte, maxPunkte: 15, wert: immobilie.zustand, energie: immobilie.energieKlasse };
+  score += zustandPunkte;
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 4: WERTSTEIGERUNGSPOTENZIAL (15 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  let wertPunkte = 7;
+  const potenzialDetails = [];
+  
+  // Mieterhöhungspotenzial
+  if (immobilie.istMiete && immobilie.marktMiete && immobilie.istMiete < immobilie.marktMiete * 0.85) {
+    wertPunkte += 3;
+    potenzialDetails.push(`Mieterhöhung möglich: +${Math.round((immobilie.marktMiete/immobilie.istMiete - 1) * 100)}%`);
+  }
+  
+  // Aufwertungsgebiet
+  if (immobilie.entwicklungsgebiet) { wertPunkte += 3; potenzialDetails.push('Entwicklungsgebiet'); }
+  if (immobilie.neueBahnanbindung) { wertPunkte += 2; potenzialDetails.push('Neue ÖPNV-Anbindung'); }
+  
+  // Denkmal-Bonus
+  if (immobilie.denkmalschutz && userProfil.hoherSteuersatz) {
+    wertPunkte += 2;
+    potenzialDetails.push('Denkmal-AfA möglich!');
+  }
+  
+  details.wertsteigerung = { punkte: Math.min(15, wertPunkte), maxPunkte: 15, faktoren: potenzialDetails };
+  score += Math.min(15, wertPunkte);
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 5: MIETER-/NACHFRAGEQUALITÄT (15 Punkte)
+  // ═══════════════════════════════════════════════════════════
+  
+  let mieterPunkte = 10;
+  
+  if (immobilie.vermietet && immobilie.mieterBonität === 'gut') mieterPunkte += 3;
+  if (immobilie.mietvertragDauer > 24) mieterPunkte += 2; // Langzeitmieter
+  if (immobilie.leerstand) mieterPunkte -= 3;
+  if (immobilie.mietrueckstaende) mieterPunkte -= 5;
+  
+  // Nachfrage-Indikator
+  const regionDaten = getRegionaleBenchmarks(immobilie.stadt);
+  if (regionDaten.nachfrageHoch) mieterPunkte += 2;
+  
+  details.mieterNachfrage = { punkte: Math.max(0, Math.min(15, mieterPunkte)), maxPunkte: 15 };
+  score += Math.max(0, Math.min(15, mieterPunkte));
+  
+  // ═══════════════════════════════════════════════════════════
+  // KOMPONENTE 6: RISIKOFAKTOREN (10 Punkte, Abzüge)
+  // ═══════════════════════════════════════════════════════════
+  
+  let risikoPunkte = 10;
+  const risiken = [];
+  
+  if (immobilie.erbpacht) { risikoPunkte -= 3; risiken.push('Erbpacht'); }
+  if (immobilie.erhaltungsruecklageProzent < 20) { risikoPunkte -= 2; risiken.push('Niedrige Rücklage'); }
+  if (immobilie.sonderumlagenGeplant) { risikoPunkte -= 2; risiken.push('Sonderumlage geplant'); }
+  if (immobilie.baujahr < 1960 && !immobilie.kernsaniert) { risikoPunkte -= 2; risiken.push('Altbau unsaniert'); }
+  if (immobilie.wegProbleme) { risikoPunkte -= 3; risiken.push('WEG-Probleme'); }
+  
+  details.risiken = { punkte: Math.max(0, risikoPunkte), maxPunkte: 10, faktoren: risiken };
+  score += Math.max(0, risikoPunkte);
+  
+  // ═══════════════════════════════════════════════════════════
+  // FINALE
+  // ═══════════════════════════════════════════════════════════
+  
+  return {
+    score: Math.min(100, Math.max(0, score)),
+    details,
+    kategorie: getInvestmentKategorie(score)
+  };
+}
+
+function getInvestmentKategorie(score) {
+  if (score >= 85) return { emoji: '🏆', text: 'Top-Objekt', beschreibung: 'Erstklassige Immobilie' };
+  if (score >= 70) return { emoji: '🟢', text: 'Gutes Objekt', beschreibung: 'Solide Langfrist-Anlage' };
+  if (score >= 55) return { emoji: '🟡', text: 'Durchschnitt', beschreibung: 'Okay mit richtigem Preis' };
+  if (score >= 40) return { emoji: '🟠', text: 'Unterdurchschnitt', beschreibung: 'Nur bei Schnäppchen' };
+  return { emoji: '🔴', text: 'Problematisch', beschreibung: 'Viele Risiken' };
+}
+```
+
+---
+
+## 🎯 GESAMT-ANALYSE (Alles zusammen!)
+
+```javascript
+function analysiereImmobilieKomplett(immobilie, userProfil = {}) {
+  // ═══════════════════════════════════════════════════════════
+  // 1. MARKTWERT SCHÄTZEN
+  // ═══════════════════════════════════════════════════════════
+  const marktwertAnalyse = schaetzeMarktwert(immobilie);
+  immobilie.marktwert = marktwertAnalyse.geschaetzterMarktwert;
+  
+  // ═══════════════════════════════════════════════════════════
+  // 2. BEIDE SCORES BERECHNEN
+  // ═══════════════════════════════════════════════════════════
+  const dealScore = berechneDealScore(immobilie);
+  const investmentScore = berechneInvestmentScore(immobilie, userProfil);
+  
+  // ═══════════════════════════════════════════════════════════
+  // 3. GESAMT-SCORE (Strategie-abhängig)
+  // ═══════════════════════════════════════════════════════════
+  const strategie = userProfil.strategie || 'default';
+  const gesamtScore = berechneGesamtScore(dealScore.score, investmentScore.score, strategie);
+  
+  // ═══════════════════════════════════════════════════════════
+  // 4. INSTANT EQUITY ANALYSE
+  // ═══════════════════════════════════════════════════════════
+  const instantEquity = berechneInstantEquityWert(
+    immobilie.kaufpreis, 
+    immobilie.marktwert, 
+    userProfil.geplanteHaltedauer || 10
+  );
+  
+  // ═══════════════════════════════════════════════════════════
+  // 5. NEGATIVE CASHFLOW CHECK
+  // ═══════════════════════════════════════════════════════════
+  const cashflowCheck = bewerteNegativenCashflow(
+    immobilie.cashflow, 
+    instantEquity.instantEquity
+  );
+  
+  // ═══════════════════════════════════════════════════════════
+  // 6. 4-QUELLEN-RENDITE
+  // ═══════════════════════════════════════════════════════════
+  const gesamtRendite = berechneGesamtRendite(immobilie, immobilie.finanzierung, userProfil);
+  
+  // ═══════════════════════════════════════════════════════════
+  // 7. FINALE EMPFEHLUNG
+  // ═══════════════════════════════════════════════════════════
+  
+  return {
+    // Die zwei Haupt-Scores
+    dealScore: dealScore,
+    investmentScore: investmentScore,
+    gesamtScore: {
+      score: gesamtScore,
+      kategorie: getGesamtKategorie(gesamtScore, dealScore.score, investmentScore.score)
+    },
+    
+    // Marktwert-Analyse
+    marktwert: marktwertAnalyse,
+    instantEquity: instantEquity,
+    cashflowCheck: cashflowCheck,
+    
+    // Rendite-Analyse
+    gesamtRendite: gesamtRendite,
+    
+    // Finale Empfehlung
+    empfehlung: generiereEmpfehlung(dealScore, investmentScore, gesamtScore, instantEquity, cashflowCheck)
+  };
+}
+
+function getGesamtKategorie(gesamt, deal, investment) {
+  // Besondere Fälle
+  if (deal >= 80 && investment < 50) {
+    return { emoji: '💰', text: 'Schnäppchen mit Risiko', beschreibung: 'Super Preis, aber Objekt hat Schwächen' };
+  }
+  if (deal < 40 && investment >= 70) {
+    return { emoji: '💎', text: 'Gutes Objekt, zu teuer', beschreibung: 'Tolles Objekt, aber Preis verhandeln!' };
+  }
+  
+  // Standard
+  if (gesamt >= 80) return { emoji: '🏆', text: 'TOP INVESTMENT', beschreibung: 'Guter Deal + Gutes Objekt!' };
+  if (gesamt >= 65) return { emoji: '🟢', text: 'Empfehlenswert', beschreibung: 'Solide Gelegenheit' };
+  if (gesamt >= 50) return { emoji: '🟡', text: 'Prüfenswert', beschreibung: 'Mit Verhandlung interessant' };
+  if (gesamt >= 35) return { emoji: '🟠', text: 'Vorsicht', beschreibung: 'Nur bei deutlicher Verbesserung' };
+  return { emoji: '🔴', text: 'Nicht empfohlen', beschreibung: 'Zu teuer und/oder zu riskant' };
+}
+
+function generiereEmpfehlung(dealScore, investmentScore, gesamtScore, instantEquity, cashflowCheck) {
+  const empfehlungen = [];
+  
+  // Deal-basierte Empfehlungen
+  if (dealScore.score < 50) {
+    const zielDiscount = 0.15;
+    const zielPreis = Math.round(dealScore.details.unterMarktwert.marktwert * (1 - zielDiscount));
+    empfehlungen.push({
+      prioritaet: 1,
+      typ: 'Preisverhandlung',
+      icon: '💰',
+      text: `Preis zu hoch! Biete maximal ${zielPreis.toLocaleString()}€ (15% unter Marktwert)`,
+      effekt: `Deal-Score würde von ${dealScore.score} auf ~75 steigen`
+    });
+  }
+  
+  // Cashflow-basierte Empfehlungen
+  if (!cashflowCheck.akzeptabel) {
+    empfehlungen.push({
+      prioritaet: 2,
+      typ: 'Cashflow-Problem',
+      icon: '⚠️',
+      text: cashflowCheck.empfehlung,
+      effekt: 'Negativer Cashflow wird durch Instant Equity nicht gedeckt'
+    });
+  }
+  
+  // Investment-basierte Empfehlungen
+  if (investmentScore.details.risiken.faktoren.length > 0) {
+    empfehlungen.push({
+      prioritaet: 3,
+      typ: 'Risiken prüfen',
+      icon: '🔍',
+      text: `Risiken identifiziert: ${investmentScore.details.risiken.faktoren.join(', ')}`,
+      effekt: 'Vor Kauf klären!'
+    });
+  }
+  
+  // Positive Empfehlung bei gutem Deal
+  if (gesamtScore >= 70 && cashflowCheck.akzeptabel) {
+    empfehlungen.unshift({
+      prioritaet: 0,
+      typ: 'Kaufempfehlung',
+      icon: '✅',
+      text: 'Gute Gelegenheit! Bei Interesse schnell handeln.',
+      effekt: `${instantEquity.instantEquity.toLocaleString()}€ Instant Equity + ${instantEquity.monatlichEquivalent}€/Monat virtueller CF`
+    });
+  }
+  
+  return empfehlungen.sort((a, b) => a.prioritaet - b.prioritaet);
+}
+```
+
+---
+
+## 🎚️ MODUS-AUSWAHL: EINSTEIGER vs. PROFI
+
+```javascript
+const MODUS_CONFIG = {
+  einsteiger: {
+    name: 'Einsteiger-Modus',
+    beschreibung: 'Konservativer, mehr Warnungen, ausführlichere Erklärungen',
+    einstellungen: {
+      risikopuffer: 150,  // 150€/Monat extra
+      minCashflowFuerGruen: 50,  // Mindestens 50€ positiv für Grün
+      warnungBeiNegativCashflow: true,
+      erklaerungAusfuehrlich: true,
+      worstCaseAnzeigen: 'immer',
+      maxBeleihung: 95,  // Max 95% empfohlen
+      minEigenkapitalEmpfehlung: 'nebenkosten_plus_10'
+    }
+  },
+  
+  profi: {
+    name: 'Profi-Modus',
+    beschreibung: 'Weniger Warnungen, zeigt auch aggressive Strategien',
+    einstellungen: {
+      risikopuffer: 50,  // Nur 50€/Monat
+      minCashflowFuerGruen: 0,  // Neutral reicht
+      warnungBeiNegativCashflow: false,
+      erklaerungAusfuehrlich: false,
+      worstCaseAnzeigen: 'aufKlick',  // Nur wenn User will
+      maxBeleihung: 110,  // Auch 110% zeigen
+      minEigenkapitalEmpfehlung: 'null_moeglich'
+    }
+  }
+};
+
+function getModusEinstellungen(modus = 'einsteiger') {
+  return MODUS_CONFIG[modus] || MODUS_CONFIG.einsteiger;
+}
+
+// Beispiel: Cashflow-Bewertung je nach Modus
+function bewerteCashflowMitModus(cashflow, modus) {
+  const config = getModusEinstellungen(modus);
+  const effektiv = cashflow - config.einstellungen.risikopuffer;
+  
+  if (modus === 'profi') {
+    // Profi: Weniger streng
+    if (cashflow >= 100) return { ampel: '🟢🟢', text: 'Sehr gut' };
+    if (cashflow >= 0) return { ampel: '🟢', text: 'OK' };
+    if (cashflow >= -150) return { ampel: '🟡', text: 'Akzeptabel' };
+    return { ampel: '🟠', text: 'Negativ' };
+  }
+  
+  // Einsteiger: Strenger (Standard)
+  if (effektiv >= 150) return { ampel: '🟢🟢', text: 'Sehr gut' };
+  if (effektiv >= 50) return { ampel: '🟢', text: 'Gut' };
+  if (cashflow >= 0) return { ampel: '🟡', text: 'Grenzwertig – kein Puffer!' };
+  return { ampel: '🔴', text: 'Negativ – Vorsicht!' };
+}
+```
+
+### Wann welchen Modus empfehlen?
+
+| Situation | Empfohlener Modus |
+|-----------|-------------------|
+| Erstes Investment | Einsteiger |
+| Wenig Rücklagen | Einsteiger |
+| 3+ Immobilien besessen | Profi |
+| Erfahrener Investor | Profi |
+| Hohe finanzielle Reserven | Profi |
+| Selbstständiger ohne Puffer | Einsteiger |
+
+---
+
+## 🔍 LIVE-RECHERCHE FÜR MARKTWERT (KRITISCH!)
+
+### Warum Live-Recherche?
+
+**PROBLEM:** Statische Daten veralten und sind zu ungenau!
+- "Hamburg" hat 100+ Stadtteile mit KOMPLETT unterschiedlichen Preisen
+- Harburg: ~3.200€/m² vs. Blankenese: ~12.000€/m²
+- Reihenhaus vs. ETW vs. EFH haben verschiedene €/m²-Preise
+- Marktpreise ändern sich ständig
+
+**LÖSUNG:** Bei JEDER Analyse Live-Daten recherchieren!
+
+---
+
+### 🔄 RECHERCHE-WORKFLOW (Schritt für Schritt)
+
+```
+USER GIBT EIN:
+├─ Adresse/Stadtteil: [z.B. "Poppenbüttel, Hamburg"]
+├─ Immobilientyp: [Reihenhaus / ETW / EFH / MFH / DHH]
+├─ Wohnfläche: [z.B. 120 m²]
+├─ Kaufpreis: [z.B. 520.000€]
+├─ Kaltmiete: [z.B. 1.800€] (falls vermietet)
+└─ Zustand/Baujahr: [optional]
+
+KI FÜHRT AUTOMATISCH DURCH:
+│
+├─ SCHRITT 1: Kaufpreis-Recherche
+│   └─ Suche: "[Stadtteil] [Stadt] [Immobilientyp] Kaufpreis €/m² 2025"
+│
+├─ SCHRITT 2: Mietpreis-Recherche  
+│   └─ Suche: "[Stadtteil] [Stadt] Mietspiegel Haus mieten €/m² 2025"
+│
+├─ SCHRITT 3: Vergleichsangebote finden
+│   └─ Suche: "[Stadtteil] [Immobilientyp] kaufen [Fläche]m²"
+│
+├─ SCHRITT 4: Daten extrahieren & vergleichen
+│   └─ Durchschnitts-€/m² berechnen
+│   └─ Mit User-Eingabe vergleichen
+│
+└─ SCHRITT 5: Bewertung ausgeben
+    └─ Deal-Score berechnen
+    └─ Empfehlung generieren
+```
+
+---
+
+### 🔎 SUCH-TEMPLATES (Exakte Formulierungen!)
+
+**Für KAUFPREISE:**
+```
+Suche 1: "[Stadtteil] [Stadt] [Immobilientyp] Quadratmeterpreis €/m² 2025"
+Suche 2: "[Stadtteil] [Stadt] Immobilienpreise [Immobilientyp] kaufen"
+Suche 3: "[Stadtteil] Haus kaufen Preis" (für konkrete Angebote)
+```
+
+**Für MIETPREISE:**
+```
+Suche 1: "[Stadtteil] [Stadt] Mietspiegel 2025"
+Suche 2: "[Stadtteil] [Stadt] [Immobilientyp] mieten €/m²"
+Suche 3: "Mietpreis Haus [Stadtteil] [Stadt]"
+```
+
+**Für VERGLEICHSOBJEKTE:**
+```
+Suche: "[Stadtteil] [Immobilientyp] kaufen [Fläche-10]m² bis [Fläche+10]m²"
+```
+
+---
+
+### 📊 DATEN-EXTRAKTION (Was suchen wir?)
+
+**Aus den Suchergebnissen extrahieren:**
+
+| Datenpunkt | Quelle | Priorität |
+|------------|--------|-----------|
+| Ø €/m² Kaufpreis | ImmoScout24, Immowelt, Homeday | ⭐⭐⭐ |
+| €/m² Spanne (min-max) | Immoportal, Engel&Völkers | ⭐⭐⭐ |
+| Ø €/m² Miete | Mietspiegel-Seiten | ⭐⭐⭐ |
+| Konkrete Angebote | ImmoScout24, Kleinanzeigen | ⭐⭐ |
+| Preisentwicklung (YoY) | ImmoScout Atlas | ⭐ |
+
+**Bevorzugte Quellen (in dieser Reihenfolge):**
+1. ImmoScout24 Atlas (atlas.immobilienscout24.de) - Beste Datenbasis
+2. Homeday Preisatlas - Gute Stadtteil-Daten
+3. Engel & Völkers Mietspiegel - Professionell
+4. Immoportal.com - Aktuelle Preise
+5. Kleinanzeigen.de - Echte Angebote zum Vergleich
+
+---
+
+### 🧮 MARKTWERT-BERECHNUNG (Nach Live-Recherche)
+
+```javascript
+function berechneMarktwertMitLiveDaten(userEingabe, rechercheDaten) {
+  /*
+  rechercheDaten = {
+    kaufpreisProQm: {
+      durchschnitt: 4941,      // Aus Recherche
+      minimum: 4200,
+      maximum: 6500,
+      quelle: 'ImmoScout24 Q3/2025',
+      stadtteil: 'Poppenbüttel',
+      immobilientyp: 'Haus'
+    },
+    mietpreisProQm: {
+      durchschnitt: 17.08,
+      quelle: 'ImmoScout24 Mietspiegel',
+    },
+    vergleichsangebote: [
+      { preis: 465000, flaeche: 148, qmPreis: 3142, zustand: 'gut' },
+      { preis: 679000, flaeche: 125, qmPreis: 5432, zustand: 'saniert' },
+      // ...
+    ]
+  }
+  */
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // METHODE 1: Durchschnittspreis × Fläche
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const marktwertDurchschnitt = rechercheDaten.kaufpreisProQm.durchschnitt * userEingabe.wohnflaeche;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // METHODE 2: Anpassung nach Zustand
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let zustandsFaktor = 1.0;
+  if (userEingabe.zustand === 'Neubau' || userEingabe.zustand === 'Kernsaniert') zustandsFaktor = 1.10;
+  if (userEingabe.zustand === 'Saniert') zustandsFaktor = 1.05;
+  if (userEingabe.zustand === 'Renovierungsbedürftig') zustandsFaktor = 0.85;
+  if (userEingabe.zustand === 'Sanierungsbedürftig') zustandsFaktor = 0.75;
+  
+  // Energie-Anpassung
+  let energieFaktor = 1.0;
+  if (['A+', 'A', 'B'].includes(userEingabe.energieKlasse)) energieFaktor = 1.05;
+  if (['F', 'G', 'H'].includes(userEingabe.energieKlasse)) energieFaktor = 0.90;
+  
+  const marktwertAngepasst = marktwertDurchschnitt * zustandsFaktor * energieFaktor;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // METHODE 3: Vergleich mit ähnlichen Angeboten
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // Finde Angebote mit ähnlicher Fläche (±20%)
+  const aehnlicheAngebote = rechercheDaten.vergleichsangebote.filter(a => 
+    a.flaeche >= userEingabe.wohnflaeche * 0.8 && 
+    a.flaeche <= userEingabe.wohnflaeche * 1.2
+  );
+  
+  let marktwertVergleich = null;
+  if (aehnlicheAngebote.length >= 2) {
+    const durchschnittQm = aehnlicheAngebote.reduce((sum, a) => sum + a.qmPreis, 0) / aehnlicheAngebote.length;
+    marktwertVergleich = durchschnittQm * userEingabe.wohnflaeche;
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FINALE MARKTWERT-SCHÄTZUNG (gewichteter Durchschnitt)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let finalerMarktwert;
+  if (marktwertVergleich) {
+    // Wenn Vergleichsangebote vorhanden: 60% Vergleich, 40% Durchschnitt
+    finalerMarktwert = marktwertVergleich * 0.6 + marktwertAngepasst * 0.4;
+  } else {
+    finalerMarktwert = marktwertAngepasst;
+  }
+  
+  return {
+    geschaetzterMarktwert: Math.round(finalerMarktwert),
+    methoden: {
+      durchschnitt: Math.round(marktwertDurchschnitt),
+      angepasst: Math.round(marktwertAngepasst),
+      vergleich: marktwertVergleich ? Math.round(marktwertVergleich) : null
+    },
+    datenqualitaet: berechneDatenqualitaet(rechercheDaten),
+    quellen: rechercheDaten.quellen || [],
+    stand: new Date().toISOString().split('T')[0]
+  };
+}
+
+function berechneDatenqualitaet(rechercheDaten) {
+  let score = 0;
+  
+  // Haben wir €/m²-Daten?
+  if (rechercheDaten.kaufpreisProQm?.durchschnitt) score += 30;
+  if (rechercheDaten.kaufpreisProQm?.minimum && rechercheDaten.kaufpreisProQm?.maximum) score += 10;
+  
+  // Haben wir Mietdaten?
+  if (rechercheDaten.mietpreisProQm?.durchschnitt) score += 20;
+  
+  // Haben wir Vergleichsangebote?
+  if (rechercheDaten.vergleichsangebote?.length >= 3) score += 30;
+  else if (rechercheDaten.vergleichsangebote?.length >= 1) score += 15;
+  
+  // Mehrere Quellen?
+  if (rechercheDaten.quellen?.length >= 2) score += 10;
+  
+  if (score >= 80) return { niveau: 'Hoch', emoji: '🟢', text: 'Gute Datenbasis' };
+  if (score >= 50) return { niveau: 'Mittel', emoji: '🟡', text: 'Ausreichende Daten' };
+  return { niveau: 'Niedrig', emoji: '🟠', text: 'Wenig Daten - Schätzung unsicher!' };
+}
+```
+
+---
+
+### 📋 BEISPIEL-ANALYSE MIT LIVE-RECHERCHE
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+🏠 IMMOBILIEN-ANALYSE: Wesselstraße, Poppenbüttel (Reihenhaus)
+═══════════════════════════════════════════════════════════════════════════════
+
+📥 EINGABE VOM USER:
+├─ Adresse: Wesselstraße, 22399 Hamburg-Poppenbüttel
+├─ Typ: Reihenhaus
+├─ Wohnfläche: 120 m²
+├─ Kaufpreis: 520.000€
+├─ Kaltmiete (aktuell): 1.800€/Monat
+└─ Zustand: Gepflegt, Baujahr 1985
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔍 LIVE-RECHERCHE DURCHGEFÜHRT (Stand: 28.01.2026)
+
+📊 KAUFPREISE POPPENBÜTTEL (Häuser):
+├─ Quelle: ImmoScout24 Atlas Q3/2025
+├─ Durchschnitt: 4.941 €/m²
+├─ Spanne: 4.465 - 8.160 €/m²
+└─ Trend: -0,88% zu Q2/2025
+
+📊 MIETPREISE POPPENBÜTTEL (Häuser):
+├─ Quelle: ImmoScout24 Mietspiegel
+├─ Durchschnitt: 17,08 €/m²
+├─ Trend: +1,46% erwartet Q4/2025
+└─ Zum Vergleich Wohnungen: 13,04 €/m²
+
+📊 VERGLEICHSANGEBOTE AKTUELL AUF DEM MARKT:
+├─ Reihenhaus 148m², 7 Zi.: 465.000€ (3.142 €/m²) - Energieklasse B
+├─ Reihenhaus 82m², 4,5 Zi.: 399.000€ (4.836 €/m²) - Energieklasse F
+└─ Reihenhaus 125m², 4 Zi.: 679.000€ (5.432 €/m²) - Energieklasse C
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 MARKTWERT-BERECHNUNG
+
+Methode 1 (Durchschnitt): 120m² × 4.941€ = 592.920€
+Methode 2 (Zustand-angepasst): 592.920€ × 1.0 = 592.920€
+Methode 3 (Vergleichsangebote Ø): ~580.000€
+
+➜ GESCHÄTZTER MARKTWERT: ~590.000€
+  (Spanne: 535.000€ - 650.000€)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💰 DEAL-ANALYSE
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DEIN KAUFPREIS:        520.000€  (4.333 €/m²)                              │
+│ GESCHÄTZTER MARKTWERT: 590.000€  (4.917 €/m²)                              │
+│                        ─────────────────────                                │
+│ DIFFERENZ:             70.000€ UNTER MARKTWERT! ✅                         │
+│ RABATT:                11,9%                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DEINE MIETE:           1.800€/Monat (15,00 €/m²)                           │
+│ MARKTMIETE:            2.050€/Monat (17,08 €/m²)                           │
+│                        ─────────────────────                                │
+│ MIETERHÖHUNGSPOTENZIAL: +250€/Monat (+13,9%)                               │
+│ (Nach Modernisierung oder bei Neuvermietung)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 SCORES
+
+🎯 DEAL-SCORE: 76/100 🟢 "Guter Deal"
+├─ Unter Marktwert: 28/40 (11,9% Rabatt)
+├─ Kaufpreisfaktor: 14/20 (Faktor 24,1 - OK für Hamburg-Nord)
+├─ Verhandlungspotenzial: 10/15
+├─ Nebenkosten: 6/10 (Hamburg 5,5% GrESt)
+└─ Exit-Optionen: 18/15 (Beliebte Lage)
+
+🏠 INVESTMENT-SCORE: 68/100 🟢 "Gut"
+├─ Cashflow: 12/25 (aktuell leicht negativ geschätzt)
+├─ Lage: 20/25 (Poppenbüttel = gute Wohnlage)
+├─ Wertsteigerung: 14/20 (Mieterhöhungspotenzial!)
+├─ Objektqualität: 10/15 (gepflegt, aber Bj. 1985)
+└─ Mieter/Nachfrage: 12/15 (hohe Nachfrage in HH-Nord)
+
+⚖️ GESAMT-SCORE: 72/100 🟢 "EMPFEHLENSWERT"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💡 TOTAL VALUE CREATION (über 10 Jahre)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. INSTANT EQUITY (sofort):           +70.000€                             │
+│    → Umgerechnet: 583€/Monat virtueller Cashflow                           │
+│                                                                             │
+│ 2. CASHFLOW (geschätzt):              -50€/Monat                           │
+│    (Nach Finanzierung mit 20% EK)                                          │
+│                                                                             │
+│ 3. TOTAL VALUE CREATION:              +533€/Monat! ✅                      │
+│    Der negative Cashflow ist MEHR ALS AUSGEGLICHEN durch den               │
+│    günstigen Einkauf!                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ EMPFEHLUNG: KAUFEN!
+
+Begründung:
+• Du kaufst 70.000€ (12%) unter Marktwert → sofortiger Buchgewinn
+• Mieterhöhungspotenzial von +250€/Monat bei Neuvermietung
+• Poppenbüttel ist eine etablierte, nachgefragte Wohnlage
+• Reihenhaus = gute Wiederverkäuflichkeit
+
+⚠️ Noch prüfen:
+• Energetischer Zustand (Heizung, Dämmung) - Bj. 1985!
+• Instandhaltungsrücklage bei Reihenhausanlage
+• Grundbuch auf Lasten prüfen
+
+💰 Maximales Gebot: 540.000€ (dann noch 8,5% unter Marktwert)
+
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+### 🚨 WICHTIG: Wann MUSS Live-Recherche gemacht werden?
+
+**IMMER bei:**
+- Jeder neuen Immobilien-Analyse
+- Wenn User einen Stadtteil nennt
+- Wenn User einen Kaufpreis/Marktwert bewerten will
+- Wenn User fragt "Ist das ein guter Preis?"
+
+**NICHT nötig bei:**
+- Allgemeinen Fragen zur Finanzierung
+- Erklärungen von Begriffen
+- Steuer-Fragen (außer es geht um konkrete Objekte)
+
+---
+
+### 🔧 FALLBACK: Wenn Recherche nicht möglich ist
+
+Falls keine Live-Recherche möglich ist (z.B. Offline, API-Limit):
+
+```javascript
+function fallbackMarktwert(userEingabe) {
+  // Warnung ausgeben!
+  console.warn('⚠️ Keine Live-Daten verfügbar - nutze Fallback-Schätzung!');
+  
+  // Grobe Schätzung basierend auf Stadt-Durchschnitt
+  const stadtDurchschnitt = FALLBACK_PREISE[userEingabe.stadt] || 3500;
+  
+  // Immobilientyp-Faktor
+  const typFaktor = {
+    'ETW': 1.0,
+    'Reihenhaus': 0.95,
+    'DHH': 1.05,
+    'EFH': 1.10,
+    'MFH': 0.85
+  }[userEingabe.typ] || 1.0;
+  
+  const schaetzung = stadtDurchschnitt * typFaktor * userEingabe.wohnflaeche;
+  
+  return {
+    marktwert: Math.round(schaetzung),
+    warnung: '⚠️ ACHTUNG: Dies ist nur eine grobe Schätzung basierend auf Stadt-Durchschnitt! Für genaue Bewertung bitte Stadtteil-spezifische Daten recherchieren.',
+    konfidenz: 'Niedrig'
+  };
+}
+
+// Fallback-Preise (nur als Notfall!)
+const FALLBACK_PREISE = {
+  'hamburg': 5500,
+  'muenchen': 9000,
+  'berlin': 5000,
+  'frankfurt': 6000,
+  'koeln': 4500,
+  // ... etc.
+};
+```
+
+---
 
 ## Projekt-Übersicht
 
@@ -2455,13 +4125,610 @@ function berechneSteuereffekt(input, kredit) {
   };
 }
 
-function bewerteCashflow(cashflow) {
-  if (cashflow >= 200) return { ampel: '🟢', text: 'Sehr gut', score: 95 };
-  if (cashflow >= 100) return { ampel: '🟢', text: 'Gut', score: 85 };
-  if (cashflow >= 0) return { ampel: '🟢', text: 'Cashflow-neutral', score: 70 };
-  if (cashflow >= -100) return { ampel: '🟡', text: 'Leicht negativ', score: 55 };
-  if (cashflow >= -200) return { ampel: '🟠', text: 'Negativ', score: 40 };
-  return { ampel: '🔴', text: 'Stark negativ', score: 20 };
+// ═══════════════════════════════════════════════════════════════
+// 🆕 ÜBERARBEITETES BEWERTUNGSSYSTEM V2.0 (REALISTISCHER!)
+// ═══════════════════════════════════════════════════════════════
+
+/*
+ÄNDERUNGEN gegenüber V1:
+- Cashflow MUSS positiv sein für "Grün" (Kapitalanleger-Perspektive!)
+- Risikopuffer von 100€/Monat eingerechnet (für Reparaturen, Leerstand)
+- Regionale Rendite-Benchmarks (München ≠ Leipzig)
+- Denkmal als CHANCE, nicht als Malus
+- Worst-Case-Szenario IMMER anzeigen
+- Separater Risiko-Score
+*/
+
+function bewerteCashflow(cashflow, mitRisikopuffer = true) {
+  // WICHTIG: Für Kapitalanleger sollte Cashflow POSITIV sein!
+  // Wir rechnen mit 100€/Monat Puffer für Unvorhergesehenes
+  
+  const puffer = mitRisikopuffer ? 100 : 0;
+  const effektiverCashflow = cashflow - puffer;
+  
+  // STRENGER als vorher! Nur positiver Cashflow ist wirklich "Grün"
+  if (effektiverCashflow >= 200) return { 
+    ampel: '🟢🟢', 
+    text: 'Exzellent', 
+    score: 98,
+    erklaerung: 'Top! Auch nach Rücklagen bleibt ordentlich übrig.'
+  };
+  if (effektiverCashflow >= 100) return { 
+    ampel: '🟢', 
+    text: 'Sehr gut', 
+    score: 90,
+    erklaerung: 'Solider positiver Cashflow mit Sicherheitspuffer.'
+  };
+  if (effektiverCashflow >= 0) return { 
+    ampel: '🟢', 
+    text: 'Gut', 
+    score: 80,
+    erklaerung: 'Positiv nach Abzug des Risikopuffers.'
+  };
+  if (cashflow >= 100) return { 
+    ampel: '🟡', 
+    text: 'Akzeptabel', 
+    score: 70,
+    erklaerung: 'Positiv, aber Puffer für Unvorhergesehenes knapp.'
+  };
+  if (cashflow >= 0) return { 
+    ampel: '🟡', 
+    text: 'Grenzwertig', 
+    score: 60,
+    erklaerung: 'Gerade so neutral – kein Puffer für Reparaturen!'
+  };
+  if (cashflow >= -100) return { 
+    ampel: '🟠', 
+    text: 'Negativ', 
+    score: 45,
+    erklaerung: 'Du zahlst 1.200€/Jahr drauf. Nur bei starker Wertsteigerung sinnvoll.'
+  };
+  if (cashflow >= -200) return { 
+    ampel: '🔴', 
+    text: 'Schlecht', 
+    score: 30,
+    erklaerung: 'Du zahlst 2.400€/Jahr drauf. Preisverhandlung nötig!'
+  };
+  if (cashflow >= -300) return { 
+    ampel: '🔴', 
+    text: 'Sehr schlecht', 
+    score: 20,
+    erklaerung: 'Du zahlst 3.600€/Jahr drauf. Nicht empfehlenswert.'
+  };
+  return { 
+    ampel: '🔴🔴', 
+    text: 'Dealbreaker', 
+    score: 10,
+    erklaerung: `Du zahlst ${Math.abs(cashflow * 12).toLocaleString()}€/Jahr drauf. Finger weg!`
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆕 REGIONALE RENDITE-BENCHMARKS
+// ═══════════════════════════════════════════════════════════════
+
+const REGIONALE_BENCHMARKS = {
+  // A-Städte (teuer, niedrige Renditen normal)
+  'muenchen': { 
+    akzeptableRendite: 2.5, 
+    guteRendite: 3.0,
+    topRendite: 3.5, 
+    faktorGrenze: 35,
+    mietMultiplikator: 1.3,
+    beschreibung: 'Teuerster Markt, niedrige Renditen normal'
+  },
+  'frankfurt': { 
+    akzeptableRendite: 3.0, 
+    guteRendite: 3.5,
+    topRendite: 4.0, 
+    faktorGrenze: 30,
+    mietMultiplikator: 1.2,
+    beschreibung: 'Finanzmetropole, stabile Nachfrage'
+  },
+  'hamburg': { 
+    akzeptableRendite: 3.0, 
+    guteRendite: 3.5,
+    topRendite: 4.0, 
+    faktorGrenze: 30,
+    mietMultiplikator: 1.15,
+    beschreibung: 'Hafenstadt, gute Wertsteigerung'
+  },
+  'berlin': { 
+    akzeptableRendite: 3.0, 
+    guteRendite: 3.5,
+    topRendite: 4.5, 
+    faktorGrenze: 28,
+    mietMultiplikator: 1.1,
+    beschreibung: 'Hauptstadt, Mietendeckel-Historie beachten!'
+  },
+  'duesseldorf': { 
+    akzeptableRendite: 3.5, 
+    guteRendite: 4.0,
+    topRendite: 4.5, 
+    faktorGrenze: 27,
+    mietMultiplikator: 1.1,
+    beschreibung: 'Wirtschaftsstandort NRW'
+  },
+  'koeln': { 
+    akzeptableRendite: 3.5, 
+    guteRendite: 4.0,
+    topRendite: 4.5, 
+    faktorGrenze: 27,
+    mietMultiplikator: 1.1,
+    beschreibung: 'Medienstadt, stabile Nachfrage'
+  },
+  'stuttgart': { 
+    akzeptableRendite: 3.0, 
+    guteRendite: 3.5,
+    topRendite: 4.0, 
+    faktorGrenze: 28,
+    mietMultiplikator: 1.15,
+    beschreibung: 'Automobilindustrie, hohes Einkommen'
+  },
+  
+  // B-Städte
+  'nuernberg': { 
+    akzeptableRendite: 4.0, 
+    guteRendite: 4.5,
+    topRendite: 5.5, 
+    faktorGrenze: 25,
+    mietMultiplikator: 1.0,
+    beschreibung: 'Starke Wirtschaft, moderate Preise'
+  },
+  'hannover': { 
+    akzeptableRendite: 4.0, 
+    guteRendite: 4.5,
+    topRendite: 5.5, 
+    faktorGrenze: 25,
+    mietMultiplikator: 1.0,
+    beschreibung: 'Messestadt, gute Verkehrsanbindung'
+  },
+  'leipzig': { 
+    akzeptableRendite: 5.0, 
+    guteRendite: 6.0,
+    topRendite: 7.0, 
+    faktorGrenze: 20,
+    mietMultiplikator: 0.85,
+    beschreibung: 'Boomtown Ost, starke Wertsteigerung'
+  },
+  'dresden': { 
+    akzeptableRendite: 5.0, 
+    guteRendite: 5.5,
+    topRendite: 6.5, 
+    faktorGrenze: 20,
+    mietMultiplikator: 0.85,
+    beschreibung: 'Kulturstadt, wachsend'
+  },
+  
+  // C-Städte / Ruhrgebiet
+  'dortmund': { 
+    akzeptableRendite: 5.5, 
+    guteRendite: 6.5,
+    topRendite: 8.0, 
+    faktorGrenze: 18,
+    mietMultiplikator: 0.8,
+    beschreibung: 'Strukturwandel, hohe Renditen möglich'
+  },
+  'essen': { 
+    akzeptableRendite: 5.5, 
+    guteRendite: 6.5,
+    topRendite: 8.0, 
+    faktorGrenze: 18,
+    mietMultiplikator: 0.8,
+    beschreibung: 'Ruhrgebiet, Vorsicht bei Mikrolage!'
+  },
+  'duisburg': { 
+    akzeptableRendite: 6.0, 
+    guteRendite: 7.0,
+    topRendite: 9.0, 
+    faktorGrenze: 16,
+    mietMultiplikator: 0.75,
+    beschreibung: 'Hohe Renditen, aber Leerstandsrisiko!'
+  },
+  'gelsenkirchen': { 
+    akzeptableRendite: 7.0, 
+    guteRendite: 8.0,
+    topRendite: 10.0, 
+    faktorGrenze: 14,
+    mietMultiplikator: 0.7,
+    beschreibung: 'Höchste Renditen, höchstes Risiko!'
+  },
+  
+  // Default für unbekannte Städte
+  'default': { 
+    akzeptableRendite: 4.5, 
+    guteRendite: 5.0,
+    topRendite: 6.0, 
+    faktorGrenze: 22,
+    mietMultiplikator: 0.95,
+    beschreibung: 'Durchschnittlicher Markt'
+  }
+};
+
+function getRegionaleBenchmarks(stadt) {
+  const key = stadt.toLowerCase().replace(/[^a-zäöüß]/g, '');
+  return REGIONALE_BENCHMARKS[key] || REGIONALE_BENCHMARKS['default'];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆕 RENDITE-BEWERTUNG MIT REGIONALER ANPASSUNG
+// ═══════════════════════════════════════════════════════════════
+
+function bewerteRenditeRegional(bruttorendite, stadt) {
+  const benchmark = getRegionaleBenchmarks(stadt);
+  
+  if (bruttorendite >= benchmark.topRendite) {
+    return { 
+      ampel: '🟢🟢', 
+      text: 'Top für Region', 
+      score: 95,
+      vergleich: `${bruttorendite.toFixed(1)}% ist überdurchschnittlich für ${stadt}!`
+    };
+  }
+  if (bruttorendite >= benchmark.guteRendite) {
+    return { 
+      ampel: '🟢', 
+      text: 'Gut für Region', 
+      score: 80,
+      vergleich: `${bruttorendite.toFixed(1)}% ist solide für ${stadt}.`
+    };
+  }
+  if (bruttorendite >= benchmark.akzeptableRendite) {
+    return { 
+      ampel: '🟡', 
+      text: 'Akzeptabel', 
+      score: 65,
+      vergleich: `${bruttorendite.toFixed(1)}% ist Durchschnitt für ${stadt}.`
+    };
+  }
+  if (bruttorendite >= benchmark.akzeptableRendite - 0.5) {
+    return { 
+      ampel: '🟠', 
+      text: 'Unter Durchschnitt', 
+      score: 45,
+      vergleich: `${bruttorendite.toFixed(1)}% ist unter Markt für ${stadt}.`
+    };
+  }
+  return { 
+    ampel: '🔴', 
+    text: 'Zu niedrig', 
+    score: 25,
+    vergleich: `${bruttorendite.toFixed(1)}% ist deutlich zu wenig für ${stadt}!`
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆕 WORST-CASE-SZENARIO (PFLICHT BEI JEDER ANALYSE!)
+// ═══════════════════════════════════════════════════════════════
+
+/*
+WICHTIG: Jede Analyse MUSS das Worst-Case zeigen!
+Der User soll wissen, was im schlimmsten Fall passiert.
+*/
+
+function berechneWorstCase(immobilie, finanzierung) {
+  const szenarien = [];
+  
+  // ═══════════════════════════════════════════════════════════
+  // SZENARIO 1: 3 Monate Leerstand
+  // ═══════════════════════════════════════════════════════════
+  const leerstandsKosten = immobilie.kaltmiete * 3;
+  const cfNachLeerstand = immobilie.cashflowJahr - leerstandsKosten;
+  
+  szenarien.push({
+    name: '3 Monate Leerstand',
+    icon: '🏚️',
+    einmalkosten: leerstandsKosten,
+    auswirkungCashflowJahr: cfNachLeerstand,
+    auswirkungCashflowMonat: Math.round(cfNachLeerstand / 12),
+    bewertung: cfNachLeerstand >= 0 ? '🟢 Tragbar' : cfNachLeerstand >= -2400 ? '🟡 Belastend' : '🔴 Kritisch',
+    tipp: 'Mietausfall-Versicherung prüfen (ca. 100-200€/Jahr)'
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // SZENARIO 2: Sonderumlage 10.000€
+  // ═══════════════════════════════════════════════════════════
+  const sonderumlage = 10000;
+  
+  szenarien.push({
+    name: 'Sonderumlage 10.000€',
+    icon: '💸',
+    einmalkosten: sonderumlage,
+    frage: 'Hast du 10.000€ Rücklagen für so einen Fall?',
+    bewertung: 'Typisch bei Dachsanierung, Heizungsaustausch, Fassade',
+    tipp: 'Erhaltungsrücklage im WEG-Protokoll prüfen! Sollte min. 25€/m²/Jahr sein.'
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // SZENARIO 3: Zinsen +2% bei Anschlussfinanzierung
+  // ═══════════════════════════════════════════════════════════
+  const neuerZins = finanzierung.zinssatz + 0.02;
+  const neueRate = finanzierung.restschuld * (neuerZins + finanzierung.tilgungssatz) / 12;
+  const ratenErhoehung = neueRate - finanzierung.monatlicheRate;
+  const neuerCashflow = immobilie.cashflow - ratenErhoehung;
+  
+  szenarien.push({
+    name: 'Anschlussfinanzierung +2% Zins',
+    icon: '📈',
+    aktuellerZins: (finanzierung.zinssatz * 100).toFixed(1) + '%',
+    neuerZins: (neuerZins * 100).toFixed(1) + '%',
+    aktuelleRate: Math.round(finanzierung.monatlicheRate),
+    neueRate: Math.round(neueRate),
+    mehrkosten: Math.round(ratenErhoehung),
+    neuerCashflow: Math.round(neuerCashflow),
+    bewertung: neuerCashflow >= 0 ? '🟢 Noch tragbar' : neuerCashflow >= -200 ? '🟡 Belastend' : '🔴 Kritisch!',
+    tipp: neuerCashflow < 0 ? 'Sondertilgung nutzen um Restschuld zu reduzieren!' : 'Situation noch komfortabel'
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // SZENARIO 4: Heizungsaustausch (GEG-Pflicht)
+  // ═══════════════════════════════════════════════════════════
+  if (immobilie.heizungAlter > 15 || ['Öl', 'Gas'].includes(immobilie.heizungTyp)) {
+    const heizungskosten = 25000; // Durchschnitt Wärmepumpe
+    const foerderung = immobilie.selbstnutzer ? 0.50 : 0.30; // 50% Selbstnutzer, 30% Vermieter
+    const eigenanteil = heizungskosten * (1 - foerderung);
+    
+    szenarien.push({
+      name: 'Heizungsaustausch (GEG)',
+      icon: '🔥',
+      bruttokosten: heizungskosten,
+      foerderung: Math.round(heizungskosten * foerderung),
+      eigenanteil: Math.round(eigenanteil),
+      zeitrahmen: 'Bei Heizungsausfall oder GEG-Frist',
+      bewertung: immobilie.heizungAlter > 25 ? '🔴 Bald fällig!' : '🟡 In 5-10 Jahren',
+      tipp: 'KfW 458 Heizungsförderung beantragen – bis zu 70% Zuschuss!'
+    });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // SZENARIO 5: Alle drei gleichzeitig (Hardcore Worst-Case)
+  // ═══════════════════════════════════════════════════════════
+  const totalWorstCase = leerstandsKosten + sonderumlage + (ratenErhoehung * 12);
+  
+  szenarien.push({
+    name: '⚠️ SUPER-WORST-CASE',
+    icon: '💀',
+    beschreibung: 'Leerstand + Sonderumlage + Zinserhöhung im selben Jahr',
+    gesamtbelastung: Math.round(totalWorstCase),
+    frage: `Kannst du ${totalWorstCase.toLocaleString()}€ Extra-Belastung verkraften?`,
+    bewertung: totalWorstCase > immobilie.eigenkapitalEinsatz * 0.5 ? '🔴 Hohes Risiko!' : '🟡 Verkraftbar',
+    tipp: 'Mindestens 3 Monatsraten + 10.000€ als Reserve halten!'
+  });
+  
+  return {
+    szenarien,
+    zusammenfassung: {
+      empfohleneReserve: Math.round(finanzierung.monatlicheRate * 6 + 10000),
+      risikoEinstufung: getRisikoEinstufung(szenarien),
+      wichtigsterTipp: getWichtigstenTipp(szenarien)
+    }
+  };
+}
+
+function getRisikoEinstufung(szenarien) {
+  const kritisch = szenarien.filter(s => s.bewertung?.includes('🔴')).length;
+  if (kritisch >= 2) return { level: 'Hoch', ampel: '🔴', text: 'Mehrere kritische Szenarien!' };
+  if (kritisch >= 1) return { level: 'Mittel', ampel: '🟡', text: 'Ein kritisches Szenario' };
+  return { level: 'Gering', ampel: '🟢', text: 'Alle Szenarien verkraftbar' };
+}
+
+function getWichtigstenTipp(szenarien) {
+  // Priorisiere nach Dringlichkeit
+  const kritische = szenarien.filter(s => s.bewertung?.includes('🔴'));
+  if (kritische.length > 0) return kritische[0].tipp;
+  return 'Finanzielle Reserve aufbauen: 6 Monatsraten + 10.000€';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆕 VERBESSERTE KREDIT-CHANCE MIT BERUF
+// ═══════════════════════════════════════════════════════════════
+
+const BERUF_MODIFIER = {
+  'beamter': { bonus: 15, erklaerung: 'Unkündbar, sichere Pension' },
+  'angestellt_oeffentlich': { bonus: 10, erklaerung: 'Öffentlicher Dienst = sehr sicher' },
+  'angestellt_konzern': { bonus: 5, erklaerung: 'Großes Unternehmen = stabil' },
+  'angestellt_kmu': { bonus: 0, erklaerung: 'Standard-Risiko' },
+  'angestellt_startup': { bonus: -5, erklaerung: 'Höheres Risiko' },
+  'freiberufler_kammer': { bonus: 0, erklaerung: 'Arzt/Anwalt/Steuerberater = akzeptiert' },
+  'selbststaendig_3plus_jahre': { bonus: -5, erklaerung: 'Etabliert, aber mehr Prüfung' },
+  'selbststaendig_unter_3_jahre': { bonus: -20, erklaerung: 'Sehr schwierig!' },
+  'rentner': { bonus: -10, erklaerung: 'Laufzeit-Einschränkungen' },
+  'arbeitslos': { bonus: -50, erklaerung: 'Praktisch unmöglich' }
+};
+
+function berechneKreditChanceV2(params) {
+  const {
+    eigenkapital,
+    kaufpreis,
+    kaufnebenkosten,
+    monatlichesNetto,
+    beruf = 'angestellt_kmu',
+    schufa = 'gut',
+    bestehendeKredite = 0,
+    alter = 35,
+    immobilienDetails = {}
+  } = params;
+  
+  const gesamtkosten = kaufpreis + kaufnebenkosten;
+  const eigenkapitalQuote = eigenkapital / gesamtkosten;
+  
+  let chance = 0;
+  const faktoren = [];
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 1: Eigenkapital (wichtigster Faktor!)
+  // ═══════════════════════════════════════════════════════════
+  if (eigenkapital >= gesamtkosten * 0.30) {
+    chance += 40;
+    faktoren.push({ name: 'Eigenkapital 30%+', effekt: '+40%', ampel: '🟢🟢' });
+  } else if (eigenkapital >= gesamtkosten * 0.20) {
+    chance += 35;
+    faktoren.push({ name: 'Eigenkapital 20-30%', effekt: '+35%', ampel: '🟢' });
+  } else if (eigenkapital >= kaufnebenkosten + kaufpreis * 0.10) {
+    chance += 28;
+    faktoren.push({ name: 'Eigenkapital 10%+ plus NK', effekt: '+28%', ampel: '🟢' });
+  } else if (eigenkapital >= kaufnebenkosten) {
+    chance += 20;
+    faktoren.push({ name: 'Nur Nebenkosten als EK', effekt: '+20%', ampel: '🟡' });
+  } else if (eigenkapital >= kaufnebenkosten * 0.5) {
+    chance += 10;
+    faktoren.push({ name: 'Unter Nebenkosten', effekt: '+10%', ampel: '🟠' });
+  } else {
+    chance += 3;
+    faktoren.push({ name: 'Fast kein Eigenkapital', effekt: '+3%', ampel: '🔴' });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 2: Einkommen / Belastungsquote
+  // ═══════════════════════════════════════════════════════════
+  const geschaetzteRate = (gesamtkosten - eigenkapital) * 0.053 / 12; // ~5.3% Annuität
+  const belastungsquote = geschaetzteRate / monatlichesNetto;
+  
+  if (belastungsquote < 0.28) {
+    chance += 25;
+    faktoren.push({ name: 'Sehr niedrige Belastung (<28%)', effekt: '+25%', ampel: '🟢🟢' });
+  } else if (belastungsquote < 0.33) {
+    chance += 20;
+    faktoren.push({ name: 'Gute Belastungsquote (28-33%)', effekt: '+20%', ampel: '🟢' });
+  } else if (belastungsquote < 0.38) {
+    chance += 12;
+    faktoren.push({ name: 'Normale Belastung (33-38%)', effekt: '+12%', ampel: '🟡' });
+  } else if (belastungsquote < 0.42) {
+    chance += 5;
+    faktoren.push({ name: 'Hohe Belastung (38-42%)', effekt: '+5%', ampel: '🟠' });
+  } else {
+    chance += 0;
+    faktoren.push({ name: 'Zu hohe Belastung (>42%)', effekt: '+0%', ampel: '🔴' });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 3: Beruf
+  // ═══════════════════════════════════════════════════════════
+  const berufInfo = BERUF_MODIFIER[beruf] || BERUF_MODIFIER['angestellt_kmu'];
+  chance += berufInfo.bonus;
+  faktoren.push({ 
+    name: `Beruf: ${beruf.replace(/_/g, ' ')}`, 
+    effekt: `${berufInfo.bonus >= 0 ? '+' : ''}${berufInfo.bonus}%`, 
+    ampel: berufInfo.bonus > 5 ? '🟢' : berufInfo.bonus < 0 ? '🔴' : '🟡',
+    erklaerung: berufInfo.erklaerung
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 4: SCHUFA
+  // ═══════════════════════════════════════════════════════════
+  const schufaMap = {
+    'sehr_gut': { bonus: 10, ampel: '🟢' },
+    'gut': { bonus: 5, ampel: '🟢' },
+    'befriedigend': { bonus: 0, ampel: '🟡' },
+    'ausreichend': { bonus: -15, ampel: '🟠' },
+    'mangelhaft': { bonus: -40, ampel: '🔴' }
+  };
+  const schufaInfo = schufaMap[schufa] || schufaMap['gut'];
+  chance += schufaInfo.bonus;
+  faktoren.push({ name: `SCHUFA: ${schufa}`, effekt: `${schufaInfo.bonus >= 0 ? '+' : ''}${schufaInfo.bonus}%`, ampel: schufaInfo.ampel });
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 5: Bestehende Kredite
+  // ═══════════════════════════════════════════════════════════
+  if (bestehendeKredite > 0) {
+    const malus = bestehendeKredite * 5;
+    chance -= malus;
+    faktoren.push({ name: `${bestehendeKredite} bestehende Kredite`, effekt: `-${malus}%`, ampel: '🟠' });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 6: Alter (Laufzeit-Einschränkung)
+  // ═══════════════════════════════════════════════════════════
+  if (alter > 55) {
+    chance -= 10;
+    faktoren.push({ name: 'Alter >55 Jahre', effekt: '-10%', ampel: '🟠', erklaerung: 'Kürzere maximale Laufzeit' });
+  } else if (alter > 60) {
+    chance -= 20;
+    faktoren.push({ name: 'Alter >60 Jahre', effekt: '-20%', ampel: '🔴', erklaerung: 'Stark eingeschränkte Laufzeit' });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 7: Immobilien-Qualität (Bank bewertet auch das Objekt!)
+  // ═══════════════════════════════════════════════════════════
+  if (immobilienDetails.lage === 'A' || immobilienDetails.lage === 'B') {
+    chance += 5;
+    faktoren.push({ name: 'Gute Lage (A/B)', effekt: '+5%', ampel: '🟢' });
+  }
+  if (immobilienDetails.baujahr > 1990) {
+    chance += 3;
+    faktoren.push({ name: 'Neuerer Bau (>1990)', effekt: '+3%', ampel: '🟢' });
+  }
+  if (['A', 'B', 'C'].includes(immobilienDetails.energieKlasse)) {
+    chance += 2;
+    faktoren.push({ name: 'Gute Energieklasse', effekt: '+2%', ampel: '🟢' });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FINALE CHANCE
+  // ═══════════════════════════════════════════════════════════
+  const finaleChance = Math.max(2, Math.min(98, chance));
+  
+  return {
+    chance: finaleChance,
+    faktoren,
+    kategorie: getKreditChanceKategorie(finaleChance),
+    details: {
+      eigenkapitalQuote: Math.round(eigenkapitalQuote * 100),
+      belastungsquote: Math.round(belastungsquote * 100),
+      geschaetzteRate: Math.round(geschaetzteRate)
+    },
+    empfehlungen: getKreditEmpfehlungen(finaleChance, faktoren)
+  };
+}
+
+function getKreditChanceKategorie(chance) {
+  if (chance >= 85) return { ampel: '🟢🟢', text: 'Sehr hohe Chance', beschreibung: 'Banken werden sich um dich reißen!' };
+  if (chance >= 70) return { ampel: '🟢', text: 'Gute Chance', beschreibung: '2-3 Banken anfragen, sollte klappen.' };
+  if (chance >= 50) return { ampel: '🟡', text: 'Moderate Chance', beschreibung: 'Machbar, aber gut vorbereiten!' };
+  if (chance >= 30) return { ampel: '🟠', text: 'Schwierig', beschreibung: 'Vermittler einschalten (Dr. Klein, Interhyp)' };
+  if (chance >= 15) return { ampel: '🔴', text: 'Sehr schwierig', beschreibung: 'Kreative Lösungen nötig (siehe Tipps)' };
+  return { ampel: '🔴🔴', text: 'Fast unmöglich', beschreibung: 'Situation erst verbessern' };
+}
+
+function getKreditEmpfehlungen(chance, faktoren) {
+  const empfehlungen = [];
+  
+  // Basierend auf den schwächsten Faktoren Tipps geben
+  faktoren.forEach(f => {
+    if (f.ampel === '🔴' || f.ampel === '🟠') {
+      if (f.name.includes('Eigenkapital')) {
+        empfehlungen.push({
+          prioritaet: 1,
+          tipp: 'Eigenkapital erhöhen durch: Familie, Bausparvertrag, Nachrangdarlehen',
+          effekt: 'Kann Chance um 10-20% verbessern'
+        });
+      }
+      if (f.name.includes('Belastung')) {
+        empfehlungen.push({
+          prioritaet: 2,
+          tipp: 'Günstigeres Objekt suchen oder zweiten Kreditnehmer einbeziehen',
+          effekt: 'Bessere Belastungsquote'
+        });
+      }
+      if (f.name.includes('selbststaendig')) {
+        empfehlungen.push({
+          prioritaet: 3,
+          tipp: 'Partner mit Festanstellung als Hauptkreditnehmer, KfW nutzen',
+          effekt: 'Umgeht Selbstständigen-Problem'
+        });
+      }
+    }
+  });
+  
+  if (chance < 50) {
+    empfehlungen.push({
+      prioritaet: 4,
+      tipp: 'Kreditvermittler nutzen: Dr. Klein, Interhyp haben 500+ Bankpartner',
+      effekt: 'Findet auch Nischen-Banken'
+    });
+  }
+  
+  return empfehlungen.sort((a, b) => a.prioritaet - b.prioritaet);
 }
 ```
 
@@ -4033,7 +6300,729 @@ const rueckfluss = refinanzierung - investment; // 9.000€ + laufender Cashflow
 
 ---
 
-## TEIL 12: BEWERTUNGSLOGIK (Score 0-100)
+## TEIL 12: BEWERTUNGSLOGIK V3.0 (PROFI-STANDARD!)
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+🆕 KOMPLETT NEUES BEWERTUNGSSYSTEM V3.0
+═══════════════════════════════════════════════════════════════════════════════
+
+KERNPRINZIP: "Price is what you pay, value is what you get." – Warren Buffett
+
+Das alte System hatte einen fundamentalen Fehler: Es bewertete nur Cashflow.
+Aber ein Investor, der 20% unter Marktwert kauft, hat SOFORT Gewinn gemacht!
+
+NEUES DUAL-SCORE-SYSTEM:
+1. DEAL-SCORE: Wie gut ist dieser KAUF? (Preis vs. Wert)
+2. INVESTMENT-SCORE: Wie gut ist diese ANLAGE? (Langfristige Qualität)
+
+Beide Scores zusammen ergeben die Gesamtbewertung.
+*/
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎯 MARKTWERT-ERMITTLUNG (Automatisch!)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+DREI METHODEN zur Marktwert-Schätzung (nach ImmoWertV):
+1. Ertragswertverfahren - Für Kapitalanlagen (UNSER STANDARD!)
+2. Vergleichswertverfahren - Für ETW mit genug Vergleichsdaten
+3. Sachwertverfahren - Für Eigennutzer, Unikate
+*/
+
+function berechneMarktwert(immobilie, methode = 'auto') {
+  // Automatische Methodenwahl
+  if (methode === 'auto') {
+    if (immobilie.nutzung === 'kapitalanlage') methode = 'ertragswert';
+    else if (immobilie.typ === 'ETW' && immobilie.vergleichsdatenVorhanden) methode = 'vergleichswert';
+    else methode = 'sachwert';
+  }
+  
+  let marktwert = 0;
+  let details = {};
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // METHODE 1: ERTRAGSWERTVERFAHREN (Für Kapitalanleger!)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  if (methode === 'ertragswert') {
+    /*
+    Formel: Ertragswert = (Jahresreinertrag × Vervielfältiger) + Bodenwert
+    
+    - Jahresreinertrag = Jahresmiete - Bewirtschaftungskosten
+    - Vervielfältiger hängt ab von Liegenschaftszins und Restnutzungsdauer
+    - Liegenschaftszins: Typisch 4-6% für Wohnimmobilien (aus Gutachterausschuss)
+    */
+    
+    const jahresmiete = immobilie.kaltmiete * 12;
+    
+    // Bewirtschaftungskosten (ca. 20-25% der Miete)
+    const bewirtschaftungskosten = jahresmiete * 0.22;
+    const mietausfallrisiko = jahresmiete * 0.02; // 2% Standard
+    
+    const jahresreinertrag = jahresmiete - bewirtschaftungskosten - mietausfallrisiko;
+    
+    // Liegenschaftszins nach Region (aus Gutachterausschuss-Daten)
+    const liegenschaftszins = getLiegenschaftszins(immobilie.stadt, immobilie.lage);
+    
+    // Restnutzungsdauer
+    const gesamtnutzungsdauer = 80; // Jahre für Wohngebäude
+    const alter = new Date().getFullYear() - immobilie.baujahr;
+    const restnutzungsdauer = Math.max(20, gesamtnutzungsdauer - alter);
+    
+    // Vervielfältiger berechnen
+    const vervielfaeltiger = (1 - Math.pow(1 + liegenschaftszins, -restnutzungsdauer)) / liegenschaftszins;
+    
+    // Bodenwert (aus Bodenrichtwert)
+    const bodenwert = immobilie.grundstuecksflaeche * immobilie.bodenrichtwert;
+    
+    // Gebäudeertragswert
+    const bodenwertverzinsung = bodenwert * liegenschaftszins;
+    const gebaeudeReinertrag = jahresreinertrag - bodenwertverzinsung;
+    const gebaeudeErtragswert = gebaeudeReinertrag * vervielfaeltiger;
+    
+    marktwert = Math.round(gebaeudeErtragswert + bodenwert);
+    
+    details = {
+      methode: 'Ertragswertverfahren',
+      jahresmiete,
+      jahresreinertrag: Math.round(jahresreinertrag),
+      liegenschaftszins: (liegenschaftszins * 100).toFixed(1) + '%',
+      vervielfaeltiger: vervielfaeltiger.toFixed(1),
+      restnutzungsdauer,
+      bodenwert: Math.round(bodenwert),
+      gebaeudeErtragswert: Math.round(gebaeudeErtragswert)
+    };
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // METHODE 2: VERGLEICHSWERTVERFAHREN (Für ETW)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  else if (methode === 'vergleichswert') {
+    /*
+    Basis: €/m² aus vergleichbaren Verkäufen in der Gegend
+    Anpassungen für: Zustand, Etage, Balkon, Energieklasse, etc.
+    */
+    
+    const basisPreisProQm = getVergleichspreisProQm(immobilie.plz, immobilie.stadt);
+    
+    // Anpassungsfaktoren
+    let anpassungsfaktor = 1.0;
+    
+    // Zustand
+    const zustandFaktor = {
+      'Neubau': 1.15, 'Kernsaniert': 1.10, 'Saniert': 1.05,
+      'Gepflegt': 1.00, 'Renovierungsbedürftig': 0.90, 'Sanierungsbedürftig': 0.80
+    };
+    anpassungsfaktor *= zustandFaktor[immobilie.zustand] || 1.0;
+    
+    // Energieklasse
+    const energieFaktor = {
+      'A+': 1.08, 'A': 1.05, 'B': 1.03, 'C': 1.00,
+      'D': 0.97, 'E': 0.94, 'F': 0.90, 'G': 0.85, 'H': 0.80
+    };
+    anpassungsfaktor *= energieFaktor[immobilie.energieKlasse] || 1.0;
+    
+    // Etage (bei ETW)
+    if (immobilie.etage) {
+      if (immobilie.etage >= 3 && immobilie.aufzug) anpassungsfaktor *= 1.05;
+      else if (immobilie.etage >= 4 && !immobilie.aufzug) anpassungsfaktor *= 0.95;
+      if (immobilie.etage === 0) anpassungsfaktor *= 0.97; // EG etwas weniger
+    }
+    
+    // Balkon/Terrasse
+    if (immobilie.balkon) anpassungsfaktor *= 1.03;
+    if (immobilie.terrasse || immobilie.garten) anpassungsfaktor *= 1.05;
+    
+    const angepassterPreisProQm = basisPreisProQm * anpassungsfaktor;
+    marktwert = Math.round(angepassterPreisProQm * immobilie.wohnflaeche);
+    
+    details = {
+      methode: 'Vergleichswertverfahren',
+      basisPreisProQm: Math.round(basisPreisProQm),
+      anpassungsfaktor: anpassungsfaktor.toFixed(2),
+      angepassterPreisProQm: Math.round(angepassterPreisProQm),
+      wohnflaeche: immobilie.wohnflaeche
+    };
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // METHODE 3: VEREINFACHTE MARKTWERT-SCHÄTZUNG (Fallback)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  else {
+    // Kombination aus Ertragswert (Miete × Faktor) und Vergleichswert (€/m²)
+    const regional = getRegionaleBenchmarks(immobilie.stadt);
+    
+    // Ertragswert-Näherung: Jahresmiete × regionaler Zielfaktor
+    const ertragswertNaeherung = immobilie.kaltmiete * 12 * regional.maxFaktor * 0.9;
+    
+    // Vergleichswert-Näherung: €/m² × Fläche
+    const vergleichsPreisQm = getVergleichspreisProQm(immobilie.plz, immobilie.stadt);
+    const vergleichswertNaeherung = vergleichsPreisQm * immobilie.wohnflaeche;
+    
+    // Gewichteter Durchschnitt (60% Ertragswert für Kapitalanlage)
+    marktwert = Math.round(ertragswertNaeherung * 0.6 + vergleichswertNaeherung * 0.4);
+    
+    details = {
+      methode: 'Kombinierte Schätzung',
+      ertragswertNaeherung: Math.round(ertragswertNaeherung),
+      vergleichswertNaeherung: Math.round(vergleichswertNaeherung),
+      gewichtung: '60% Ertrag / 40% Vergleich'
+    };
+  }
+  
+  return { marktwert, details };
+}
+
+// Liegenschaftszinssätze nach Stadt/Lage (aus Gutachterausschuss)
+function getLiegenschaftszins(stadt, lage = 'mittel') {
+  const basisZins = {
+    'muenchen': 0.025,    // 2.5% - sehr niedrig wegen hoher Nachfrage
+    'frankfurt': 0.030,
+    'hamburg': 0.030,
+    'berlin': 0.032,
+    'duesseldorf': 0.035,
+    'koeln': 0.035,
+    'stuttgart': 0.032,
+    'nuernberg': 0.040,
+    'leipzig': 0.045,
+    'dresden': 0.045,
+    'dortmund': 0.050,
+    'essen': 0.050,
+    'default': 0.045
+  };
+  
+  const stadtKey = stadt?.toLowerCase().replace(/[^a-z]/g, '') || 'default';
+  let zins = basisZins[stadtKey] || basisZins['default'];
+  
+  // Lage-Anpassung
+  if (lage === 'sehr_gut' || lage === 'A') zins -= 0.005;
+  if (lage === 'einfach' || lage === 'D') zins += 0.010;
+  
+  return zins;
+}
+
+// Vergleichspreise pro m² nach PLZ/Stadt (vereinfacht)
+function getVergleichspreisProQm(plz, stadt) {
+  // In Produktion: API-Anbindung an GREIX, Sprengnetter, oder PriceHubble
+  // Hier: Vereinfachte Schätzung basierend auf Stadt
+  
+  const stadtPreise = {
+    'muenchen': 9500,
+    'frankfurt': 6500,
+    'hamburg': 6000,
+    'berlin': 5000,
+    'duesseldorf': 4800,
+    'koeln': 4500,
+    'stuttgart': 5500,
+    'nuernberg': 3800,
+    'leipzig': 3200,
+    'dresden': 3000,
+    'dortmund': 2400,
+    'essen': 2200,
+    'default': 3000
+  };
+  
+  const stadtKey = stadt?.toLowerCase().replace(/[^a-z]/g, '') || 'default';
+  return stadtPreise[stadtKey] || stadtPreise['default'];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎯 DEAL-SCORE: Wie gut ist dieser KAUF? (100 Punkte)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function berechneDealScore(immobilie, marktwertErgebnis) {
+  let score = 0;
+  const details = {};
+  const marktwert = marktwertErgebnis.marktwert;
+  const kaufpreis = immobilie.kaufpreis;
+  
+  // Rabatt zum Marktwert berechnen
+  const rabatt = (marktwert - kaufpreis) / marktwert;
+  const rabattProzent = rabatt * 100;
+  const instantEquity = marktwert - kaufpreis;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 1: UNTER MARKTWERT KAUFEN (40 Punkte max.)
+  // Das ist der WICHTIGSTE Faktor! "Margin of Safety"
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let rabattPunkte = 0;
+  let rabattBewertung = '';
+  
+  if (rabattProzent >= 20) {
+    rabattPunkte = 40;
+    rabattBewertung = '🟢🟢 Ausgezeichnet! 20%+ unter Marktwert = sofortiger Profit!';
+  } else if (rabattProzent >= 15) {
+    rabattPunkte = 35;
+    rabattBewertung = '🟢🟢 Sehr gut! 15-20% unter Marktwert';
+  } else if (rabattProzent >= 10) {
+    rabattPunkte = 28;
+    rabattBewertung = '🟢 Gut! 10-15% unter Marktwert';
+  } else if (rabattProzent >= 5) {
+    rabattPunkte = 20;
+    rabattBewertung = '🟡 Akzeptabel. 5-10% unter Marktwert';
+  } else if (rabattProzent >= 0) {
+    rabattPunkte = 12;
+    rabattBewertung = '🟡 Marktpreis – kein besonderer Deal';
+  } else if (rabattProzent >= -5) {
+    rabattPunkte = 6;
+    rabattBewertung = '🟠 Leicht über Marktwert';
+  } else {
+    rabattPunkte = 0;
+    rabattBewertung = '🔴 Deutlich über Marktwert – zu teuer!';
+  }
+  
+  details.rabatt = {
+    punkte: rabattPunkte,
+    marktwert,
+    kaufpreis,
+    differenz: instantEquity,
+    prozent: rabattProzent.toFixed(1) + '%',
+    bewertung: rabattBewertung
+  };
+  score += rabattPunkte;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 2: KAUFPREISFAKTOR VS. REGIONAL (20 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const kaufpreisfaktor = kaufpreis / (immobilie.kaltmiete * 12);
+  const regional = getRegionaleBenchmarks(immobilie.stadt);
+  
+  let faktorPunkte = 0;
+  if (kaufpreisfaktor <= regional.maxFaktor * 0.7) faktorPunkte = 20;
+  else if (kaufpreisfaktor <= regional.maxFaktor * 0.8) faktorPunkte = 16;
+  else if (kaufpreisfaktor <= regional.maxFaktor * 0.9) faktorPunkte = 12;
+  else if (kaufpreisfaktor <= regional.maxFaktor) faktorPunkte = 8;
+  else if (kaufpreisfaktor <= regional.maxFaktor * 1.1) faktorPunkte = 4;
+  else faktorPunkte = 0;
+  
+  details.kaufpreisfaktor = {
+    punkte: faktorPunkte,
+    wert: kaufpreisfaktor.toFixed(1),
+    regionalMax: regional.maxFaktor,
+    bewertung: kaufpreisfaktor <= regional.maxFaktor ? '🟢 Im Rahmen' : '🔴 Zu hoch für Region'
+  };
+  score += faktorPunkte;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 3: VERHANDLUNGSPOTENZIAL (15 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let verhandlungsPunkte = 7; // Neutral
+  
+  if (immobilie.inseratDauer > 90) {
+    verhandlungsPunkte += 4;
+    details.verhandlung = { hinweis: 'Lange inseriert (>90 Tage) – Verhandlungsspielraum!' };
+  }
+  if (immobilie.verkaeufermotivation === 'hoch') {
+    verhandlungsPunkte += 4;
+  }
+  if (immobilie.konkurrenz === 'keine') {
+    verhandlungsPunkte += 2;
+  }
+  
+  details.verhandlung = { ...details.verhandlung, punkte: Math.min(15, verhandlungsPunkte) };
+  score += Math.min(15, verhandlungsPunkte);
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 4: NEBENKOSTEN-EFFIZIENZ (10 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let nebenkostenPunkte = 5;
+  
+  if (!immobilie.mitMakler) {
+    nebenkostenPunkte += 3;
+    details.nebenkosten = { hinweis: 'Ohne Makler = 3-4% gespart!' };
+  }
+  if (immobilie.bundesland === 'Bayern' || immobilie.bundesland === 'Sachsen') {
+    nebenkostenPunkte += 2;
+    details.nebenkosten = { ...details.nebenkosten, hinweis2: 'Niedrige Grunderwerbsteuer (3.5%)' };
+  }
+  
+  details.nebenkosten = { ...details.nebenkosten, punkte: Math.min(10, nebenkostenPunkte) };
+  score += Math.min(10, nebenkostenPunkte);
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 5: EXIT-OPTIONEN (15 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let exitPunkte = 7;
+  
+  // Gute Wiederverkaufbarkeit
+  if (immobilie.wohnflaeche >= 40 && immobilie.wohnflaeche <= 100) exitPunkte += 3;
+  if (immobilie.zimmer >= 2 && immobilie.zimmer <= 4) exitPunkte += 2;
+  if (['A', 'B'].includes(immobilie.lage)) exitPunkte += 3;
+  
+  details.exit = { punkte: Math.min(15, exitPunkte) };
+  score += Math.min(15, exitPunkte);
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FINALE DEAL-SCORE
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  return {
+    score: Math.round(Math.max(0, Math.min(100, score))),
+    details,
+    instantEquity,
+    rabattProzent,
+    kategorie: getDealScoreKategorie(score)
+  };
+}
+
+function getDealScoreKategorie(score) {
+  if (score >= 85) return { emoji: '🟢🟢', text: 'TOP-DEAL!', beschreibung: 'Hervorragender Kauf – sofort zuschlagen!' };
+  if (score >= 70) return { emoji: '🟢', text: 'Guter Deal', beschreibung: 'Attraktiver Preis, empfehlenswert' };
+  if (score >= 55) return { emoji: '🟡', text: 'Fairer Deal', beschreibung: 'Marktgerechter Preis, verhandelbar' };
+  if (score >= 40) return { emoji: '🟠', text: 'Mäßiger Deal', beschreibung: 'Eher teuer, nur mit Verhandlung' };
+  return { emoji: '🔴', text: 'Schlechter Deal', beschreibung: 'Zu teuer – weitergehen!' };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏠 INVESTMENT-SCORE: Wie gut ist diese ANLAGE? (100 Punkte)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function berechneInvestmentScore(immobilie, finanzierung, userProfil = {}) {
+  let score = 0;
+  const details = {};
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 1: CASHFLOW MIT RISIKOPUFFER (25 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // 100€/Monat Risikopuffer einrechnen
+  const risikopuffer = 100;
+  const bereinigterCashflow = immobilie.cashflow - risikopuffer;
+  
+  let cashflowPunkte = 0;
+  if (bereinigterCashflow >= 200) cashflowPunkte = 25;
+  else if (bereinigterCashflow >= 100) cashflowPunkte = 22;
+  else if (bereinigterCashflow >= 0) cashflowPunkte = 18;
+  else if (immobilie.cashflow >= 50) cashflowPunkte = 14;
+  else if (immobilie.cashflow >= 0) cashflowPunkte = 10;
+  else if (immobilie.cashflow >= -100) cashflowPunkte = 6;
+  else if (immobilie.cashflow >= -200) cashflowPunkte = 3;
+  else cashflowPunkte = 0;
+  
+  details.cashflow = {
+    punkte: cashflowPunkte,
+    brutto: immobilie.cashflow,
+    bereinigt: bereinigterCashflow,
+    bewertung: bewerteCashflow(immobilie.cashflow)
+  };
+  score += cashflowPunkte;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 2: LAGE-QUALITÄT (25 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let lagePunkte = berechneMikrolagePunkte(immobilie);
+  details.lage = lagePunkte;
+  score += lagePunkte.punkte;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 3: WERTSTEIGERUNGSPOTENZIAL (20 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let wertsteigerungPunkte = 10; // Neutral
+  const wertsteigerungDetails = [];
+  
+  // Mieterhöhungspotenzial
+  if (immobilie.istMiete && immobilie.marktMiete) {
+    const mietPotenzial = (immobilie.marktMiete - immobilie.istMiete) / immobilie.istMiete;
+    if (mietPotenzial > 0.20) {
+      wertsteigerungPunkte += 5;
+      wertsteigerungDetails.push(`Mieterhöhungspotenzial +${Math.round(mietPotenzial * 100)}%`);
+    } else if (mietPotenzial > 0.10) {
+      wertsteigerungPunkte += 3;
+      wertsteigerungDetails.push(`Mieterhöhungspotenzial +${Math.round(mietPotenzial * 100)}%`);
+    }
+  }
+  
+  // Sanierungspotenzial (Forced Appreciation)
+  if (['E', 'F', 'G', 'H'].includes(immobilie.energieKlasse)) {
+    wertsteigerungPunkte += 3;
+    wertsteigerungDetails.push('Sanierungspotenzial mit KfW-Förderung');
+  }
+  
+  // Marktentwicklung
+  if (immobilie.entwicklungsgebiet) {
+    wertsteigerungPunkte += 2;
+    wertsteigerungDetails.push('Aufwertungsgebiet');
+  }
+  
+  details.wertsteigerung = {
+    punkte: Math.min(20, wertsteigerungPunkte),
+    faktoren: wertsteigerungDetails
+  };
+  score += Math.min(20, wertsteigerungPunkte);
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 4: OBJEKTQUALITÄT (15 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let qualitaetPunkte = 7;
+  
+  // Zustand
+  const zustandBonus = {
+    'Neubau': 5, 'Kernsaniert': 4, 'Saniert': 3, 'Gepflegt': 1,
+    'Renovierungsbedürftig': -2, 'Sanierungsbedürftig': -4
+  };
+  qualitaetPunkte += zustandBonus[immobilie.zustand] || 0;
+  
+  // Energieeffizienz
+  if (['A+', 'A', 'B'].includes(immobilie.energieKlasse)) qualitaetPunkte += 3;
+  else if (['G', 'H'].includes(immobilie.energieKlasse)) qualitaetPunkte -= 2;
+  
+  details.qualitaet = {
+    punkte: Math.max(0, Math.min(15, qualitaetPunkte)),
+    zustand: immobilie.zustand,
+    energieKlasse: immobilie.energieKlasse
+  };
+  score += Math.max(0, Math.min(15, qualitaetPunkte));
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FAKTOR 5: MIETERQUALITÄT & NACHFRAGE (15 Punkte max.)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let mieterPunkte = 7;
+  
+  // Hohe Nachfrage in der Region
+  const regional = getRegionaleBenchmarks(immobilie.stadt);
+  if (regional.maxFaktor >= 30) mieterPunkte += 4; // A-Stadt = hohe Nachfrage
+  else if (regional.maxFaktor >= 25) mieterPunkte += 2;
+  
+  // Bestehender Mietvertrag
+  if (immobilie.vermietet && immobilie.mieterSeit > 3) {
+    mieterPunkte += 3;
+    details.mieter = { hinweis: 'Langjähriger Mieter = Stabilität' };
+  }
+  
+  // Leerstandsrisiko
+  if (immobilie.leerstandsquoteRegion > 0.05) {
+    mieterPunkte -= 3;
+  }
+  
+  details.mieter = { ...details.mieter, punkte: Math.max(0, Math.min(15, mieterPunkte)) };
+  score += Math.max(0, Math.min(15, mieterPunkte));
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // FINALE INVESTMENT-SCORE
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  return {
+    score: Math.round(Math.max(0, Math.min(100, score))),
+    details,
+    kategorie: getInvestmentScoreKategorie(score)
+  };
+}
+
+function getInvestmentScoreKategorie(score) {
+  if (score >= 85) return { emoji: '🟢🟢', text: 'TOP-Investment', beschreibung: 'Hervorragende Anlage für Buy & Hold' };
+  if (score >= 70) return { emoji: '🟢', text: 'Gutes Investment', beschreibung: 'Solide Anlage mit guter Perspektive' };
+  if (score >= 55) return { emoji: '🟡', text: 'Akzeptables Investment', beschreibung: 'OK als Anlage, einige Kompromisse' };
+  if (score >= 40) return { emoji: '🟠', text: 'Mäßiges Investment', beschreibung: 'Schwächen vorhanden, kritisch prüfen' };
+  return { emoji: '🔴', text: 'Schwaches Investment', beschreibung: 'Für langfristige Anlage nicht geeignet' };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎯 GESAMT-SCORE: Kombiniert Deal + Investment
+// ═══════════════════════════════════════════════════════════════════════════
+
+function berechneGesamtScore(immobilie, finanzierung, userProfil = {}) {
+  // Marktwert ermitteln
+  const marktwertErgebnis = berechneMarktwert(immobilie);
+  
+  // Beide Scores berechnen
+  const dealScore = berechneDealScore(immobilie, marktwertErgebnis);
+  const investmentScore = berechneInvestmentScore(immobilie, finanzierung, userProfil);
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // GEWICHTUNG JE NACH STRATEGIE
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let dealGewicht, investmentGewicht;
+  
+  switch (userProfil.strategie) {
+    case 'flip':
+      // Flipper: Deal-Qualität am wichtigsten
+      dealGewicht = 0.70;
+      investmentGewicht = 0.30;
+      break;
+    case 'value_add':
+      // Value-Add: Ausgewogen
+      dealGewicht = 0.55;
+      investmentGewicht = 0.45;
+      break;
+    case 'buy_and_hold':
+    default:
+      // Buy & Hold: Investment-Qualität wichtiger
+      dealGewicht = 0.40;
+      investmentGewicht = 0.60;
+      break;
+  }
+  
+  const gewichteterScore = Math.round(
+    dealScore.score * dealGewicht + 
+    investmentScore.score * investmentGewicht
+  );
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // INSTANT EQUITY AUF CASHFLOW UMRECHNEN (Dein Kerngedanke!)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  /*
+  LOGIK: Wenn du 30.000€ unter Marktwert kaufst und 10 Jahre hältst,
+  entspricht das 3.000€/Jahr oder 250€/Monat "virtuellem Cashflow".
+  
+  Dieser kann negativen Cashflow ausgleichen!
+  */
+  
+  const haltedauer = userProfil.geplanteHaltedauer || 10; // Jahre
+  const instantEquityProJahr = dealScore.instantEquity / haltedauer;
+  const instantEquityProMonat = instantEquityProJahr / 12;
+  
+  // "Bereinigter Total-Cashflow" = echter Cashflow + anteiliger Equity-Gewinn
+  const totalValueCreationProMonat = immobilie.cashflow + instantEquityProMonat;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // NEGATIVER CASHFLOW AKZEPTABEL?
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  /*
+  REGEL: Für jeden 100€ negativen Cashflow brauchst du mind. 15.000-20.000€ 
+  Instant Equity als Ausgleich.
+  
+  Beispiel: -200€/Monat Cashflow = 2.400€/Jahr
+  → Braucht: 36.000-48.000€ unter Marktwert
+  */
+  
+  let negativCashflowAkzeptabel = false;
+  let negativCashflowBegruendung = '';
+  
+  if (immobilie.cashflow < 0) {
+    const benoetigtesEquity = Math.abs(immobilie.cashflow) * 150; // 150× monatlicher Verlust
+    
+    if (dealScore.instantEquity >= benoetigtesEquity) {
+      negativCashflowAkzeptabel = true;
+      negativCashflowBegruendung = `✅ Negativer Cashflow (${immobilie.cashflow}€/Monat) ist akzeptabel, weil du ${dealScore.instantEquity.toLocaleString()}€ unter Marktwert kaufst (mind. ${benoetigtesEquity.toLocaleString()}€ nötig).`;
+    } else {
+      negativCashflowBegruendung = `⚠️ Negativer Cashflow (${immobilie.cashflow}€/Monat) ist NICHT ausreichend durch Equity-Gewinn gedeckt. Du kaufst ${dealScore.instantEquity.toLocaleString()}€ unter Marktwert, bräuchtest aber ${benoetigtesEquity.toLocaleString()}€.`;
+    }
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // ERGEBNIS
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  return {
+    // Einzelne Scores
+    dealScore,
+    investmentScore,
+    
+    // Kombinierter Score
+    gesamtScore: gewichteterScore,
+    gewichtung: { deal: dealGewicht, investment: investmentGewicht },
+    
+    // Marktwert-Analyse
+    marktwert: marktwertErgebnis,
+    instantEquity: dealScore.instantEquity,
+    rabattProzent: dealScore.rabattProzent,
+    
+    // Total Value Creation (Dein Kerngedanke umgesetzt!)
+    totalValueCreation: {
+      proMonat: Math.round(totalValueCreationProMonat),
+      proJahr: Math.round(totalValueCreationProMonat * 12),
+      cashflowAnteil: immobilie.cashflow,
+      equityAnteil: Math.round(instantEquityProMonat),
+      erklaerung: `Echter Cashflow (${immobilie.cashflow}€) + anteiliger Equity-Gewinn (${Math.round(instantEquityProMonat)}€) = ${Math.round(totalValueCreationProMonat)}€/Monat Total Value Creation`
+    },
+    
+    // Cashflow-Analyse
+    negativCashflowAnalyse: {
+      akzeptabel: negativCashflowAkzeptabel,
+      begruendung: negativCashflowBegruendung
+    },
+    
+    // Finale Bewertung
+    kategorie: getGesamtScoreKategorie(gewichteterScore, dealScore.score, investmentScore.score)
+  };
+}
+
+function getGesamtScoreKategorie(gesamt, deal, investment) {
+  // Spezialfälle
+  if (deal >= 80 && investment < 50) {
+    return { emoji: '🟡💰', text: 'Guter Deal, schwaches Investment', beschreibung: 'Günstig gekauft, aber Objekt/Lage mäßig. Für Flipper interessant!' };
+  }
+  if (investment >= 80 && deal < 50) {
+    return { emoji: '🟡🏠', text: 'Gutes Investment, teurer Deal', beschreibung: 'Tolles Objekt, aber zu teuer. Verhandeln!' };
+  }
+  
+  // Standard
+  if (gesamt >= 85) return { emoji: '🟢🟢', text: 'EXZELLENT', beschreibung: 'Top-Deal UND Top-Investment – Zuschlagen!' };
+  if (gesamt >= 70) return { emoji: '🟢', text: 'EMPFEHLENSWERT', beschreibung: 'Guter Kauf mit solider Perspektive' };
+  if (gesamt >= 55) return { emoji: '🟡', text: 'PRÜFENSWERT', beschreibung: 'Akzeptabel, aber Verbesserungspotenzial' };
+  if (gesamt >= 40) return { emoji: '🟠', text: 'VORSICHT', beschreibung: 'Einige Schwächen, nur mit Abschlag kaufen' };
+  return { emoji: '🔴', text: 'NICHT EMPFOHLEN', beschreibung: 'Zu teuer und/oder zu schwaches Objekt' };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 📊 BEISPIEL-OUTPUT
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+═══════════════════════════════════════════════════════════════════════════════
+🏠 IMMOBILIEN-ANALYSE: Musterstraße 123, Frankfurt
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 MARKTWERT-ANALYSE
+├─ Geschätzter Marktwert: 320.000€ (Ertragswertverfahren)
+├─ Kaufpreis: 285.000€
+├─ Differenz: +35.000€ unter Marktwert!
+└─ Rabatt: 10.9% 🟢
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 DEAL-SCORE: 72/100 🟢 "Guter Deal"
+├─ Unter Marktwert kaufen: 28/40 (10.9% Rabatt)
+├─ Kaufpreisfaktor: 12/20 (Faktor 23.8, regional OK)
+├─ Verhandlungspotenzial: 10/15
+├─ Nebenkosten-Effizienz: 7/10
+└─ Exit-Optionen: 15/15
+
+🏠 INVESTMENT-SCORE: 61/100 🟡 "Akzeptabel"
+├─ Cashflow: 10/25 (-85€/Monat, nach Risikopuffer)
+├─ Lage-Qualität: 18/25 (B-Lage Frankfurt)
+├─ Wertsteigerung: 13/20
+├─ Objektqualität: 10/15
+└─ Mieter/Nachfrage: 10/15
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💡 TOTAL VALUE CREATION (Dein tatsächlicher Gewinn!)
+├─ Echter Cashflow: -85€/Monat
+├─ + Anteiliger Equity-Gewinn: +292€/Monat (35.000€ ÷ 10 Jahre ÷ 12)
+├─ = TOTAL: +207€/Monat! 🟢
+└─ Der negative Cashflow ist durch den günstigen Kauf mehr als ausgeglichen!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚖️ GESAMT-BEWERTUNG: 68/100 🟢 "EMPFEHLENSWERT"
+
+Gewichtung: 40% Deal / 60% Investment (Buy & Hold Strategie)
+
+FAZIT: Du kaufst 35.000€ unter Marktwert. Der leicht negative 
+Cashflow (-85€) wird durch den Equity-Gewinn überkompensiert.
+Mit Mieterhöhungspotenzial wird das Objekt in 2-3 Jahren 
+Cashflow-positiv sein.
+
+✅ EMPFEHLUNG: KAUFEN – aber maximal 290.000€ bieten!
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
 
 ### Entscheidungslogik (Profi-Framework)
 
@@ -4046,11 +7035,34 @@ const DEALBREAKER = [
   'WEG-Governance hochriskant (Mehrheitseigentümer, Dauerstreit, leere Kasse)',
   'Cashflow im Worst-Case-Szenario nicht tragfähig',
   'Fehlende Kernunterlagen trotz Nachfrage',
-  'Erbpacht mit Restlaufzeit < 50 Jahre',
+  'Erbpacht mit Restlaufzeit < 30 Jahre',
   'Zwangsversteigerungsvermerk im Grundbuch',
   'Asbest/Altlasten ohne klaren Sanierungsplan',
-  'Sperrminorität eines unkooperativen Eigentümers'
+  'Sperrminorität eines unkooperativen Eigentümers',
+  'Leerstandsquote im Gebäude > 20%'
 ];
+
+function pruefeAufDealbreaker(immobilie) {
+  const gefunden = [];
+  
+  if (immobilie.wohnrecht || immobilie.niessbrauch) {
+    gefunden.push({ typ: 'Lastenlage', details: 'Wohnrecht oder Nießbrauch eingetragen' });
+  }
+  if (immobilie.baumaengel?.schwerwiegend) {
+    gefunden.push({ typ: 'Bauschäden', details: 'Massive Bauschäden ohne klare Sanierbarkeit' });
+  }
+  if (immobilie.wegProbleme || immobilie.erhaltungsruecklage < immobilie.sollRuecklage * 0.3) {
+    gefunden.push({ typ: 'WEG-Risiko', details: 'Kritische Eigentümergemeinschaft oder leere Kasse' });
+  }
+  if (immobilie.erbpacht && immobilie.erbpachtRestlaufzeit < 30) {
+    gefunden.push({ typ: 'Erbpacht', details: `Nur noch ${immobilie.erbpachtRestlaufzeit} Jahre Restlaufzeit` });
+  }
+  
+  return {
+    hatDealbreaker: gefunden.length > 0,
+    dealbreaker: gefunden
+  };
+}
 ```
 
 #### Verhandelbar (Preisabschlag fordern!)
@@ -4062,6 +7074,8 @@ const DEALBREAKER = [
 | Mietvertrag unter Markt | 12× Mietdifferenz | Mietspiegel-Vergleich |
 | Fehlende Stellplätze | 10.000-30.000€ je nach Lage | Marktvergleich |
 | Renovierungsbedarf innen | 300-600€/m² | Handwerker-Angebote |
+| Alte Heizung (>20 Jahre) | 15.000-30.000€ | Heizungsbauer-Angebot |
+| Fenster vor 1995 | 500-800€/Fenster | Fensterbauer-Angebot |
 
 #### Transparenzpflicht (für KI-Output)
 
@@ -4071,50 +7085,209 @@ const DEALBREAKER = [
 - Welche Unsicherheiten bestehen
 - Welche nächsten Schritte erforderlich sind
 
-### Score-Berechnung
+### Score-Berechnung V2.0 (REGIONAL ANGEPASST!)
 
 ```javascript
-function berechneImmobilienScore(immobilie) {
-  let score = 50; // Basis
+function berechneImmobilienScoreV2(immobilie, userProfil = {}) {
+  // ═══════════════════════════════════════════════════════════
+  // STEP 0: Dealbreaker-Check
+  // ═══════════════════════════════════════════════════════════
   
-  // Cashflow (30%)
-  const cashflowPunkte = Math.min(30, Math.max(0, 15 + (immobilie.cashflow / 10)));
+  const dealbreaker = pruefeAufDealbreaker(immobilie);
+  if (dealbreaker.hatDealbreaker) {
+    return {
+      score: 0,
+      kategorie: { emoji: '🚫', text: 'DEALBREAKER', aktion: 'Nicht kaufen!' },
+      dealbreaker: dealbreaker.dealbreaker,
+      details: null
+    };
+  }
   
-  // Rendite (20%)
-  const renditePunkte = Math.min(20, immobilie.bruttorendite * 4);
+  let score = 0;
+  const details = {};
+  const region = getRegionaleBenchmarks(immobilie.stadt || 'default');
   
-  // Lage (20%)
-  const lagePunkte = { 'A': 20, 'B': 15, 'C': 10, 'D': 5 }[immobilie.lage];
+  // ═══════════════════════════════════════════════════════════
+  // KATEGORIE 1: CASHFLOW & RENDITE (40 Punkte max.)
+  // ═══════════════════════════════════════════════════════════
   
-  // Zustand (15%)
-  const zustandPunkte = { 'Neubau': 15, 'Saniert': 12, 'Gepflegt': 9, 'Renovierungsbedürftig': 5 }[immobilie.zustand];
+  // Cashflow (25 Punkte) - STRENGER als vorher!
+  let cashflowPunkte = 0;
+  if (immobilie.cashflow >= 200) cashflowPunkte = 25;
+  else if (immobilie.cashflow >= 100) cashflowPunkte = 22;
+  else if (immobilie.cashflow >= 0) cashflowPunkte = 18;
+  else if (immobilie.cashflow >= -100) cashflowPunkte = 12;
+  else if (immobilie.cashflow >= -200) cashflowPunkte = 6;
+  else cashflowPunkte = 0;
   
-  // Energieeffizienz (15%)
-  const energiePunkte = { 'A+': 15, 'A': 14, 'B': 12, 'C': 10, 'D': 8, 'E': 5, 'F': 3, 'G': 1, 'H': 0 }[immobilie.energieKlasse];
+  details.cashflow = {
+    punkte: cashflowPunkte,
+    wert: immobilie.cashflow,
+    bewertung: bewerteCashflow(immobilie.cashflow)
+  };
+  score += cashflowPunkte;
   
-  score = cashflowPunkte + renditePunkte + lagePunkte + zustandPunkte + energiePunkte;
+  // Rendite REGIONAL bewertet (15 Punkte)
+  let renditePunkte = 0;
+  if (immobilie.bruttorendite >= region.topRendite) renditePunkte = 15;
+  else if (immobilie.bruttorendite >= region.guteRendite) renditePunkte = 12;
+  else if (immobilie.bruttorendite >= region.akzeptableRendite) renditePunkte = 9;
+  else if (immobilie.bruttorendite >= region.akzeptableRendite - 0.5) renditePunkte = 5;
+  else renditePunkte = 2;
   
-  // Abzüge für Red Flags
-  if (immobilie.erbpacht) score -= 30;
-  if (immobilie.baujahr < 1970 && !immobilie.kernsaniert) score -= 20;
-  if (['G', 'H'].includes(immobilie.energieKlasse)) score -= 15;
-  if (immobilie.sozialbindung) score -= 15;
-  if (immobilie.kaufpreisfaktor > 30) score -= 10;
-  if (immobilie.denkmalschutz) score -= 10;
+  details.rendite = {
+    punkte: renditePunkte,
+    wert: immobilie.bruttorendite,
+    benchmark: region,
+    bewertung: bewerteRenditeRegional(immobilie.bruttorendite, immobilie.stadt)
+  };
+  score += renditePunkte;
   
-  return Math.max(0, Math.min(100, score));
+  // ═══════════════════════════════════════════════════════════
+  // KATEGORIE 2: OBJEKTQUALITÄT (30 Punkte max.)
+  // ═══════════════════════════════════════════════════════════
+  
+  // Mikrolage (15 Punkte) - DIFFERENZIERTER
+  let lagePunkte = berechneMikrolagePunkte(immobilie);
+  details.lage = {
+    punkte: lagePunkte.punkte,
+    faktoren: lagePunkte.faktoren
+  };
+  score += lagePunkte.punkte;
+  
+  // Zustand (10 Punkte)
+  const zustandMap = { 
+    'Neubau': 10, 'Kernsaniert': 9, 'Saniert': 8, 'Modernisiert': 7,
+    'Gepflegt': 6, 'Renovierungsbedürftig': 4, 'Sanierungsbedürftig': 2, 'Abrissreif': 0
+  };
+  const zustandPunkte = zustandMap[immobilie.zustand] || 5;
+  details.zustand = { punkte: zustandPunkte, wert: immobilie.zustand };
+  score += zustandPunkte;
+  
+  // Energie (5 Punkte) - MIT FÖRDERUNGS-BONUS!
+  let energiePunkte = { 
+    'A+': 5, 'A': 5, 'B': 4, 'C': 4, 'D': 3, 'E': 2, 'F': 1, 'G': 0, 'H': 0 
+  }[immobilie.energieKlasse] || 2;
+  
+  let energieBonus = null;
+  if (['F', 'G', 'H'].includes(immobilie.energieKlasse)) {
+    if (userProfil.kinder > 0) {
+      energiePunkte += 2;
+      energieBonus = '✅ KfW 308 "Jung kauft Alt" förderfähig – 1,12% Zins!';
+    }
+    if (userProfil.sanierungGeplant) {
+      energiePunkte += 1;
+      energieBonus = (energieBonus || '') + ' ✅ KfW 261 bis 67.500€ Zuschuss möglich!';
+    }
+  }
+  details.energie = { punkte: energiePunkte, klasse: immobilie.energieKlasse, bonus: energieBonus };
+  score += energiePunkte;
+  
+  // ═══════════════════════════════════════════════════════════
+  // KATEGORIE 3: RISIKOFAKTOREN (20 Punkte max.)
+  // ═══════════════════════════════════════════════════════════
+  
+  let risikoPunkte = 20;
+  const risikoDetails = [];
+  
+  if (immobilie.wegEinheiten > 100) { risikoPunkte -= 2; risikoDetails.push('Große WEG (>100 Einheiten)'); }
+  if (immobilie.erhaltungsruecklageProzent < 20) { risikoPunkte -= 4; risikoDetails.push('Erhaltungsrücklage unter Soll!'); }
+  if (immobilie.sonderumlagenLetzte5Jahre > 0) { risikoPunkte -= 3; risikoDetails.push(`Sonderumlage in letzten 5 Jahren`); }
+  if (immobilie.baujahr < 1960 && !immobilie.kernsaniert) { risikoPunkte -= 4; risikoDetails.push('Altbau vor 1960 ohne Kernsanierung'); }
+  if (immobilie.baujahr >= 1960 && immobilie.baujahr < 1980 && !immobilie.saniert) { risikoPunkte -= 2; risikoDetails.push('70er-Jahre-Bau – Asbest prüfen!'); }
+  
+  if (immobilie.erbpacht) {
+    const restlaufzeit = immobilie.erbpachtRestlaufzeit || 50;
+    if (restlaufzeit < 40) { risikoPunkte -= 6; risikoDetails.push(`Erbpacht nur noch ${restlaufzeit} Jahre`); }
+    else if (restlaufzeit < 60) { risikoPunkte -= 3; risikoDetails.push(`Erbpacht noch ${restlaufzeit} Jahre`); }
+    else { risikoPunkte -= 1; risikoDetails.push(`Erbpacht noch ${restlaufzeit} Jahre (akzeptabel)`); }
+  }
+  
+  if (immobilie.kaufpreisfaktor > region.faktorGrenze) { risikoPunkte -= 3; risikoDetails.push(`Faktor über Regional-Grenze`); }
+  if (immobilie.kaufpreisfaktor > region.faktorGrenze * 1.15) { risikoPunkte -= 3; risikoDetails.push('Kaufpreis deutlich überhöht!'); }
+  
+  details.risiko = { punkte: Math.max(0, risikoPunkte), faktoren: risikoDetails };
+  score += Math.max(0, risikoPunkte);
+  
+  // ═══════════════════════════════════════════════════════════
+  // KATEGORIE 4: WERTSTEIGERUNGSPOTENZIAL (10 Punkte max.)
+  // ═══════════════════════════════════════════════════════════
+  
+  let potenzialPunkte = 5;
+  const potenzialDetails = [];
+  
+  if (immobilie.istMiete && immobilie.marktMiete) {
+    const mietPotenzial = (immobilie.marktMiete - immobilie.istMiete) / immobilie.istMiete;
+    if (mietPotenzial > 0.15) { potenzialPunkte += 3; potenzialDetails.push(`Mieterhöhungspotenzial +${Math.round(mietPotenzial * 100)}%`); }
+    else if (mietPotenzial > 0.05) { potenzialPunkte += 1; potenzialDetails.push(`Leichtes Mietpotenzial`); }
+  }
+  
+  if (immobilie.entwicklungsgebiet) { potenzialPunkte += 2; potenzialDetails.push('Aufwertungsgebiet'); }
+  
+  // DENKMAL = BONUS für Kapitalanleger!
+  if (immobilie.denkmalschutz) {
+    if (userProfil.nutzung === 'kapitalanlage' && userProfil.hoherSteuersatz) {
+      potenzialPunkte += 3;
+      potenzialDetails.push('🏛️ Denkmal-AfA: 100% in 12 Jahren absetzbar!');
+    } else {
+      potenzialPunkte += 1;
+      potenzialDetails.push('Denkmalschutz (Steuervorteile möglich)');
+    }
+  }
+  
+  details.potenzial = { punkte: Math.min(10, potenzialPunkte), faktoren: potenzialDetails };
+  score += Math.min(10, potenzialPunkte);
+  
+  // ═══════════════════════════════════════════════════════════
+  // FINALE
+  // ═══════════════════════════════════════════════════════════
+  
+  const finalScore = Math.round(Math.max(0, Math.min(100, score)));
+  
+  return {
+    score: finalScore,
+    kategorie: getScoreKategorieV2(finalScore),
+    details,
+    maxPunkte: { cashflow: 25, rendite: 15, lage: 15, zustand: 10, energie: 5, risiko: 20, potenzial: 10, gesamt: 100 }
+  };
+}
+
+function berechneMikrolagePunkte(immobilie) {
+  let punkte = 7;
+  const faktoren = [];
+  
+  if (immobilie.entfernungBahnhof <= 500) { punkte += 3; faktoren.push('✅ Sehr gute ÖPNV-Anbindung'); }
+  else if (immobilie.entfernungBahnhof <= 1000) { punkte += 2; faktoren.push('✅ Gute ÖPNV-Anbindung'); }
+  else if (immobilie.entfernungBahnhof > 2000) { punkte -= 2; faktoren.push('⚠️ Schlechte ÖPNV-Anbindung'); }
+  
+  if (immobilie.nahversorger <= 500) { punkte += 1; faktoren.push('✅ Einkauf fußläufig'); }
+  if (immobilie.hauptstrasse) { punkte -= 2; faktoren.push('⚠️ Lärmbelastung'); }
+  if (immobilie.sozialerBrennpunkt) { punkte -= 3; faktoren.push('❌ Sozialer Brennpunkt'); }
+  if (immobilie.gruenflaechen) { punkte += 1; faktoren.push('✅ Parks/Grünflächen'); }
+  
+  return { punkte: Math.max(0, Math.min(15, punkte)), faktoren };
+}
+
+function getScoreKategorieV2(score) {
+  if (score >= 85) return { emoji: '🟢🟢', text: 'Top-Investment', aktion: 'Schnell handeln!' };
+  if (score >= 70) return { emoji: '🟢', text: 'Gutes Investment', aktion: 'Empfehlenswert' };
+  if (score >= 55) return { emoji: '🟡', text: 'Prüfenswert', aktion: 'Verhandeln!' };
+  if (score >= 40) return { emoji: '🟠', text: 'Vorsicht', aktion: 'Nur mit Preisreduktion' };
+  if (score >= 25) return { emoji: '🔴', text: 'Nicht empfohlen', aktion: 'Besser lassen' };
+  return { emoji: '🔴🔴', text: 'Finger weg!', aktion: 'Hard Pass' };
 }
 ```
 
-### Empfehlung basierend auf Score
+### Empfehlung basierend auf Score V2
 
 | Score | Empfehlung | Aktion |
 |-------|------------|--------|
-| 80-100 | 🟢 Sehr empfehlenswert | Zuschlagen! |
-| 60-79 | 🟢 Empfehlenswert | Gutes Investment |
-| 40-59 | 🟡 Prüfen | Verhandeln oder lassen |
-| 20-39 | 🟠 Vorsicht | Nur mit Expertise |
-| 0-19 | 🔴 Finger weg! | Red Flags! |
+| 85-100 | 🟢🟢 Top-Investment | Schnell handeln! |
+| 70-84 | 🟢 Gutes Investment | Empfehlenswert |
+| 55-69 | 🟡 Prüfenswert | Verhandeln! |
+| 40-54 | 🟠 Vorsicht | Nur mit Preisreduktion |
+| 25-39 | 🔴 Nicht empfohlen | Besser lassen |
+| 0-24 | 🔴🔴 Finger weg! | Hard Pass |
 
 ### KI-Output-Standard (Pflichtfelder für jede Analyse)
 

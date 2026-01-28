@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AnalysisResult from '../components/AnalysisResult';
+import ProjectionCharts from '../components/ProjectionCharts';
+import ScenarioSimulator from '../components/ScenarioSimulator';
+import FairPriceCalculator from '../components/FairPriceCalculator';
+import AIChat from '../components/AIChat';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 function LibraryDetail() {
   const { id } = useParams();
@@ -13,6 +18,8 @@ function LibraryDetail() {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: '', notes: '' });
+  const [activeTool, setActiveTool] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     fetchAnalysis();
@@ -84,9 +91,11 @@ function LibraryDetail() {
     }
   };
 
-  const deleteAnalysis = async () => {
-    if (!confirm('Mochten Sie diese Analyse wirklich loschen?')) return;
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
 
+  const confirmDelete = async () => {
     try {
       const response = await fetch(`http://localhost:8000/library/${id}`, {
         method: 'DELETE',
@@ -100,6 +109,8 @@ function LibraryDetail() {
       }
     } catch (error) {
       console.error('Failed to delete analysis:', error);
+    } finally {
+      setShowDeleteDialog(false);
     }
   };
 
@@ -253,7 +264,7 @@ function LibraryDetail() {
 
             {/* Delete Button */}
             <button
-              onClick={deleteAnalysis}
+              onClick={handleDeleteClick}
               className="w-12 h-12 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500/50 rounded-xl flex items-center justify-center transition-all"
             >
               <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,6 +322,114 @@ function LibraryDetail() {
         </div>
       </div>
 
+      {/* Profi-Tools Section */}
+      <div className="glass-card rounded-2xl p-6 border border-white/10 relative z-10 fade-in fade-in-delay-1">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-white flex items-center gap-3">
+            <span className="w-10 h-10 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-xl flex items-center justify-center border border-neon-blue/30 text-lg">
+              🛠️
+            </span>
+            Profi-Tools für diese Analyse
+          </h3>
+          {activeTool && (
+            <button
+              onClick={() => setActiveTool(null)}
+              className="text-text-secondary hover:text-white transition-colors text-sm flex items-center gap-1"
+            >
+              Schließen
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Tool Selector */}
+        {!activeTool && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button
+              onClick={() => setActiveTool('projection')}
+              className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-green/30 hover:bg-neon-green/5 transition-all group text-left"
+            >
+              <span className="text-2xl mb-2 block">📈</span>
+              <h4 className="font-bold text-white group-hover:text-neon-green transition-colors">30-Jahre-Projektion</h4>
+              <p className="text-xs text-text-muted mt-1">Cashflow & Vermögen über Zeit</p>
+            </button>
+            <button
+              onClick={() => setActiveTool('scenario')}
+              className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-purple/30 hover:bg-neon-purple/5 transition-all group text-left"
+            >
+              <span className="text-2xl mb-2 block">🔮</span>
+              <h4 className="font-bold text-white group-hover:text-neon-purple transition-colors">Szenarien-Simulator</h4>
+              <p className="text-xs text-text-muted mt-1">"Was wäre wenn" Analysen</p>
+            </button>
+            <button
+              onClick={() => setActiveTool('fairprice')}
+              className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-accent/30 hover:bg-accent/5 transition-all group text-left"
+            >
+              <span className="text-2xl mb-2 block">⚖️</span>
+              <h4 className="font-bold text-white group-hover:text-accent transition-colors">Fairer Preis</h4>
+              <p className="text-xs text-text-muted mt-1">Marktwert & Verhandlungsziel</p>
+            </button>
+            <button
+              onClick={() => setActiveTool('chat')}
+              className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-blue/30 hover:bg-neon-blue/5 transition-all group text-left"
+            >
+              <span className="text-2xl mb-2 block">🤖</span>
+              <h4 className="font-bold text-white group-hover:text-neon-blue transition-colors">AI Berater</h4>
+              <p className="text-xs text-text-muted mt-1">Fragen zu dieser Immobilie</p>
+            </button>
+          </div>
+        )}
+
+        {/* Active Tool Content */}
+        {activeTool === 'projection' && (
+          <div className="border-t border-white/10 pt-6 mt-4">
+            <ProjectionCharts analysisData={{
+              kaufpreis: analysis.kaufpreis,
+              kaltmiete: analysis.kaltmiete,
+              hausgeld: analysis.hausgeld,
+              wohnflaeche: analysis.wohnflaeche,
+              vergleichspreisProQm: analysis.analysis_result?.kennzahlen?.preis_pro_qm || 3500
+            }} />
+          </div>
+        )}
+
+        {activeTool === 'scenario' && (
+          <div className="border-t border-white/10 pt-6 mt-4">
+            <ScenarioSimulator analysisData={{
+              kaufpreis: analysis.kaufpreis,
+              kaltmiete: analysis.kaltmiete,
+              hausgeld: analysis.hausgeld
+            }} />
+          </div>
+        )}
+
+        {activeTool === 'fairprice' && (
+          <div className="border-t border-white/10 pt-6 mt-4">
+            <FairPriceCalculator analysisData={{
+              kaufpreis: analysis.kaufpreis,
+              kaltmiete: analysis.kaltmiete,
+              hausgeld: analysis.hausgeld,
+              wohnflaeche: analysis.wohnflaeche,
+              vergleichspreisProQm: analysis.analysis_result?.kennzahlen?.preis_pro_qm || 3500
+            }} />
+          </div>
+        )}
+
+        {activeTool === 'chat' && (
+          <div className="border-t border-white/10 pt-6 mt-4 h-96">
+            <AIChat analysisContext={{
+              kaufpreis: analysis.kaufpreis,
+              kaltmiete: analysis.kaltmiete,
+              stadt: analysis.stadt,
+              eigenkapital: analysis.eigenkapital,
+              gesamtscore: analysis.gesamtscore
+            }} />
+          </div>
+        )}
+      </div>
+
       {/* Full Analysis Result with all Charts */}
       {analysis.analysis_result && (
         <div className="relative z-10">
@@ -322,6 +441,17 @@ function LibraryDetail() {
           />
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDelete}
+        title="Analyse löschen"
+        message="Möchten Sie diese Analyse wirklich unwiderruflich löschen?"
+        confirmText="Löschen"
+        variant="danger"
+      />
     </div>
   );
 }
