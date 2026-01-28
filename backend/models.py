@@ -1,0 +1,71 @@
+"""
+Datenbank-Modelle für User und Analysen
+"""
+
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, Text, ForeignKey, JSON
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from database import Base
+
+
+class User(Base):
+    """User-Modell für Authentifizierung"""
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=False)
+    full_name = Column(String, nullable=True)
+    hashed_password = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Settings
+    default_verwendungszweck = Column(String, default="kapitalanlage")
+    default_zinssatz = Column(Float, default=3.75)
+    default_tilgung = Column(Float, default=1.25)
+
+    # Relationship
+    analyses = relationship("Analysis", back_populates="owner", cascade="all, delete-orphan")
+
+
+class Analysis(Base):
+    """Gespeicherte Immobilien-Analysen"""
+    __tablename__ = "analyses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Analyse-Metadaten
+    title = Column(String, nullable=True)  # User kann Titel vergeben
+    notes = Column(Text, nullable=True)    # Notizen zur Immobilie
+    is_favorite = Column(Boolean, default=False)
+    tags = Column(String, nullable=True)   # Comma-separated tags
+
+    # Immobilien-Daten (als JSON gespeichert)
+    property_data = Column(JSON, nullable=False)
+
+    # Analyse-Ergebnis (als JSON gespeichert)
+    analysis_result = Column(JSON, nullable=False)
+
+    # Verwendungszweck
+    verwendungszweck = Column(String, nullable=False)
+
+    # Finanzierung
+    eigenkapital = Column(Float, default=0)
+    zinssatz = Column(Float, default=3.75)
+    tilgung = Column(Float, default=1.25)
+
+    # Quick-Access Felder für Suche/Filter
+    kaufpreis = Column(Float, nullable=True)
+    wohnflaeche = Column(Float, nullable=True)
+    stadt = Column(String, nullable=True)
+    stadtteil = Column(String, nullable=True)
+    gesamtscore = Column(Float, nullable=True)
+
+    # Relationship
+    owner = relationship("User", back_populates="analyses")
