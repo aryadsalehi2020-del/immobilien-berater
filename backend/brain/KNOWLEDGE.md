@@ -1,5 +1,391 @@
 # Immobilien-Berater – Claude Code Projektanweisungen (ULTIMATE EDITION V3.0)
 
+## 💰 KAUFNEBENKOSTEN-BERECHNUNG (IMMER ANZEIGEN!)
+
+### Warum wichtig?
+
+**Kaufnebenkosten sind "verlorenes" Geld** – sie erhöhen deinen Kapitaleinsatz, aber nicht den Wert der Immobilie!
+
+```
+BEISPIEL:
+Kaufpreis:      300.000€
++ Nebenkosten:   35.700€ (11,9%)
+────────────────────────
+TOTAL INVEST:   335.700€
+
+Aber die Immobilie ist nur 300.000€ wert!
+→ Du startest mit 35.700€ "Verlust" (auf dem Papier)
+```
+
+---
+
+### 📊 KAUFNEBENKOSTEN NACH BUNDESLAND
+
+```javascript
+const GRUNDERWERBSTEUER = {
+  // Stand 2025/2026
+  'baden-wuerttemberg': 0.050,   // 5.0%
+  'bayern': 0.035,               // 3.5% ← Günstigste!
+  'berlin': 0.060,               // 6.0%
+  'brandenburg': 0.065,          // 6.5% ← Teuerste!
+  'bremen': 0.050,               // 5.0%
+  'hamburg': 0.055,              // 5.5%
+  'hessen': 0.060,               // 6.0%
+  'mecklenburg-vorpommern': 0.060, // 6.0%
+  'niedersachsen': 0.050,        // 5.0%
+  'nordrhein-westfalen': 0.065,  // 6.5% ← Teuerste!
+  'rheinland-pfalz': 0.050,      // 5.0%
+  'saarland': 0.065,             // 6.5% ← Teuerste!
+  'sachsen': 0.035,              // 3.5% ← Günstigste!
+  'sachsen-anhalt': 0.050,       // 5.0%
+  'schleswig-holstein': 0.065,   // 6.5% ← Teuerste!
+  'thueringen': 0.050            // 5.0%
+};
+
+const NOTAR_UND_GRUNDBUCH = 0.02;  // ~2% (1.5% Notar + 0.5% Grundbuch)
+
+const MAKLER = {
+  'mit_makler': 0.0357,           // 3.57% inkl. MwSt (üblich: 50/50 Teilung)
+  'ohne_makler': 0.00
+};
+```
+
+---
+
+### 🧮 NEBENKOSTEN-RECHNER
+
+```javascript
+function berechneKaufnebenkosten(kaufpreis, bundesland, mitMakler = true) {
+  const bundeslandKey = bundesland.toLowerCase().replace(/[^a-z]/g, '').replace('ü', 'ue').replace('ö', 'oe');
+  
+  // Grunderwerbsteuer
+  const grstSatz = GRUNDERWERBSTEUER[bundeslandKey] || 0.05;
+  const grunderwerbsteuer = kaufpreis * grstSatz;
+  
+  // Notar + Grundbuch
+  const notarGrundbuch = kaufpreis * NOTAR_UND_GRUNDBUCH;
+  
+  // Makler (optional)
+  const maklerKosten = mitMakler ? kaufpreis * MAKLER['mit_makler'] : 0;
+  
+  // Summe
+  const nebenkostenGesamt = grunderwerbsteuer + notarGrundbuch + maklerKosten;
+  const nebenkostenProzent = (nebenkostenGesamt / kaufpreis) * 100;
+  
+  return {
+    grunderwerbsteuer: {
+      betrag: Math.round(grunderwerbsteuer),
+      prozent: grstSatz * 100,
+      bundesland: bundesland
+    },
+    notarGrundbuch: {
+      betrag: Math.round(notarGrundbuch),
+      prozent: NOTAR_UND_GRUNDBUCH * 100
+    },
+    makler: {
+      betrag: Math.round(maklerKosten),
+      prozent: mitMakler ? MAKLER['mit_makler'] * 100 : 0,
+      vorhanden: mitMakler
+    },
+    gesamt: {
+      betrag: Math.round(nebenkostenGesamt),
+      prozent: Math.round(nebenkostenProzent * 10) / 10
+    },
+    gesamtinvestition: kaufpreis + Math.round(nebenkostenGesamt)
+  };
+}
+```
+
+---
+
+### 📋 NEBENKOSTEN-ANZEIGE (IMMER ZEIGEN!)
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+💰 KAUFNEBENKOSTEN-ÜBERSICHT
+═══════════════════════════════════════════════════════════════════════════════
+
+Kaufpreis:                     300.000€
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ NEBENKOSTEN                                                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Grunderwerbsteuer (Hamburg 5,5%):           16.500€                        │
+│ Notar + Grundbuch (~2%):                     6.000€                        │
+│ Makler (3,57%):                             10.710€                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ NEBENKOSTEN GESAMT:                         33.210€  (11,07%)              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+GESAMTINVESTITION:                           333.210€
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## 📈 EIGENKAPITALRENDITE (ROI) - MIT NEBENKOSTEN!
+
+### Warum ist das kritisch?
+
+**Die meisten Rechner ignorieren Nebenkosten beim ROI – das ist FALSCH!**
+
+```
+❌ FALSCHE Berechnung:
+Eigenkapital: 60.000€ (20% von 300.000€)
+Cashflow: 3.600€/Jahr
+→ "ROI": 3.600 / 60.000 = 6% 
+
+✅ RICHTIGE Berechnung (mit Nebenkosten):
+Eigenkapital: 60.000€
++ Nebenkosten selbst getragen: 33.210€
+= ECHTES Eigenkapital: 93.210€
+Cashflow: 3.600€/Jahr
+→ ECHTER ROI: 3.600 / 93.210 = 3,86%
+
+Der echte ROI ist 36% NIEDRIGER als der "schöne" ROI!
+```
+
+---
+
+### 🔄 ZWEI SZENARIEN: Nebenkosten finanzieren vs. selbst zahlen
+
+```javascript
+function berechneEigenkapitalrendite(immobilie, finanzierung, optionen = {}) {
+  const { 
+    kaufpreis, 
+    kaltmiete, 
+    hausgeld, 
+    nichtUmlagefaehig 
+  } = immobilie;
+  
+  const {
+    eigenkapitalProzent,
+    zinssatz,
+    tilgungssatz,
+    bundesland,
+    mitMakler
+  } = finanzierung;
+  
+  const {
+    nebenkostenFinanzieren = false,  // User-Wahl!
+    betrachtungszeitraum = 10        // Jahre
+  } = optionen;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // SCHRITT 1: Nebenkosten berechnen
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const nebenkosten = berechneKaufnebenkosten(kaufpreis, bundesland, mitMakler);
+  const nebenkostenBetrag = nebenkosten.gesamt.betrag;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // SCHRITT 2: Eigenkapital-Einsatz berechnen
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const eigenkapitalKaufpreis = kaufpreis * eigenkapitalProzent;
+  
+  let eigenkapitalGesamt, darlehensSumme;
+  
+  if (nebenkostenFinanzieren) {
+    // VARIANTE A: Nebenkosten werden mitfinanziert (110% Finanzierung)
+    // → Eigenkapital = nur Anzahlung auf Kaufpreis
+    // → Aber: Höherer Zinssatz! (+0.3-0.5%)
+    eigenkapitalGesamt = eigenkapitalKaufpreis;
+    darlehensSumme = kaufpreis - eigenkapitalKaufpreis + nebenkostenBetrag;
+  } else {
+    // VARIANTE B: Nebenkosten aus eigener Tasche (EMPFOHLEN!)
+    // → Eigenkapital = Anzahlung + Nebenkosten
+    // → Besserer Zinssatz, weniger Schulden
+    eigenkapitalGesamt = eigenkapitalKaufpreis + nebenkostenBetrag;
+    darlehensSumme = kaufpreis - eigenkapitalKaufpreis;
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // SCHRITT 3: Monatliche Belastung berechnen
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // Zinszuschlag wenn Nebenkosten finanziert werden
+  const effektiverZins = nebenkostenFinanzieren 
+    ? zinssatz + 0.004  // +0.4% Aufschlag bei 110% Finanzierung
+    : zinssatz;
+  
+  const annuitaet = darlehensSumme * (effektiverZins + tilgungssatz);
+  const monatlicheRate = annuitaet / 12;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // SCHRITT 4: Cashflow berechnen
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const mieteinnahmenMonat = kaltmiete;
+  const hausgeldMonat = hausgeld;
+  const nichtUmlagefaehigMonat = nichtUmlagefaehig || hausgeld * 0.3;
+  const instandhaltungMonat = immobilie.wohnflaeche * 1;  // 1€/m²/Monat Reserve
+  
+  const cashflowMonat = mieteinnahmenMonat - monatlicheRate - nichtUmlagefaehigMonat - instandhaltungMonat;
+  const cashflowJahr = cashflowMonat * 12;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // SCHRITT 5: EIGENKAPITALRENDITE BERECHNEN
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // A) Reine Cashflow-Rendite
+  const cashflowRendite = (cashflowJahr / eigenkapitalGesamt) * 100;
+  
+  // B) + Tilgung (Equity Buildup)
+  const tilgungJahr1 = darlehensSumme * tilgungssatz;
+  const tilgungRendite = (tilgungJahr1 / eigenkapitalGesamt) * 100;
+  
+  // C) + Wertsteigerung (konservativ 1.5%/Jahr für Deutschland)
+  const wertsteigerungJahr = kaufpreis * 0.015;
+  const wertsteigerungRendite = (wertsteigerungJahr / eigenkapitalGesamt) * 100;
+  
+  // D) GESAMT-EIGENKAPITALRENDITE
+  const gesamtRendite = cashflowRendite + tilgungRendite + wertsteigerungRendite;
+  
+  return {
+    // Eingaben
+    szenario: nebenkostenFinanzieren ? 'Nebenkosten finanziert' : 'Nebenkosten selbst gezahlt',
+    
+    // Kapitaleinsatz
+    eigenkapital: {
+      kaufpreisAnteil: Math.round(eigenkapitalKaufpreis),
+      nebenkosten: nebenkostenFinanzieren ? 0 : nebenkostenBetrag,
+      gesamt: Math.round(eigenkapitalGesamt),
+      prozentVomKaufpreis: Math.round((eigenkapitalKaufpreis / kaufpreis) * 100),
+      prozentVomGesamtinvest: Math.round((eigenkapitalGesamt / (kaufpreis + nebenkostenBetrag)) * 100)
+    },
+    
+    // Finanzierung
+    darlehen: {
+      summe: Math.round(darlehensSumme),
+      zinssatz: (effektiverZins * 100).toFixed(2),
+      tilgungssatz: (tilgungssatz * 100).toFixed(2),
+      monatlicheRate: Math.round(monatlicheRate),
+      beleihungsauslauf: Math.round((darlehensSumme / kaufpreis) * 100)
+    },
+    
+    // Cashflow
+    cashflow: {
+      monatlich: Math.round(cashflowMonat),
+      jaehrlich: Math.round(cashflowJahr)
+    },
+    
+    // EIGENKAPITALRENDITE (Das Wichtigste!)
+    eigenkapitalRendite: {
+      cashflowRendite: Math.round(cashflowRendite * 100) / 100,
+      tilgungsRendite: Math.round(tilgungRendite * 100) / 100,
+      wertsteigerungsRendite: Math.round(wertsteigerungRendite * 100) / 100,
+      gesamtRendite: Math.round(gesamtRendite * 100) / 100,
+      bewertung: bewerteEigenkapitalrendite(gesamtRendite)
+    },
+    
+    // Vergleich der Szenarien
+    vergleich: {
+      ohneNebenkosten: nebenkostenFinanzieren ? null : 'Aktuelles Szenario',
+      mitNebenkosten: nebenkostenFinanzieren ? 'Aktuelles Szenario' : null,
+      hinweis: nebenkostenFinanzieren 
+        ? '⚠️ Nebenkosten finanzieren = höherer Zins + mehr Schulden'
+        : '✅ Nebenkosten selbst zahlen = bessere Konditionen'
+    }
+  };
+}
+
+function bewerteEigenkapitalrendite(rendite) {
+  // ANGEPASST: ~10 Punkte positiver bewertet!
+  if (rendite >= 10) return { ampel: '🟢🟢', text: 'Exzellent', beschreibung: 'Top-Investment!' };
+  if (rendite >= 6) return { ampel: '🟢', text: 'Sehr gut', beschreibung: 'Überdurchschnittlich' };
+  if (rendite >= 3) return { ampel: '🟡', text: 'Gut', beschreibung: 'Solide Rendite' };
+  if (rendite >= 1) return { ampel: '🟠', text: 'Akzeptabel', beschreibung: 'Unter Durchschnitt' };
+  if (rendite >= -2) return { ampel: '🔴', text: 'Schwach', beschreibung: 'Kaum Rendite' };
+  return { ampel: '🔴🔴', text: 'Negativ', beschreibung: 'Verlustgeschäft!' };
+}
+```
+
+---
+
+### 📋 EIGENKAPITALRENDITE-ANZEIGE (BEIDE SZENARIEN!)
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+📈 EIGENKAPITALRENDITE (ROI) - VERGLEICH
+═══════════════════════════════════════════════════════════════════════════════
+
+Kaufpreis: 300.000€ | Nebenkosten: 33.210€ | Eigenkapital: 20%
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ SZENARIO A: Nebenkosten SELBST zahlen (EMPFOHLEN! ✅)                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Dein Kapitaleinsatz:                                                        │
+│   • Eigenkapital (20% von 300k):     60.000€                               │
+│   • Nebenkosten selbst:              33.210€                               │
+│   • GESAMT eingesetzt:               93.210€                               │
+│                                                                             │
+│ Darlehen: 240.000€ @ 3,80% + 2% Tilgung = 1.160€/Monat                     │
+│ Beleihungsauslauf: 80% (gute Konditionen!)                                 │
+│                                                                             │
+│ EIGENKAPITALRENDITE:                                                        │
+│   • Cashflow-Rendite:                +1,2%                                 │
+│   • Tilgungs-Rendite:                +5,2%                                 │
+│   • Wertsteigerungs-Rendite:         +4,8%                                 │
+│   ─────────────────────────────────────────                                │
+│   • GESAMT-RENDITE:                  +11,2% p.a. 🟢                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ SZENARIO B: Nebenkosten MITFINANZIEREN (⚠️ Teurer!)                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Dein Kapitaleinsatz:                                                        │
+│   • Eigenkapital (20% von 300k):     60.000€                               │
+│   • Nebenkosten selbst:                   0€                               │
+│   • GESAMT eingesetzt:               60.000€                               │
+│                                                                             │
+│ Darlehen: 273.210€ @ 4,20% + 2% Tilgung = 1.412€/Monat                     │
+│ Beleihungsauslauf: 91% (schlechtere Konditionen, +0,4% Zins!)              │
+│                                                                             │
+│ EIGENKAPITALRENDITE:                                                        │
+│   • Cashflow-Rendite:                -2,8% (NEGATIV!)                      │
+│   • Tilgungs-Rendite:                +9,1%                                 │
+│   • Wertsteigerungs-Rendite:         +7,5%                                 │
+│   ─────────────────────────────────────────                                │
+│   • GESAMT-RENDITE:                  +13,8% p.a. 🟢                        │
+│                                                                             │
+│ ⚠️ ABER: Höheres Risiko! Negativer Cashflow = du zahlst drauf!            │
+│    252€/Monat mehr Rate = 3.024€/Jahr aus eigener Tasche                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+💡 EMPFEHLUNG:
+Szenario A (Nebenkosten selbst) ist sicherer:
+• Positiver Cashflow = kein monatliches Draufzahlen
+• Niedrigerer Zins = weniger Gesamtkosten über Laufzeit
+• 80% Beleihung = leichtere Anschlussfinanzierung
+
+Szenario B nur wenn:
+• Du SICHER bist, dass du die monatliche Belastung trägst
+• Du auf schnelleren Vermögensaufbau setzt
+• Du genug Reserve für Notfälle hast (min. 6 Monatsraten)
+
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+### 🔢 QUICK-REFERENCE: Nebenkosten nach Bundesland
+
+| Bundesland | GrESt | + Notar/GB | + Makler | GESAMT |
+|------------|-------|------------|----------|--------|
+| Bayern | 3,5% | 2,0% | 3,57% | **9,07%** |
+| Sachsen | 3,5% | 2,0% | 3,57% | **9,07%** |
+| Baden-Württemberg | 5,0% | 2,0% | 3,57% | **10,57%** |
+| Hamburg | 5,5% | 2,0% | 3,57% | **11,07%** |
+| Berlin | 6,0% | 2,0% | 3,57% | **11,57%** |
+| NRW | 6,5% | 2,0% | 3,57% | **12,07%** |
+| Brandenburg | 6,5% | 2,0% | 3,57% | **12,07%** |
+| Schleswig-Holstein | 6,5% | 2,0% | 3,57% | **12,07%** |
+
+**Ohne Makler:** Zieht 3,57% ab!
+
+---
+
 ## ⚠️ KRITISCHE ANWEISUNG: LIVE-RECHERCHE!
 
 ```
@@ -19,6 +405,519 @@
 │                                                                             │
 │ Siehe Abschnitt "LIVE-RECHERCHE FÜR MARKTWERT" für Details!                │
 └─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 💰 KAUFNEBENKOSTEN-BERECHNUNG (PFLICHT BEI JEDER ANALYSE!)
+
+### Grunderwerbsteuer nach Bundesland (Stand 2025)
+
+```javascript
+const GRUNDERWERBSTEUER = {
+  'baden-wuerttemberg': 0.050,   // 5.0%
+  'bayern': 0.035,               // 3.5% - Am günstigsten!
+  'berlin': 0.060,               // 6.0%
+  'brandenburg': 0.065,          // 6.5%
+  'bremen': 0.050,               // 5.0%
+  'hamburg': 0.055,              // 5.5%
+  'hessen': 0.060,               // 6.0%
+  'mecklenburg-vorpommern': 0.060, // 6.0%
+  'niedersachsen': 0.050,        // 5.0%
+  'nordrhein-westfalen': 0.065,  // 6.5% - Am teuersten!
+  'rheinland-pfalz': 0.050,      // 5.0%
+  'saarland': 0.065,             // 6.5%
+  'sachsen': 0.035,              // 3.5% - Am günstigsten!
+  'sachsen-anhalt': 0.050,       // 5.0%
+  'schleswig-holstein': 0.065,   // 6.5%
+  'thueringen': 0.050            // 5.0%
+};
+```
+
+### Kaufnebenkosten-Rechner (Komplett!)
+
+```javascript
+function berechneKaufnebenkosten(kaufpreis, bundesland, mitMakler = true, maklerAnteilKaeufer = 0.5) {
+  /*
+  KAUFNEBENKOSTEN IN DEUTSCHLAND:
+  ├─ Grunderwerbsteuer: 3,5% - 6,5% (je nach Bundesland)
+  ├─ Notar & Grundbuch: ~1,5% - 2,0%
+  └─ Makler (Käuferanteil): 0% - 3,57% (seit 2020 geteilt)
+  
+  GESAMT: 7% - 12% je nach Bundesland und Makler!
+  */
+  
+  const bundeslandKey = bundesland.toLowerCase().replace(/[^a-z]/g, '').replace('ü', 'ue').replace('ö', 'oe');
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 1. GRUNDERWERBSTEUER
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const grstSatz = GRUNDERWERBSTEUER[bundeslandKey] || 0.05;
+  const grunderwerbsteuer = kaufpreis * grstSatz;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 2. NOTAR & GRUNDBUCH (ca. 1,5% - 2,0%)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // Notar: ~1,0% - 1,5% (Beurkundung, Vollzug)
+  // Grundbuch: ~0,5% (Eintragung, Auflassungsvormerkung)
+  const notarUndGrundbuch = kaufpreis * 0.02; // Konservativ 2%
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 3. MAKLER (seit 2020: Teilung zwischen Käufer & Verkäufer)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let maklerKaeufer = 0;
+  let maklerInfo = '';
+  
+  if (mitMakler) {
+    // Übliche Gesamtprovision: 5,95% - 7,14% (inkl. MwSt)
+    // Seit 2020: Käufer zahlt max. so viel wie Verkäufer
+    // Typisch: 50/50 Teilung = 2,975% - 3,57% pro Seite
+    
+    const gesamtProvision = 0.0714; // 7,14% inkl. MwSt (üblich)
+    maklerKaeufer = kaufpreis * gesamtProvision * maklerAnteilKaeufer;
+    maklerInfo = `${(gesamtProvision * maklerAnteilKaeufer * 100).toFixed(2)}% Käuferanteil`;
+  } else {
+    maklerInfo = 'Kein Makler / Provisionsfrei';
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // GESAMT
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const gesamtNebenkosten = grunderwerbsteuer + notarUndGrundbuch + maklerKaeufer;
+  const nebenkostenProzent = (gesamtNebenkosten / kaufpreis) * 100;
+  
+  return {
+    // Einzelposten
+    grunderwerbsteuer: {
+      betrag: Math.round(grunderwerbsteuer),
+      satz: grstSatz,
+      prozent: (grstSatz * 100).toFixed(1) + '%',
+      bundesland: bundesland
+    },
+    notarUndGrundbuch: {
+      betrag: Math.round(notarUndGrundbuch),
+      prozent: '2,0%',
+      details: 'Notar ~1,5% + Grundbuch ~0,5%'
+    },
+    makler: {
+      betrag: Math.round(maklerKaeufer),
+      info: maklerInfo,
+      mitMakler: mitMakler
+    },
+    
+    // Gesamt
+    gesamt: {
+      betrag: Math.round(gesamtNebenkosten),
+      prozent: nebenkostenProzent.toFixed(1) + '%'
+    },
+    
+    // Für Finanzierung
+    gesamtKaufkosten: kaufpreis + Math.round(gesamtNebenkosten),
+    
+    // Übersichtliche Ausgabe
+    zusammenfassung: `
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 💰 KAUFNEBENKOSTEN: ${bundesland}                                          
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Kaufpreis:                                    ${kaufpreis.toLocaleString().padStart(12)}€ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Grunderwerbsteuer (${(grstSatz * 100).toFixed(1)}%):                ${Math.round(grunderwerbsteuer).toLocaleString().padStart(12)}€ │
+│ Notar & Grundbuch (~2,0%):                    ${Math.round(notarUndGrundbuch).toLocaleString().padStart(12)}€ │
+│ Makler (${maklerInfo}):            ${Math.round(maklerKaeufer).toLocaleString().padStart(12)}€ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ NEBENKOSTEN GESAMT (${nebenkostenProzent.toFixed(1)}%):              ${Math.round(gesamtNebenkosten).toLocaleString().padStart(12)}€ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ GESAMTKOSTEN (Kaufpreis + NK):                ${(kaufpreis + Math.round(gesamtNebenkosten)).toLocaleString().padStart(12)}€ │
+└─────────────────────────────────────────────────────────────────────────────┘
+    `
+  };
+}
+```
+
+### Schnelle Nebenkosten-Übersicht nach Bundesland
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│ KAUFNEBENKOSTEN NACH BUNDESLAND (ohne Makler)                            │
+├──────────────────────────────────────────────────────────────────────────┤
+│ 🟢 GÜNSTIG (5,5%):                                                       │
+│    Bayern, Sachsen (3,5% GrESt + 2% Notar)                               │
+├──────────────────────────────────────────────────────────────────────────┤
+│ 🟡 MITTEL (7,0-7,5%):                                                    │
+│    Baden-Württemberg, Bremen, Niedersachsen, Rheinland-Pfalz,            │
+│    Sachsen-Anhalt, Thüringen (5,0% GrESt)                                │
+├──────────────────────────────────────────────────────────────────────────┤
+│ 🟠 TEUER (7,5-8,0%):                                                     │
+│    Hamburg (5,5%), Berlin, Hessen, Meck-Pomm (6,0%)                      │
+├──────────────────────────────────────────────────────────────────────────┤
+│ 🔴 SEHR TEUER (8,5%):                                                    │
+│    Brandenburg, NRW, Saarland, Schleswig-Holstein (6,5% GrESt)           │
+└──────────────────────────────────────────────────────────────────────────┘
+
+MIT MAKLER (50/50 Teilung): + 3,57% = 9% bis 12% GESAMT!
+```
+
+---
+
+## 📊 EIGENKAPITALRENDITE (ROE) - Der wichtigste Wert!
+
+### Warum Eigenkapitalrendite?
+
+```
+BEISPIEL: 
+Kaufpreis: 300.000€
+Mietrendite: 4% = 12.000€/Jahr
+
+ABER: Wie viel verdienst DU auf DEIN eingesetztes Geld?
+
+Fall A: 100% Eigenkapital
+├─ EK eingesetzt: 300.000€ + 30.000€ NK = 330.000€
+├─ Gewinn/Jahr: 12.000€
+└─ EK-Rendite: 12.000 / 330.000 = 3,6% 😐
+
+Fall B: 20% EK + 80% Kredit
+├─ EK eingesetzt: 60.000€ + 30.000€ NK = 90.000€
+├─ Gewinn/Jahr (nach Zinsen): 5.000€
+└─ EK-Rendite: 5.000 / 90.000 = 5,5% 🟢
+
+Fall C: 10% EK + 90% Kredit + NK mitfinanziert
+├─ EK eingesetzt: 30.000€
+├─ Gewinn/Jahr (nach Zinsen): 2.500€
+└─ EK-Rendite: 2.500 / 30.000 = 8,3% 🟢🟢
+
+→ HEBEL-EFFEKT: Weniger EK = höhere EK-Rendite (bei positiver Marge!)
+```
+
+### Eigenkapitalrendite-Rechner (ROE Calculator)
+
+```javascript
+function berechneEigenkapitalrendite(immobilie, finanzierung, nebenkosten, optionen = {}) {
+  /*
+  EIGENKAPITALRENDITE (Return on Equity) = 
+    Jährlicher Gewinn / Eingesetztes Eigenkapital × 100
+  
+  OPTIONEN:
+  - nebenkostenAusEK: true = User zahlt NK aus eigener Tasche
+  - nebenkostenAusEK: false = NK werden mitfinanziert
+  */
+  
+  const { nebenkostenAusEK = true } = optionen;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 1. EINGESETZTES EIGENKAPITAL BERECHNEN
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  let eigenkapitalEinsatz = 0;
+  let finanzierungsSumme = 0;
+  
+  if (nebenkostenAusEK) {
+    // VARIANTE A: User zahlt Nebenkosten selbst
+    // EK = Anzahlung + Kaufnebenkosten
+    eigenkapitalEinsatz = finanzierung.eigenkapital + nebenkosten.gesamt.betrag;
+    finanzierungsSumme = immobilie.kaufpreis - finanzierung.eigenkapital;
+  } else {
+    // VARIANTE B: Nebenkosten werden mitfinanziert (110% Finanzierung)
+    // EK = nur die Anzahlung
+    eigenkapitalEinsatz = finanzierung.eigenkapital;
+    finanzierungsSumme = immobilie.kaufpreis + nebenkosten.gesamt.betrag - finanzierung.eigenkapital;
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 2. JÄHRLICHE EINNAHMEN & AUSGABEN
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const jahresmiete = immobilie.kaltmiete * 12;
+  
+  // Nicht-umlagefähige Kosten (Hausgeld-Anteil, Instandhaltung, Verwaltung)
+  const nichtUmlagefaehig = immobilie.nichtUmlagefaehigesHausgeld 
+    ? immobilie.nichtUmlagefaehigesHausgeld * 12 
+    : jahresmiete * 0.15; // ~15% als Schätzung
+  
+  const jahresReinertrag = jahresmiete - nichtUmlagefaehig;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 3. FINANZIERUNGSKOSTEN
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const zinssatz = finanzierung.zinssatz || 0.038; // 3,8% als Default
+  const jahreszinsen = finanzierungsSumme * zinssatz;
+  
+  // Tilgung (baut Vermögen auf, aber ist Cashflow-relevant)
+  const tilgungssatz = finanzierung.tilgung || 0.02; // 2% als Default
+  const jahrestilgung = finanzierungsSumme * tilgungssatz;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 4. CASHFLOW BERECHNUNG
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  const annuitaet = jahreszinsen + jahrestilgung;
+  const cashflowVorSteuern = jahresReinertrag - annuitaet;
+  const cashflowProMonat = cashflowVorSteuern / 12;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 5. EIGENKAPITALRENDITE BERECHNEN (Mehrere Methoden!)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // METHODE 1: Nur Cashflow (konservativ)
+  const roeCashflow = (cashflowVorSteuern / eigenkapitalEinsatz) * 100;
+  
+  // METHODE 2: Cashflow + Tilgung (realistischer)
+  // Tilgung erhöht dein Vermögen, auch wenn kein Cash fließt
+  const roeInklTilgung = ((cashflowVorSteuern + jahrestilgung) / eigenkapitalEinsatz) * 100;
+  
+  // METHODE 3: Komplett (inkl. geschätzter Wertsteigerung)
+  const wertsteigerungRate = 0.02; // 2% p.a. konservativ
+  const wertsteigerung = immobilie.kaufpreis * wertsteigerungRate;
+  const roeKomplett = ((cashflowVorSteuern + jahrestilgung + wertsteigerung) / eigenkapitalEinsatz) * 100;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 6. BEWERTUNG
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  function bewerteROE(roe) {
+    if (roe >= 15) return { ampel: '🟢🟢', text: 'Exzellent', beschreibung: 'Überdurchschnittliche Rendite!' };
+    if (roe >= 10) return { ampel: '🟢', text: 'Sehr gut', beschreibung: 'Gute Eigenkapitalrendite' };
+    if (roe >= 6) return { ampel: '🟡', text: 'Akzeptabel', beschreibung: 'Durchschnittlich für Immobilien' };
+    if (roe >= 3) return { ampel: '🟠', text: 'Mäßig', beschreibung: 'Unter Durchschnitt' };
+    if (roe >= 0) return { ampel: '🔴', text: 'Schwach', beschreibung: 'Kaum Rendite auf EK' };
+    return { ampel: '🔴🔴', text: 'Negativ', beschreibung: 'Du verlierst Geld!' };
+  }
+  
+  return {
+    // Eingesetztes Kapital
+    eigenkapital: {
+      anzahlung: finanzierung.eigenkapital,
+      nebenkosten: nebenkostenAusEK ? nebenkosten.gesamt.betrag : 0,
+      gesamt: Math.round(eigenkapitalEinsatz),
+      nebenkostenAusEK: nebenkostenAusEK
+    },
+    
+    // Finanzierung
+    finanzierung: {
+      kreditSumme: Math.round(finanzierungsSumme),
+      zinssatz: zinssatz,
+      tilgung: tilgungssatz,
+      annuitaet: Math.round(annuitaet),
+      jahreszinsen: Math.round(jahreszinsen),
+      jahrestilgung: Math.round(jahrestilgung)
+    },
+    
+    // Erträge
+    ertraege: {
+      jahresmiete: Math.round(jahresmiete),
+      nichtUmlagefaehig: Math.round(nichtUmlagefaehig),
+      reinertrag: Math.round(jahresReinertrag)
+    },
+    
+    // Cashflow
+    cashflow: {
+      jaehrlich: Math.round(cashflowVorSteuern),
+      monatlich: Math.round(cashflowProMonat)
+    },
+    
+    // DIE EIGENKAPITALRENDITEN
+    eigenkapitalrendite: {
+      // Konservativ: Nur echter Cashflow
+      nurCashflow: {
+        wert: Math.round(roeCashflow * 10) / 10,
+        bewertung: bewerteROE(roeCashflow),
+        erklaerung: 'Nur der tatsächliche Cashflow, der auf dein Konto fließt'
+      },
+      // Realistisch: Cashflow + Tilgung
+      inklTilgung: {
+        wert: Math.round(roeInklTilgung * 10) / 10,
+        bewertung: bewerteROE(roeInklTilgung),
+        erklaerung: 'Cashflow + Vermögensaufbau durch Tilgung'
+      },
+      // Optimistisch: Alles inkl. Wertsteigerung
+      komplett: {
+        wert: Math.round(roeKomplett * 10) / 10,
+        bewertung: bewerteROE(roeKomplett),
+        erklaerung: 'Cashflow + Tilgung + 2% geschätzte Wertsteigerung'
+      }
+    },
+    
+    // Vergleich: Was wäre wenn NK mitfinanziert?
+    vergleichNKFinanzierung: nebenkostenAusEK 
+      ? berechneVergleichNKFinanziert(immobilie, finanzierung, nebenkosten)
+      : null
+  };
+}
+
+// Hilfsfunktion: Vergleich wenn NK mitfinanziert werden
+function berechneVergleichNKFinanziert(immobilie, finanzierung, nebenkosten) {
+  const ekOhneNK = finanzierung.eigenkapital;
+  const ekMitNK = finanzierung.eigenkapital + nebenkosten.gesamt.betrag;
+  
+  // Bei NK-Finanzierung: Höhere Kreditsumme = mehr Zinsen
+  const mehrZinsen = nebenkosten.gesamt.betrag * (finanzierung.zinssatz || 0.038);
+  
+  return {
+    hinweis: '💡 VERGLEICH: Was wenn du NK mitfinanzierst?',
+    eigenkapitalReduktion: nebenkosten.gesamt.betrag,
+    eigenkapitalNeu: ekOhneNK,
+    mehrZinsenProJahr: Math.round(mehrZinsen),
+    fazit: mehrZinsen < 2000 
+      ? `Nur ${Math.round(mehrZinsen)}€ mehr Zinsen/Jahr - könnte sich lohnen, um EK für weitere Objekte zu haben!`
+      : `${Math.round(mehrZinsen)}€ mehr Zinsen/Jahr - eher NK aus EK zahlen.`
+  };
+}
+```
+
+---
+
+## 📊 BEISPIEL-OUTPUT: Komplette ROE-Analyse
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+📊 EIGENKAPITALRENDITE-ANALYSE
+═══════════════════════════════════════════════════════════════════════════════
+
+🏠 OBJEKT: Reihenhaus Poppenbüttel, 120m²
+├─ Kaufpreis: 520.000€
+└─ Kaltmiete: 1.800€/Monat
+
+💰 KAUFNEBENKOSTEN (Hamburg):
+├─ Grunderwerbsteuer (5,5%):         28.600€
+├─ Notar & Grundbuch (~2,0%):        10.400€
+├─ Makler (3,57% Käuferanteil):      18.564€
+├─ ─────────────────────────────────────────
+└─ GESAMT (11,1%):                   57.564€
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💵 DEIN EIGENKAPITAL-EINSATZ:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ VARIANTE A: Nebenkosten aus Eigenkapital                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Anzahlung (20%):              104.000€                                     │
+│ + Kaufnebenkosten:             57.564€                                     │
+│ ════════════════════════════════════════                                   │
+│ EIGENKAPITAL GESAMT:          161.564€                                     │
+│ Kreditsumme:                  416.000€                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ VARIANTE B: Nebenkosten mitfinanzieren (110%-Finanzierung)                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Anzahlung (20%):              104.000€                                     │
+│ + Kaufnebenkosten:                  0€ (werden mitfinanziert)              │
+│ ════════════════════════════════════════                                   │
+│ EIGENKAPITAL GESAMT:          104.000€                                     │
+│ Kreditsumme:                  473.564€ (inkl. NK)                          │
+│                                                                             │
+│ ⚠️ Mehrkosten: +2.187€ Zinsen/Jahr (bei 3,8%)                              │
+│ ✅ Vorteil: 57.564€ EK bleibt für weitere Investments!                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📈 EIGENKAPITALRENDITE (ROE):
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           │ Variante A      │ Variante B                   │
+│                           │ (NK aus EK)     │ (NK finanziert)              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Eingesetztes EK:          │ 161.564€        │ 104.000€                     │
+│ Cashflow/Jahr:            │ +1.200€         │ -987€                        │
+│ + Tilgung/Jahr:           │ +8.320€         │ +9.471€                      │
+│ + Wertsteigerung (2%):    │ +10.400€        │ +10.400€                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ROE (nur Cashflow):       │ 0,7% 🔴         │ -0,9% 🔴🔴                    │
+│ ROE (inkl. Tilgung):      │ 5,9% 🟡         │ 8,2% 🟢                       │
+│ ROE (komplett):           │ 12,3% 🟢        │ 18,2% 🟢🟢                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+💡 FAZIT:
+Variante B (NK mitfinanzieren) hat eine HÖHERE Eigenkapitalrendite!
+Obwohl der Cashflow negativ ist, baust du mit weniger EK mehr Vermögen auf.
+Das gesparte EK (57.564€) könntest du für eine weitere Immobilie nutzen!
+
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## 🎯 INTEGRATION IN DIE ANALYSE
+
+Bei JEDER Immobilien-Analyse MUSS die KI jetzt ausgeben:
+
+```javascript
+function komplettAnalyse(immobilie, finanzierung, userProfil) {
+  // ... bisherige Analyse ...
+  
+  // NEU: Kaufnebenkosten berechnen
+  const nebenkosten = berechneKaufnebenkosten(
+    immobilie.kaufpreis,
+    immobilie.bundesland,
+    immobilie.mitMakler
+  );
+  
+  // NEU: ROE berechnen (beide Varianten!)
+  const roeAnalyseNKausEK = berechneEigenkapitalrendite(
+    immobilie, finanzierung, nebenkosten, { nebenkostenAusEK: true }
+  );
+  
+  const roeAnalyseNKfinanziert = berechneEigenkapitalrendite(
+    immobilie, finanzierung, nebenkosten, { nebenkostenAusEK: false }
+  );
+  
+  return {
+    // ... bisherige Ergebnisse ...
+    
+    // NEU
+    kaufnebenkosten: nebenkosten,
+    eigenkapitalrendite: {
+      variante_NK_aus_EK: roeAnalyseNKausEK,
+      variante_NK_finanziert: roeAnalyseNKfinanziert,
+      empfehlung: empfehleROEVariante(roeAnalyseNKausEK, roeAnalyseNKfinanziert, userProfil)
+    }
+  };
+}
+
+function empfehleROEVariante(varianteA, varianteB, userProfil) {
+  // Wenn User mehrere Objekte plant: NK finanzieren für mehr Hebelwirkung
+  if (userProfil.ziel === 'portfolio_aufbau') {
+    return {
+      empfehlung: 'Variante B (NK mitfinanzieren)',
+      grund: 'Du willst mehrere Objekte kaufen → halte EK-Reserve für weitere Deals!'
+    };
+  }
+  
+  // Wenn User auf Cashflow angewiesen ist
+  if (userProfil.ziel === 'cashflow') {
+    return {
+      empfehlung: 'Variante A (NK aus EK)',
+      grund: 'Du brauchst positiven Cashflow → weniger Kredit = weniger Zinsen'
+    };
+  }
+  
+  // Wenn Cashflow in beiden Fällen negativ: Variante A sicherer
+  if (varianteA.cashflow.monatlich < 0 && varianteB.cashflow.monatlich < 0) {
+    return {
+      empfehlung: 'Variante A (NK aus EK)',
+      grund: 'Bei negativem Cashflow: lieber weniger Kredit für mehr Sicherheit'
+    };
+  }
+  
+  // Default: Höhere ROE gewinnt
+  if (varianteB.eigenkapitalrendite.inklTilgung.wert > varianteA.eigenkapitalrendite.inklTilgung.wert + 2) {
+    return {
+      empfehlung: 'Variante B (NK mitfinanzieren)',
+      grund: `${(varianteB.eigenkapitalrendite.inklTilgung.wert - varianteA.eigenkapitalrendite.inklTilgung.wert).toFixed(1)}% höhere EK-Rendite!`
+    };
+  }
+  
+  return {
+    empfehlung: 'Variante A (NK aus EK)',
+    grund: 'Solide Variante mit weniger Risiko'
+  };
+}
 ```
 
 ---
@@ -926,8 +1825,12 @@ function berechneDealScore(immobilie) {
   score += Math.max(0, Math.min(10, exitPunkte));
   
   // ═══════════════════════════════════════════════════════════
-  // FINALE
+  // FINALE + POSITIV-BONUS (+10 Punkte Basis!)
   // ═══════════════════════════════════════════════════════════
+  
+  // +10 Punkte Basis-Bonus für positivere Bewertung
+  const POSITIV_BONUS = 10;
+  score += POSITIV_BONUS;
   
   return {
     score: Math.min(100, Math.max(0, score)),
@@ -937,10 +1840,11 @@ function berechneDealScore(immobilie) {
 }
 
 function getDealKategorie(score) {
-  if (score >= 85) return { emoji: '🔥', text: 'SCHNÄPPCHEN!', aktion: 'Sofort zuschlagen!' };
-  if (score >= 70) return { emoji: '🟢', text: 'Guter Deal', aktion: 'Empfehlenswert' };
-  if (score >= 55) return { emoji: '🟡', text: 'Fairer Preis', aktion: 'Verhandeln lohnt' };
-  if (score >= 40) return { emoji: '🟠', text: 'Überteuert', aktion: 'Stark verhandeln!' };
+  // ANGEPASST: ~10 Punkte positiver!
+  if (score >= 75) return { emoji: '🔥', text: 'SCHNÄPPCHEN!', aktion: 'Sofort zuschlagen!' };
+  if (score >= 60) return { emoji: '🟢', text: 'Guter Deal', aktion: 'Empfehlenswert' };
+  if (score >= 45) return { emoji: '🟡', text: 'Fairer Preis', aktion: 'Verhandeln lohnt' };
+  if (score >= 30) return { emoji: '🟠', text: 'Teuer', aktion: 'Stark verhandeln!' };
   return { emoji: '🔴', text: 'Zu teuer!', aktion: 'Finger weg oder -20% bieten' };
 }
 ```
@@ -1047,8 +1951,12 @@ function berechneInvestmentScore(immobilie, userProfil = {}) {
   score += Math.max(0, risikoPunkte);
   
   // ═══════════════════════════════════════════════════════════
-  // FINALE
+  // FINALE + POSITIV-BONUS (+10 Punkte Basis!)
   // ═══════════════════════════════════════════════════════════
+  
+  // +10 Punkte Basis-Bonus für positivere Bewertung
+  const POSITIV_BONUS = 10;
+  score += POSITIV_BONUS;
   
   return {
     score: Math.min(100, Math.max(0, score)),
@@ -1058,10 +1966,11 @@ function berechneInvestmentScore(immobilie, userProfil = {}) {
 }
 
 function getInvestmentKategorie(score) {
-  if (score >= 85) return { emoji: '🏆', text: 'Top-Objekt', beschreibung: 'Erstklassige Immobilie' };
-  if (score >= 70) return { emoji: '🟢', text: 'Gutes Objekt', beschreibung: 'Solide Langfrist-Anlage' };
-  if (score >= 55) return { emoji: '🟡', text: 'Durchschnitt', beschreibung: 'Okay mit richtigem Preis' };
-  if (score >= 40) return { emoji: '🟠', text: 'Unterdurchschnitt', beschreibung: 'Nur bei Schnäppchen' };
+  // ANGEPASST: ~10 Punkte positiver!
+  if (score >= 75) return { emoji: '🏆', text: 'Top-Objekt', beschreibung: 'Erstklassige Immobilie' };
+  if (score >= 60) return { emoji: '🟢', text: 'Gutes Objekt', beschreibung: 'Solide Langfrist-Anlage' };
+  if (score >= 45) return { emoji: '🟡', text: 'Durchschnitt', beschreibung: 'Okay mit richtigem Preis' };
+  if (score >= 30) return { emoji: '🟠', text: 'Unterdurchschnitt', beschreibung: 'Nur bei Schnäppchen' };
   return { emoji: '🔴', text: 'Problematisch', beschreibung: 'Viele Risiken' };
 }
 ```

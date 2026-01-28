@@ -9,6 +9,7 @@ import { formatCurrency, ENERGY_CLASSES } from '../constants';
 
 function Profile() {
   const { user } = useAuth();
+  const { profile: investorProfile, isProfileComplete: isInvestorProfileComplete } = useUserProfile();
   const [profile, setProfile] = useState(() => {
     const saved = localStorage.getItem('userProfile');
     return saved ? JSON.parse(saved) : {};
@@ -21,7 +22,7 @@ function Profile() {
     verwendungszweck: 'kapitalanlage'
   });
 
-  const [activeSection, setActiveSection] = useState('profil'); // profil, test, tipps
+  const [activeSection, setActiveSection] = useState('investor'); // investor, profil, test, tipps
 
   // Speichere Profil bei Änderung
   useEffect(() => {
@@ -139,29 +140,83 @@ function Profile() {
 
         {/* Tab Navigation */}
         <div className="glass-card rounded-2xl p-2 border border-white/10 fade-in fade-in-delay-2">
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto">
             {[
-              { id: 'profil', label: 'Profil bearbeiten', icon: '👤' },
-              { id: 'test', label: 'Kredit-Chance testen', icon: '🧪' },
+              { id: 'investor', label: 'Investoren-Profil', icon: '🎯', highlight: !isInvestorProfileComplete },
+              { id: 'profil', label: 'Finanz-Profil', icon: '👤' },
+              { id: 'test', label: 'Kredit-Chance', icon: '🧪' },
               { id: 'tipps', label: 'Spar-Tipps', icon: '💡' }
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveSection(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${
                   activeSection === tab.id
                     ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white shadow-neon-blue'
-                    : 'text-text-secondary hover:bg-white/5 hover:text-white'
+                    : tab.highlight
+                      ? 'text-accent border border-accent/30 animate-pulse hover:bg-accent/10'
+                      : 'text-text-secondary hover:bg-white/5 hover:text-white'
                 }`}
               >
                 <span className="text-lg">{tab.icon}</span>
                 <span className="hidden sm:inline">{tab.label}</span>
+                {tab.highlight && <span className="text-xs">!</span>}
               </button>
             ))}
           </div>
         </div>
 
         {/* Content based on active section */}
+        {activeSection === 'investor' && (
+          <div className="fade-in space-y-6">
+            {/* Current Profile Summary */}
+            {isInvestorProfileComplete && (
+              <div className="glass-card rounded-2xl p-6 border border-neon-green/30">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-neon-green/10 rounded-xl border border-neon-green/30">
+                    <span className="text-xl">{INVESTMENT_GOALS[investorProfile.goal]?.icon}</span>
+                    <span className="text-neon-green font-semibold">{INVESTMENT_GOALS[investorProfile.goal]?.label}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-neon-blue/10 rounded-xl border border-neon-blue/30">
+                    <span className="text-xl">{RISK_PROFILES[investorProfile.riskProfile]?.icon}</span>
+                    <span className="text-neon-blue font-semibold">{RISK_PROFILES[investorProfile.riskProfile]?.label}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-neon-purple/10 rounded-xl border border-neon-purple/30">
+                    <span className="text-xl">{EXPERIENCE_LEVELS[investorProfile.experience]?.icon}</span>
+                    <span className="text-neon-purple font-semibold">{EXPERIENCE_LEVELS[investorProfile.experience]?.label}</span>
+                  </div>
+                  <div className="ml-auto text-neon-green font-medium flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Profil aktiv
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* UserGoalsForm */}
+            <UserGoalsForm onComplete={() => setActiveSection('profil')} />
+
+            {/* Info Box */}
+            <div className="glass-card rounded-2xl p-6 border border-neon-blue/20">
+              <h4 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                <span>💡</span> Warum ist das wichtig?
+              </h4>
+              <div className="grid md:grid-cols-2 gap-4 text-sm text-text-secondary">
+                <div className="p-4 bg-white/5 rounded-xl">
+                  <p className="font-semibold text-neon-blue mb-2">Personalisierte Scores</p>
+                  <p>Die Gewichtung der Bewertungskriterien wird auf dein Ziel angepasst. Cashflow-Investoren bekommen andere Scores als Vermögensaufbauer.</p>
+                </div>
+                <div className="p-4 bg-white/5 rounded-xl">
+                  <p className="font-semibold text-neon-purple mb-2">Smarte Warnungen</p>
+                  <p>Basierend auf deiner Erfahrung und Risikobereitschaft erhältst du passende Hinweise und Warnungen.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeSection === 'profil' && (
           <div className="grid lg:grid-cols-3 gap-8 fade-in">
             {/* Profil-Formular */}

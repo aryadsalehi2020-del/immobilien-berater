@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useUserProfile, INVESTMENT_GOALS } from '../contexts/UserProfileContext';
 import { formatCurrency, formatDate, getScoreColor } from '../constants';
 
 function Dashboard() {
   const { user, token } = useAuth();
+  const { profile: investorProfile, isProfileComplete: isInvestorProfileComplete } = useUserProfile();
   const [stats, setStats] = useState({
     totalAnalyses: 0,
     favorites: 0,
@@ -179,6 +181,51 @@ function Dashboard() {
           <p className="text-xs text-neon-green/60 mt-2 group-hover:text-neon-green transition-colors">Jetzt analysieren →</p>
         </Link>
       </div>
+
+      {/* Investor Profile Setup Prompt */}
+      {!isInvestorProfileComplete && (
+        <Link
+          to="/profile"
+          className="glass-card rounded-2xl p-6 border-2 border-accent/40 relative z-10 fade-in fade-in-delay-2 group hover:border-accent transition-all"
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-accent/20 to-neon-purple/20 rounded-2xl flex items-center justify-center border border-accent/30 text-3xl">
+              🎯
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-accent uppercase tracking-wider font-semibold mb-1">Neu: Personalisierte Bewertung</p>
+              <h3 className="text-xl font-bold text-white mb-1">Investoren-Profil einrichten</h3>
+              <p className="text-text-secondary text-sm">
+                Richte dein Profil ein und erhalte Scores, die auf dein Investitionsziel (Cashflow, Vermögensaufbau, etc.) optimiert sind.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 px-5 py-3 btn-neon rounded-xl font-bold text-sm">
+              Jetzt einrichten
+              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </Link>
+      )}
+
+      {/* Active Investor Profile Badge */}
+      {isInvestorProfileComplete && (
+        <div className="glass-card rounded-2xl p-4 border border-neon-green/30 relative z-10 fade-in fade-in-delay-2">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-neon-green/10 rounded-lg border border-neon-green/30">
+              <span>{INVESTMENT_GOALS[investorProfile.goal]?.icon}</span>
+              <span className="text-neon-green font-semibold text-sm">{INVESTMENT_GOALS[investorProfile.goal]?.label}</span>
+            </div>
+            <p className="text-text-secondary text-sm flex-1">
+              Deine Analysen werden auf <span className="text-neon-green font-medium">{INVESTMENT_GOALS[investorProfile.goal]?.label}</span> optimiert
+            </p>
+            <Link to="/profile" className="text-neon-blue hover:text-neon-purple text-sm font-medium transition-colors">
+              Ändern
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Best Analysis Highlight */}
       {stats.bestAnalysis && stats.bestAnalysis.gesamtscore >= 60 && (

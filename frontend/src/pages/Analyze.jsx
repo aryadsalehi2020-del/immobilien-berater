@@ -3,7 +3,9 @@ import FileUpload from '../components/FileUpload';
 import PropertyForm from '../components/PropertyForm';
 import AnalysisResult from '../components/AnalysisResult';
 import LoadingState from '../components/LoadingState';
+import UserGoalsForm from '../components/UserGoalsForm';
 import { useAuth } from '../contexts/AuthContext';
+import { useUserProfile, INVESTMENT_GOALS } from '../contexts/UserProfileContext';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -13,7 +15,9 @@ function Analyze() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState(null);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
   const { token } = useAuth();
+  const { profile: investorProfile, isProfileComplete } = useUserProfile();
 
   const handleFileUpload = useCallback(async (file) => {
     setError(null);
@@ -130,6 +134,57 @@ function Analyze() {
                 <span className="font-semibold text-red-200">Fehler</span>
                 <p className="text-sm text-red-300/80 mt-0.5">{error}</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Investor Profile Prompt */}
+        {step === 'upload' && !isProfileComplete && !showProfileSetup && (
+          <div className="mb-8 glass-card rounded-2xl p-6 border-2 border-accent/30 fade-in">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                🎯
+              </div>
+              <div className="flex-1">
+                <p className="text-accent font-semibold mb-1">Personalisierte Bewertung aktivieren</p>
+                <p className="text-text-secondary text-sm">
+                  Richte dein Investoren-Profil ein für Scores, die auf dein Ziel optimiert sind.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowProfileSetup(true)}
+                className="px-4 py-2 bg-accent/20 border border-accent/30 text-accent rounded-xl font-medium hover:bg-accent/30 transition-all text-sm"
+              >
+                Jetzt einrichten
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Inline Profile Setup */}
+        {step === 'upload' && showProfileSetup && (
+          <div className="mb-8 fade-in">
+            <UserGoalsForm compact onComplete={() => setShowProfileSetup(false)} />
+          </div>
+        )}
+
+        {/* Active Profile Badge */}
+        {step === 'upload' && isProfileComplete && (
+          <div className="mb-8 glass-card rounded-xl p-4 border border-neon-green/30 fade-in">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-neon-green/10 rounded-lg border border-neon-green/30">
+                <span>{INVESTMENT_GOALS[investorProfile.goal]?.icon}</span>
+                <span className="text-neon-green font-semibold text-sm">{INVESTMENT_GOALS[investorProfile.goal]?.label}</span>
+              </div>
+              <p className="text-text-secondary text-sm flex-1">
+                Scores werden personalisiert
+              </p>
+              <button
+                onClick={() => setShowProfileSetup(true)}
+                className="text-neon-blue hover:text-neon-purple text-sm font-medium transition-colors"
+              >
+                Ändern
+              </button>
             </div>
           </div>
         )}
