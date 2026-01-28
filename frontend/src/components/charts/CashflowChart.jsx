@@ -8,14 +8,16 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceLine
+  ReferenceLine,
+  Area,
+  ComposedChart
 } from 'recharts';
 
 function CashflowChart({ szenarien }) {
   if (!szenarien || szenarien.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 bg-slate/5 rounded-xl">
-        <p className="text-slate/60">Keine Szenario-Daten verfügbar</p>
+      <div className="flex items-center justify-center h-64 bg-white/5 rounded-xl border border-white/10">
+        <p className="text-text-secondary">Keine Szenario-Daten verfügbar</p>
       </div>
     );
   }
@@ -29,7 +31,7 @@ function CashflowChart({ szenarien }) {
   for (let i = 0; i < maxJahre; i++) {
     const dataPoint = { jahr: i + 1 };
 
-    szenarien.forEach((szenario, index) => {
+    szenarien.forEach((szenario) => {
       const jahrDaten = szenario.tilgungsplan?.jahre?.[i];
       if (jahrDaten) {
         const key = szenario.name.toLowerCase();
@@ -52,11 +54,12 @@ function CashflowChart({ szenarien }) {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 rounded-xl shadow-lg border border-slate/20">
-          <p className="font-bold text-primary mb-2">Jahr {label}</p>
+        <div className="glass-card p-4 rounded-xl border border-neon-blue/30">
+          <p className="font-bold text-white mb-2">Jahr {label}</p>
           {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: {formatCurrency(entry.value)}/Monat
+            <p key={index} style={{ color: entry.color }} className="text-sm flex justify-between gap-4">
+              <span>{entry.name}:</span>
+              <span className="font-semibold">{formatCurrency(entry.value)}/Monat</span>
             </p>
           ))}
         </div>
@@ -67,31 +70,66 @@ function CashflowChart({ szenarien }) {
 
   return (
     <div className="w-full">
-      <h4 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+      <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
         <span className="text-2xl">📈</span>
-        Cashflow-Entwicklung über 30 Jahre
+        <span className="text-gradient-neon">Cashflow-Entwicklung über 30 Jahre</span>
       </h4>
       <ResponsiveContainer width="100%" height={350}>
-        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+        <ComposedChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <defs>
+            <linearGradient id="colorKonservativ" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+            </linearGradient>
+            <linearGradient id="colorRealistisch" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#00d4ff" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#00d4ff" stopOpacity={0}/>
+            </linearGradient>
+            <linearGradient id="colorOptimistisch" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           <XAxis
             dataKey="jahr"
-            tick={{ fill: '#64748b', fontSize: 12 }}
-            tickLine={{ stroke: '#94a3b8' }}
-            label={{ value: 'Jahr', position: 'insideBottomRight', offset: -5, fill: '#64748b' }}
+            tick={{ fill: '#a1a1aa', fontSize: 12 }}
+            tickLine={{ stroke: '#71717a' }}
+            axisLine={{ stroke: '#71717a' }}
+            label={{ value: 'Jahr', position: 'insideBottomRight', offset: -5, fill: '#a1a1aa' }}
           />
           <YAxis
-            tick={{ fill: '#64748b', fontSize: 12 }}
-            tickLine={{ stroke: '#94a3b8' }}
+            tick={{ fill: '#a1a1aa', fontSize: 12 }}
+            tickLine={{ stroke: '#71717a' }}
+            axisLine={{ stroke: '#71717a' }}
             tickFormatter={(value) => `${value}€`}
-            label={{ value: 'Cashflow/Monat', angle: -90, position: 'insideLeft', fill: '#64748b' }}
+            label={{ value: 'Cashflow/Monat', angle: -90, position: 'insideLeft', fill: '#a1a1aa' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
             wrapperStyle={{ paddingTop: '20px' }}
-            formatter={(value) => <span className="text-primary capitalize">{value}</span>}
+            formatter={(value) => <span className="text-white capitalize">{value}</span>}
           />
-          <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="5 5" label={{ value: 'Break-Even', fill: '#ef4444', fontSize: 12 }} />
+          <ReferenceLine
+            y={0}
+            stroke="#ef4444"
+            strokeDasharray="5 5"
+            strokeWidth={2}
+            label={{
+              value: 'Break-Even',
+              fill: '#ef4444',
+              fontSize: 12,
+              position: 'right'
+            }}
+          />
+
+          {/* Konservativ */}
+          <Area
+            type="monotone"
+            dataKey="konservativ"
+            stroke="transparent"
+            fill="url(#colorKonservativ)"
+          />
           <Line
             type="monotone"
             dataKey="konservativ"
@@ -99,31 +137,61 @@ function CashflowChart({ szenarien }) {
             stroke="#f97316"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 6 }}
+            activeDot={{ r: 6, fill: '#f97316', stroke: '#fff', strokeWidth: 2 }}
+          />
+
+          {/* Realistisch */}
+          <Area
+            type="monotone"
+            dataKey="realistisch"
+            stroke="transparent"
+            fill="url(#colorRealistisch)"
           />
           <Line
             type="monotone"
             dataKey="realistisch"
             name="Realistisch"
-            stroke="#3b82f6"
+            stroke="#00d4ff"
             strokeWidth={3}
             dot={false}
-            activeDot={{ r: 6 }}
+            activeDot={{ r: 8, fill: '#00d4ff', stroke: '#fff', strokeWidth: 2 }}
+            style={{ filter: 'drop-shadow(0 0 8px rgba(0, 212, 255, 0.5))' }}
+          />
+
+          {/* Optimistisch */}
+          <Area
+            type="monotone"
+            dataKey="optimistisch"
+            stroke="transparent"
+            fill="url(#colorOptimistisch)"
           />
           <Line
             type="monotone"
             dataKey="optimistisch"
             name="Optimistisch"
-            stroke="#10b981"
+            stroke="#22c55e"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 6 }}
+            activeDot={{ r: 6, fill: '#22c55e', stroke: '#fff', strokeWidth: 2 }}
           />
-        </LineChart>
+        </ComposedChart>
       </ResponsiveContainer>
-      <p className="text-xs text-slate/60 mt-4 text-center">
-        Die Linien zeigen den monatlichen Cashflow unter verschiedenen Annahmen. Werte über der roten Linie sind positiv.
-      </p>
+
+      {/* Legend explanation */}
+      <div className="mt-6 grid grid-cols-3 gap-4 text-sm">
+        <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+          <p className="text-orange-400 font-semibold">Konservativ</p>
+          <p className="text-text-muted text-xs">Zins +1%, Miete +0.5%/Jahr</p>
+        </div>
+        <div className="p-3 bg-neon-blue/10 border border-neon-blue/30 rounded-xl">
+          <p className="text-neon-blue font-semibold">Realistisch</p>
+          <p className="text-text-muted text-xs">Aktuelle Werte</p>
+        </div>
+        <div className="p-3 bg-neon-green/10 border border-neon-green/30 rounded-xl">
+          <p className="text-neon-green font-semibold">Optimistisch</p>
+          <p className="text-text-muted text-xs">Miete +2.5%/Jahr</p>
+        </div>
+      </div>
     </div>
   );
 }

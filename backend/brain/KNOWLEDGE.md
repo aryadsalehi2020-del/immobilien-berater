@@ -541,6 +541,1753 @@ function berechneKaufnebenkosten(kaufpreis, bundesland) {
   };
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🆕 DETAILLIERTE KAUFNEBENKOSTEN-AUFSTELLUNG
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// 🧠 MEGA-TRICKS-DATENBANK: ALLE VORTEILE FÜR IMMOBILIENKÄUFER
+// ═══════════════════════════════════════════════════════════════
+
+/*
+PHILOSOPHIE: Die KI analysiert die Situation des Users und aktiviert
+automatisch die relevanten Tricks. Jeder Trick hat Tags für die
+Zielgruppe, damit die KI weiß, wann er relevant ist.
+*/
+
+const ALLE_TRICKS = {
+
+  // ═══════════════════════════════════════════════════════════════
+  // KATEGORIE 1: KAUFPREIS-OPTIMIERUNG
+  // ═══════════════════════════════════════════════════════════════
+  
+  kaufpreisOptimierung: [
+    {
+      id: 'inventar-separat',
+      titel: '💡 Inventar separat ausweisen – Grunderwerbsteuer sparen',
+      tags: ['alle', 'steuer-sparen', 'kaufnebenkosten'],
+      ersparnis: 'Bis 1.500€ bei 25.000€ Inventar',
+      erklaerung: `
+        Bewegliche Gegenstände sind NICHT grunderwerbsteuerpflichtig!
+        
+        Was kann separat ausgewiesen werden:
+        • Einbauküche (oft 10.000-25.000€)
+        • Markisen, Jalousien
+        • Sauna, Whirlpool
+        • Gartenhäuser, Carports (wenn nicht fest verbunden)
+        • Einbauschränke
+        • Kaminöfen (wenn herausnehmbar)
+        
+        Finanzamt akzeptiert bis 15% des Kaufpreises ohne Nachweise.
+        Bei höheren Beträgen: Rechnungen/Kaufbelege beifügen.
+        
+        MUSTERFORMULIERUNG für Kaufvertrag:
+        "Der Kaufpreis setzt sich zusammen aus [X]€ für das Grundstück 
+        nebst Gebäude und [Y]€ für das mitverkaufte bewegliche Inventar, 
+        bestehend aus: Einbauküche (Marke, Baujahr ca. [Z]), Markise 
+        (Außenmaß ca. [A]m), [weitere Gegenstände]."
+      `,
+      rechenbeispiel: {
+        kaufpreis: 400000,
+        inventar: 20000,
+        bundesland: 'NRW',
+        grstSatz: 0.065,
+        ersparnis: 1300  // 20.000 × 6,5%
+      },
+      risiko: 'Gering – bei realistischer Bewertung kein Problem',
+      quellen: ['BFH, Haufe, Steuerberater-Empfehlungen']
+    },
+    
+    {
+      id: 'kaufpreisaufteilung',
+      titel: '📊 Kaufpreisaufteilung optimieren – AfA maximieren',
+      tags: ['kapitalanleger', 'steuer-sparen', 'langfristig'],
+      ersparnis: 'Bis 43.500€ über 50 Jahre (bei 42% Steuersatz)',
+      erklaerung: `
+        Nur der GEBÄUDEANTEIL kann abgeschrieben werden (2% p.a.)!
+        
+        Das BMF-Tool führt oft zu ungünstigen Aufteilungen:
+        • München: Oft nur 30-40% Gebäudeanteil laut Tool
+        • Ländlich: 60-70% Gebäudeanteil möglich
+        
+        LÖSUNG: Eigenes Gutachten erstellen lassen!
+        • BFH hat BMF-Tool als "nicht marktgerecht" kritisiert
+        • Finanzgerichte akzeptieren Abweichungen bis 20%
+        • Gutachten kostet 1.500-3.000€, spart aber Zehntausende
+        
+        TRICK: Im Kaufvertrag Aufteilung vereinbaren!
+        Beispiel: "Die Parteien sind sich einig, dass der Bodenwert 
+        100.000€ und der Gebäudewert 300.000€ beträgt."
+        → Finanzamt muss diese Aufteilung zunächst akzeptieren!
+      `,
+      rechenbeispiel: {
+        kaufpreis: 400000,
+        bmfToolGebaeude: 0.5,  // 50%
+        gutachtenGebaeude: 0.75,  // 75%
+        differenzAfaJahr: 2000,  // (75%-50%) × 400.000 × 2%
+        steuerersparnisJahr: 840,  // bei 42% Steuersatz
+        ersparnis50Jahre: 42000
+      },
+      wann: 'Bei Kapitalanlage IMMER prüfen – besonders in teuren Städten',
+      risiko: 'Mittel – Gutachten sollte nachvollziehbar sein'
+    },
+    
+    {
+      id: 'preis-verhandeln',
+      titel: '🤝 Kaufpreis verhandeln – Die besten Argumente',
+      tags: ['alle', 'sofort-sparen'],
+      ersparnis: '5-15% vom Kaufpreis möglich',
+      erklaerung: `
+        WANN ist Verhandlung erfolgreich?
+        • Objekt steht lange (>3 Monate)
+        • Verkäufer unter Zeitdruck (Scheidung, Erbe, Umzug)
+        • Mehrere Mängel vorhanden
+        • Markt kühlt ab (steigende Zinsen)
+        
+        DIE BESTEN VERHANDLUNGSARGUMENTE:
+        1. Energieklasse schlecht → "Sanierungskosten 50.000€"
+        2. Renovierungsbedarf → Kostenvoranschläge vorlegen
+        3. WEG-Probleme → "Erhaltungsrücklage zu niedrig"
+        4. Lärmbelästigung → Flughafen, Straße, Gewerbe
+        5. Vergleichspreise → BORIS-D, ImmoScout zeigen
+        
+        TAKTIK:
+        • Erstes Gebot: 10-15% unter Angebotspreis
+        • Begründung immer schriftlich mitliefern
+        • "Mein Budget erlaubt maximal X€" (psychologisch stark)
+        • Bei Makler: "Können Sie beim Verkäufer nachfragen?"
+      `,
+      beispielArgumente: [
+        'Energieklasse F bedeutet laut GEG Sanierungspflicht – ich kalkuliere 40.000€ für Heizung/Dämmung',
+        'Der Mietspiegel zeigt 9,50€/m², die aktuelle Miete liegt 15% darunter',
+        'Vergleichbare Objekte auf ImmoScout liegen bei 3.200€/m², hier sind es 3.600€',
+        'Die Erhaltungsrücklage beträgt nur 8€/m² – Ziel sind 25€/m²'
+      ]
+    },
+    
+    {
+      id: 'kaufpreis-erhoehen-nebenkosten',
+      titel: '💰 Kaufpreis erhöhen, Nebenkosten vom Verkäufer',
+      tags: ['wenig-eigenkapital', 'kreativ'],
+      ersparnis: 'Bis zu 40.000€ weniger Eigenkapital nötig',
+      erklaerung: `
+        TRICK: Verkäufer übernimmt Nebenkosten, Kaufpreis wird erhöht.
+        Bank finanziert den höheren Kaufpreis mit!
+        
+        BEISPIEL:
+        • Ursprünglich: 300.000€ Kaufpreis + 36.000€ NK = 336.000€
+        • Dein EK für NK: 36.000€
+        
+        • NEU: 336.000€ Kaufpreis + 0€ NK (Verkäufer zahlt)
+        • Dein EK: 0€!
+        
+        Der Verkäufer bekommt das gleiche Geld:
+        336.000€ - 36.000€ NK = 300.000€ netto
+        
+        VORAUSSETZUNG:
+        • Bank muss höheren Kaufpreis akzeptieren (Wertgutachten!)
+        • Verkäufer muss mitspielen
+        • Im Kaufvertrag korrekt formulieren
+      `,
+      risiko: 'Mittel – Bank prüft Verkehrswert',
+      wann: 'Bei wenig EK und kooperativem Verkäufer'
+    },
+    
+    {
+      id: 'renovierung-einpreisen',
+      titel: '🔧 Renovierungskosten in Kaufpreis einrechnen',
+      tags: ['wenig-eigenkapital', 'sanierung'],
+      erklaerung: `
+        Wenn Renovierung geplant ist:
+        • Renovierungskosten schätzen (z.B. 30.000€)
+        • Mit Verkäufer höheren Kaufpreis vereinbaren
+        • Bank finanziert Renovierung gleich mit!
+        
+        VORTEIL: Du brauchst kein Extra-EK für Renovierung
+        
+        ALTERNATIVE: KfW-Kredit für Sanierung separat
+        → KfW 261/262 mit bis zu 67.500€ Tilgungszuschuss!
+      `
+    }
+  ],
+  
+  // ═══════════════════════════════════════════════════════════════
+  // KATEGORIE 2: FINANZIERUNG OPTIMIEREN
+  // ═══════════════════════════════════════════════════════════════
+  
+  finanzierungOptimieren: [
+    {
+      id: 'banken-vergleichen',
+      titel: '🏦 Mindestens 5 Banken vergleichen – Pflicht!',
+      tags: ['alle', 'sofort-sparen', 'zinsen'],
+      ersparnis: '0,3-0,5% besserer Zins möglich = 15.000-25.000€',
+      erklaerung: `
+        Die Zinsunterschiede zwischen Banken sind ENORM!
+        
+        STRATEGIE:
+        1. Erst zu Vermittler (Interhyp, Dr. Klein, Baufi24)
+        2. Dann Hausbank anfragen (mit Vermittler-Angebot!)
+        3. Regionale Sparkasse/Volksbank prüfen
+        4. Direktbanken checken (ING, DKB)
+        
+        VERHANDLUNGSTIPP:
+        "Ich habe ein Angebot von [Bank X] über 3,65%. 
+        Können Sie das unterbieten?"
+        
+        BESTE VERMITTLER (500+ Bankpartner):
+        • Interhyp – Testsieger Transparenz
+        • Dr. Klein – Stark bei Selbstständigen
+        • Baufi24 – Oft günstigste Zinsen
+        • Hüttig & Rompf – Finanztip-Empfehlung
+      `,
+      rechenbeispiel: {
+        kredit: 300000,
+        laufzeit: 20,
+        zinsDifferenz: 0.003,  // 0,3%
+        ersparnis: 18000  // über Laufzeit
+      }
+    },
+    
+    {
+      id: 'kfw-kombinieren',
+      titel: '🏗️ KfW-Kredite IMMER prüfen – bis 2% günstiger!',
+      tags: ['alle', 'förderung', 'zinsen'],
+      ersparnis: '30.000-100.000€ über Laufzeit',
+      erklaerung: `
+        KfW-PROGRAMME 2025/2026:
+        
+        KfW 124 – Wohneigentumsprogramm (JEDER kann das nutzen!):
+        • Bis 100.000€ Kredit
+        • Zinssatz ca. 3,4-3,9% (oft unter Markt)
+        • Keine Einkommensgrenzen!
+        
+        KfW 300 – Wohneigentum für Familien:
+        • Zinssatz nur 1,12%!! (Stand 10/2025)
+        • Ersparnis: 30.000-40.000€
+        • Einkommensgrenze: 90.000€ + 10.000€/Kind
+        • Kredit: 170.000-270.000€
+        
+        KfW 308 – Jung kauft Alt:
+        • Gleicher Zinsvorteil 1,12%
+        • Für Bestandsimmobilien Energieklasse F/G/H
+        • Sanierungspflicht auf EH 85 EE
+        
+        KfW 261/262 – Energetische Sanierung:
+        • Bis 150.000€ Kredit
+        • Bis 67.500€ Tilgungszuschuss!
+        
+        WICHTIG: Antrag VOR Kaufvertrag stellen!
+      `,
+      beispiel: {
+        ohneKfW: { kredit: 300000, zins: 0.038, zinskosten: 171000 },
+        mitKfW300: { kredit: 200000, zins: 0.0112, kfwZinskosten: 33600, hausbank: 100000, hbZinskosten: 57000, gesamt: 90600, ersparnis: 80400 }
+      }
+    },
+    
+    {
+      id: 'zinsbindung-optimieren',
+      titel: '📅 Zinsbindung clever wählen',
+      tags: ['alle', 'strategie', 'zinsen'],
+      erklaerung: `
+        FAUSTREGEL:
+        • Zinsen niedrig → LANGE Bindung (15-20 Jahre)
+        • Zinsen hoch → KURZE Bindung (5-10 Jahre) + Sondertilgung
+        
+        AKTUELL (Januar 2026):
+        Zinsen sind moderat (3,5-4%) → 15 Jahre ist guter Kompromiss
+        
+        AUFSCHLÄGE für längere Bindung:
+        • 10 → 15 Jahre: +0,2-0,3%
+        • 15 → 20 Jahre: +0,3-0,4%
+        
+        GEHEIMTIPP: §489 BGB!
+        Nach 10 Jahren kannst du JEDEN Kredit mit 6 Monaten 
+        Frist kündigen – egal wie lange die Zinsbindung!
+        
+        → 15 Jahre Bindung nehmen, nach 10 Jahren umschulden
+           wenn Zinsen gefallen sind!
+      `
+    },
+    
+    {
+      id: 'sondertilgung-verhandeln',
+      titel: '💸 Sondertilgung 10% verhandeln – kostenlos!',
+      tags: ['alle', 'flexibilität'],
+      ersparnis: 'Bis 50.000€ Zinsersparnis bei Nutzung',
+      erklaerung: `
+        Standard ist 5% Sondertilgung p.a. – MEHR ist möglich!
+        
+        VERHANDELN:
+        • 10% Sondertilgung oft ohne Aufpreis
+        • Manche Banken: 0,05% Aufschlag – lohnt sich trotzdem!
+        
+        BEISPIEL:
+        300.000€ Kredit, 10% Sondertilgung = 30.000€/Jahr möglich
+        
+        Bei konsequenter Nutzung:
+        • 10 Jahre früher schuldenfrei
+        • 40.000-60.000€ Zinsen gespart
+        
+        TIPP: Sondertilgung im Januar machen!
+        → Spart die meisten Zinsen (Zinseszinseffekt)
+      `
+    },
+    
+    {
+      id: 'tilgung-anpassen',
+      titel: '📉 Tilgung flexibel gestalten',
+      tags: ['alle', 'flexibilität', 'cashflow'],
+      erklaerung: `
+        TILGUNGSSATZWECHSEL verhandeln:
+        • 2x während Laufzeit kostenlos
+        • Zwischen 1% und 5% wechseln
+        
+        WARUM WICHTIG?
+        • Gehalt steigt → Tilgung erhöhen
+        • Kind geboren → Tilgung senken
+        • Bonus bekommen → Sondertilgung + höhere Rate
+        
+        VORSICHT:
+        Manche Banken verlangen Aufpreis für diese Option!
+        Besser: Gleich bei Vertragsabschluss vereinbaren.
+      `
+    },
+    
+    {
+      id: 'disagio-nutzen',
+      titel: '📉 Disagio für Steuereffekt (nur Kapitalanleger!)',
+      tags: ['kapitalanleger', 'steuer-sparen'],
+      erklaerung: `
+        DISAGIO = Abschlag auf Kreditsumme gegen niedrigeren Zins
+        
+        Beispiel: 5% Disagio
+        • Du bekommst 285.000€ ausgezahlt
+        • Kredit lautet auf 300.000€
+        • Zins ist 0,3% niedriger
+        
+        STEUEREFFEKT:
+        Das Disagio (15.000€) kann als Werbungskosten SOFORT
+        abgesetzt werden! Bei 42% Steuersatz = 6.300€ zurück.
+        
+        WANN SINNVOLL?
+        • Hoher Steuersatz (>35%)
+        • Lange Zinsbindung geplant
+        • Kapitalanlage (nicht Eigennutzung!)
+      `,
+      risiko: 'Steuerlich komplex – Steuerberater fragen!'
+    },
+    
+    {
+      id: 'forward-darlehen',
+      titel: '🔮 Forward-Darlehen bei steigenden Zinsen',
+      tags: ['anschlussfinanzierung', 'strategie'],
+      erklaerung: `
+        Forward-Darlehen = Zinsen HEUTE für Kredit in bis zu 5 Jahren sichern
+        
+        AUFSCHLAG pro Jahr Vorlauf:
+        • 0,01-0,03% pro Monat
+        • 12-36 Monate Vorlauf = 0,15-0,50% Aufschlag
+        
+        WANN SINNVOLL?
+        • Zinsbindung läuft in 1-3 Jahren aus
+        • Du erwartest steigende Zinsen
+        • Du willst Planungssicherheit
+        
+        TIPP: Mehrere Angebote vergleichen!
+        Forward-Aufschläge variieren stark zwischen Banken.
+      `
+    },
+    
+    {
+      id: 'bausparvertrag-kombi',
+      titel: '🏠 Bausparvertrag clever einsetzen',
+      tags: ['langfristig', 'zinssicherheit'],
+      erklaerung: `
+        Bausparvertrag als Zinssicherung für Anschlussfinanzierung:
+        
+        STRATEGIE:
+        1. Heute: Bankkredit + Bausparvertrag abschließen
+        2. Ansparphase: Bausparvertrag besparen (ca. 40-50%)
+        3. Nach 10 Jahren: Bankkredit mit Bauspardarlehen ablösen
+        
+        VORTEIL:
+        • Bausparzins ist HEUTE schon festgelegt (oft 1-2%)
+        • Egal wie hoch die Zinsen in 10 Jahren sind!
+        
+        NACHTEILE:
+        • Abschlussgebühr 1-1,6%
+        • Niedrige Guthabenzinsen während Ansparphase
+        
+        WANN SINNVOLL?
+        • Lange Finanzierungslaufzeit geplant
+        • Du erwartest stark steigende Zinsen
+        • Du willst maximale Planungssicherheit
+      `
+    }
+  ],
+  
+  // ═══════════════════════════════════════════════════════════════
+  // KATEGORIE 3: STEUERN OPTIMIEREN
+  // ═══════════════════════════════════════════════════════════════
+  
+  steuernOptimieren: [
+    {
+      id: 'afa-maximieren',
+      titel: '📊 AfA-Sätze kennen und maximieren',
+      tags: ['kapitalanleger', 'steuer-sparen', 'langfristig'],
+      erklaerung: `
+        ABSCHREIBUNG nach Baujahr:
+        • Ab 2023 gebaut: 3% (33 Jahre)
+        • 1925-2022: 2% (50 Jahre)
+        • Vor 1925: 2,5% (40 Jahre)
+        
+        SONDER-AfA (§7b EStG):
+        • 5% zusätzlich in ersten 4 Jahren!
+        • Voraussetzung: Neubau-Mietwohnungen, Baukosten max. 5.200€/m²
+        
+        DENKMAL-AfA (§7i/7h EStG):
+        • Sanierungskosten: 9% in 8 Jahren + 7% in 4 Jahren
+        • = 100% Abschreibung in 12 Jahren!
+        • Auch für Eigennutzer möglich (§10f)
+        
+        DEGRESSIVE AfA (ab 2023):
+        • 5% vom Restwert (statt linear)
+        • Lohnt sich bei hohen Gebäudewerten
+        
+        TIPP: Steuerberater rechnet durch, welche Methode besser ist!
+      `,
+      rechenbeispiel: {
+        gebaeudewert: 300000,
+        linear: { satz: 0.02, jahrlich: 6000, steuerersparnis: 2520 },
+        degressiv: { satz: 0.05, jahr1: 15000, steuerersparnis: 6300 }
+      }
+    },
+    
+    {
+      id: 'werbungskosten',
+      titel: '📝 Alle Werbungskosten absetzen',
+      tags: ['kapitalanleger', 'steuer-sparen'],
+      erklaerung: `
+        ALLES was mit Vermietung zusammenhängt, ist absetzbar:
+        
+        LAUFENDE KOSTEN:
+        • Zinsen (nicht Tilgung!)
+        • Hausgeld (nicht umlagefähiger Teil)
+        • Grundsteuer
+        • Versicherungen (Gebäude, Haus- und Grundbesitzer)
+        • Kontoführungsgebühren (pauschal 16€/Jahr)
+        • Fahrtkosten zu Besichtigungen (0,30€/km)
+        
+        EINMALIGE KOSTEN:
+        • Maklergebühr (bei Kapitalanlage voll absetzbar!)
+        • Notarkosten für Finanzierung (nicht für Kauf)
+        • Grundbuchkosten für Grundschuld
+        • Renovierung vor Erstvermietung
+        • Möbel für möblierte Vermietung (AfA!)
+        
+        OFT VERGESSEN:
+        • Kosten für Immobilienbewertung
+        • Mitgliedschaft Haus & Grund (ca. 100€/Jahr)
+        • Steuerberaterkosten (anteilig)
+        • Reisekosten für Immobiliensuche
+        • Fachliteratur, Kurse
+      `
+    },
+    
+    {
+      id: 'anschaffungsnahe-herstellungskosten',
+      titel: '⚠️ 15%-Grenze bei Renovierung beachten!',
+      tags: ['kapitalanleger', 'steuer-sparen', 'achtung'],
+      erklaerung: `
+        FALLE: Renovierungskosten in den ersten 3 Jahren!
+        
+        Wenn Renovierung > 15% der Gebäude-Anschaffungskosten:
+        → Kosten werden zu Anschaffungskosten gerechnet
+        → Keine Sofortabsetzung, nur AfA über 50 Jahre!
+        
+        BEISPIEL:
+        • Kaufpreis Gebäude: 200.000€
+        • 15%-Grenze: 30.000€
+        • Renovierung 40.000€ → Muss abgeschrieben werden!
+        
+        STRATEGIE:
+        • Renovierung über 3 Jahre strecken
+        • Unter 15% pro Jahr bleiben
+        • Oder: Vor Kauf renovieren lassen (Kaufpreis erhöhen)
+        
+        AUSNAHME: Reine Schönheitsreparaturen zählen NICHT mit.
+      `
+    },
+    
+    {
+      id: 'spekulationsfrist',
+      titel: '📅 10-Jahres-Frist beachten – steuerfrei verkaufen',
+      tags: ['alle', 'exit-strategie'],
+      erklaerung: `
+        PRIVATVERKAUF nach 10 Jahren = STEUERFREI!
+        
+        RECHNUNG:
+        Die 10 Jahre zählen von Notarvertrag zu Notarvertrag.
+        
+        TRICK bei Verkaufsplanung:
+        • Verkauf im Jahr 10, Tag 1 = komplett steuerfrei
+        • Auch Wertsteigerung von 100.000€+ = 0€ Steuern!
+        
+        ACHTUNG bei weniger als 10 Jahren:
+        • Gewinn wird mit persönlichem Steuersatz versteuert
+        • Bis zu 45% Steuern!
+        
+        AUSNAHME für Selbstnutzung:
+        • Keine Spekulationsfrist wenn selbst genutzt
+        • Oder: Im Verkaufsjahr + 2 Jahre davor selbst genutzt
+      `
+    },
+    
+    {
+      id: '3-objekte-grenze',
+      titel: '🏢 3-Objekte-Grenze beachten – gewerblicher Handel',
+      tags: ['investor', 'mehrere-objekte', 'achtung'],
+      erklaerung: `
+        GEFAHR: Verkauf von mehr als 3 Objekten in 5 Jahren
+        = Gewerblicher Grundstückshandel!
+        
+        FOLGEN:
+        • Gewerbesteuer auf ALLE Verkäufe
+        • Spekulationsfrist gilt nicht mehr
+        • Rückwirkende Besteuerung möglich!
+        
+        WAS ZÄHLT ALS OBJEKT:
+        • Jede Wohnung einzeln
+        • Jedes Haus einzeln
+        • Auch Grundstücke
+        
+        STRATEGIEN:
+        • Max. 3 Verkäufe in 5 Jahren
+        • Oder: GmbH gründen (dann eh gewerblich)
+        • Objekte länger als 10 Jahre halten
+      `
+    },
+    
+    {
+      id: 'verluste-verrechnen',
+      titel: '📉 Verluste mit Einkommen verrechnen',
+      tags: ['kapitalanleger', 'steuer-sparen'],
+      erklaerung: `
+        Mietverluste können mit anderen Einkünften verrechnet werden!
+        
+        BEISPIEL:
+        • Gehalt: 80.000€
+        • Mietverlust (wegen hoher Zinsen): -10.000€
+        • Zu versteuerndes Einkommen: 70.000€
+        • Ersparnis bei 42%: 4.200€!
+        
+        TYPISCH in den ersten Jahren:
+        • Hohe Zinsen
+        • Hohe AfA
+        • Renovierungskosten
+        → Negativer Cashflow, aber Steuerersparnis!
+        
+        ACHTUNG Liebhaberei:
+        • Finanzamt prüft ob Gewinnerzielungsabsicht besteht
+        • Bei dauerhaft Verlusten: Absetzung wird gestrichen
+        • Totalgewinnprognose erstellen lassen!
+      `
+    }
+  ],
+  
+  // ═══════════════════════════════════════════════════════════════
+  // KATEGORIE 4: KAUFNEBENKOSTEN SPAREN
+  // ═══════════════════════════════════════════════════════════════
+  
+  nebenkostenSparen: [
+    {
+      id: 'makler-sparen',
+      titel: '🔍 Ohne Makler kaufen – bis 3,57% sparen',
+      tags: ['alle', 'sofort-sparen', 'kaufnebenkosten'],
+      ersparnis: 'Bei 300.000€ Kaufpreis: 10.710€',
+      erklaerung: `
+        MAKLERFREIE QUELLEN:
+        • eBay Kleinanzeigen / Kleinanzeigen.de
+        • nebenan.de (Nachbarschafts-Netzwerk)
+        • Direkt bei Bauträgern (Neubau)
+        • Zwangsversteigerungen (zvg-portal.de)
+        • Lokalzeitungen, Aushänge
+        • Facebook-Gruppen ("Immobilien [Stadt] privat")
+        • Immoscout Filter: "Privatanbieter"
+        
+        TIPP: Direkt bei Hausverwaltungen anfragen!
+        → Bekommen oft als erste mit, wenn jemand verkauft
+        
+        MAKLER-VERHANDLUNG:
+        • Seit 2020: Käufer zahlt max. 50%!
+        • Provision ist IMMER verhandelbar
+        • "2% oder ich kaufe nicht" funktioniert oft
+      `
+    },
+    
+    {
+      id: 'grunderwerbsteuer-bundesland',
+      titel: '🗺️ Bundesland mit niedriger Grunderwerbsteuer',
+      tags: ['alle', 'kaufnebenkosten', 'standortwahl'],
+      erklaerung: `
+        GRUNDERWERBSTEUER NACH BUNDESLAND (2026):
+        
+        3,5% – Bayern, Sachsen ✅ GÜNSTIGSTEN!
+        5,0% – Baden-Württemberg, Hamburg, Niedersachsen,
+               Rheinland-Pfalz, Sachsen-Anhalt, Bremen
+        6,0% – Berlin, Hessen, Mecklenburg-Vorpommern
+        6,5% – NRW, Brandenburg, Schleswig-Holstein,
+               Thüringen, Saarland ❌ TEUERSTEN!
+        
+        Bei 400.000€ Kaufpreis:
+        • Bayern: 14.000€
+        • NRW: 26.000€
+        • DIFFERENZ: 12.000€!
+        
+        STRATEGIE für Grenzregionen:
+        • Pendeln über Landesgrenze möglich?
+        • 10 km weiter = 12.000€ gespart?
+      `
+    },
+    
+    {
+      id: 'notar-vergleichen',
+      titel: '📋 Notarkosten: Wenig Spielraum, aber...',
+      tags: ['alle', 'kaufnebenkosten'],
+      erklaerung: `
+        Notargebühren sind gesetzlich geregelt (GNotKG).
+        ABER: Es gibt Unterschiede!
+        
+        SPAREN DURCH:
+        • Nur notwendige Leistungen beauftragen
+        • Auflassungsvormerkung weglassen? (Risiko!)
+        • Keine "Vollstreckungsunterwerfung für Kaufpreis"
+        
+        TIPP: Käufer wählt den Notar!
+        → Such dir einen, der schnell und unkompliziert arbeitet
+        
+        SCHÄTZUNG Notarkosten:
+        • 1,0-1,5% des Kaufpreises
+        • Enthält: Beurkundung, Beratung, Vollzug
+      `
+    },
+    
+    {
+      id: 'instandhaltungsruecklage',
+      titel: '⚠️ Instandhaltungsrücklage – NICHT abziehbar!',
+      tags: ['etw-kauf', 'achtung'],
+      erklaerung: `
+        ACHTUNG: Seit BFH-Urteil 2020 kann die Instandhaltungs-
+        rücklage NICHT mehr von der Grunderwerbsteuer abgezogen werden!
+        
+        Die Rücklage ist zivilrechtlich Verwaltungsvermögen der WEG,
+        nicht Eigentum des Käufers.
+        
+        WAS DU TUN KANNST:
+        • Im Kaufpreis berücksichtigen (Verhandlung!)
+        • Hohe Rücklage = weniger Nachschüsse später
+        
+        BEISPIEL:
+        • Rücklage 15.000€ → KEIN Steuerabzug
+        • Aber: Verkäufer "übergibt" dir 15.000€ quasi
+        → Argument für niedrigeren Kaufpreis!
+      `
+    }
+  ],
+  
+  // ═══════════════════════════════════════════════════════════════
+  // KATEGORIE 5: EIGENKAPITAL-ERSATZ & TRICKS
+  // ═══════════════════════════════════════════════════════════════
+  
+  eigenkapitalErsatz: [
+    {
+      id: 'nachrangdarlehen',
+      titel: '🏦 Nachrangdarlehen als Eigenkapital',
+      tags: ['wenig-eigenkapital'],
+      erklaerung: `
+        Ein Nachrangdarlehen steht HINTER dem Bankkredit im Grundbuch.
+        → Viele Banken werten es als "eigenkapitalähnlich"!
+        
+        ANBIETER:
+        • Hanseatic Bank, Consors Finanz, Oyak Anker Bank
+        • Von Essen Bank (auch bei Schufa-Einträgen)
+        • KfW-Wohneigentumsprogramm (wird teils akzeptiert)
+        • Landesförderbanken (IBB Berlin, IB-LSA)
+        
+        KONDITIONEN:
+        • Zins: 5-8% (2-4% über Bauzins)
+        • Laufzeit: max. 10 Jahre
+        • Betrag: 10.000-50.000€
+        
+        RECHENBEISPIEL:
+        50.000€ Nachrang zu 7% = 3.500€/Jahr Zinsen
+        ABER: Spart 0,8% Zinsaufschlag bei 250.000€ Hauptkredit
+        = 2.000€/Jahr gespart → Lohnt sich!
+      `
+    },
+    
+    {
+      id: 'policendarlehen',
+      titel: '💼 Lebensversicherung beleihen',
+      tags: ['wenig-eigenkapital', 'versicherung-vorhanden'],
+      erklaerung: `
+        Kapital-Lebensversicherung kann beliehen werden!
+        
+        BELEIHUNGSWERT:
+        • Kapital-LV: bis 100% des Rückkaufswertes
+        • Fondsgebundene: bis 60% des Fondsguthabens
+        
+        ANBIETER (Stand 2025):
+        • Lifefinance (LV-Kredit): 4,59-4,99%
+        • SWK Bank: 5,99%, max. 250.000€
+        
+        VORTEILE:
+        • Versicherungsschutz bleibt erhalten
+        • Meist kein SCHUFA-Eintrag
+        • Flexibel zurückzahlbar
+        
+        NICHT BELEIHBAR:
+        • Risikolebensversicherungen
+        • Riester- und Rürup-Verträge
+        • Direktversicherungen
+      `
+    },
+    
+    {
+      id: 'lombardkredit',
+      titel: '📈 Wertpapierdepot beleihen (Lombardkredit)',
+      tags: ['wenig-eigenkapital', 'depot-vorhanden'],
+      erklaerung: `
+        Dein Depot kann als Sicherheit für einen Kredit dienen!
+        
+        ANBIETER & ZINSEN (Januar 2026):
+        • Scalable PRIME+: 3,24%
+        • DEGIRO: 4,75%
+        • Maxblue: 4,90%
+        • Smartbroker+: 5,04%
+        • S-Broker: 5,90%
+        • Comdirect: 6,05%
+        
+        BELEIHUNGSWERTE:
+        • ETFs breit gestreut: 70-80%
+        • Blue-Chip-Aktien: 40-70%
+        • Anleihen: 50-80%
+        
+        ACHTUNG MARGIN CALL:
+        Bei Kursverlusten kann Nachschusspflicht entstehen!
+        → Maximal 50% des Rahmens nutzen!
+      `
+    },
+    
+    {
+      id: 'muskelhypothek',
+      titel: '💪 Eigenleistung als Eigenkapital (Muskelhypothek)',
+      tags: ['wenig-eigenkapital', 'handwerklich-begabt'],
+      erklaerung: `
+        Dokumentierte Eigenleistung wird als EK angerechnet!
+        
+        AKZEPTIERT (typisch 10-15% der Bausumme, max. 30.000€):
+        • Malerarbeiten
+        • Tapezieren
+        • Bodenbeläge verlegen
+        • Trockenbau
+        • Gartenarbeiten
+        
+        ERFORDERLICH:
+        • Detaillierte Aufstellung der Arbeiten
+        • Kostenvoranschläge von Handwerkern als Vergleich
+        • Bei Facharbeiten: Qualifikationsnachweise
+        
+        BANKEN die das akzeptieren:
+        • Sparkassen, Volksbanken
+        • Deutsche Bank
+        • Dr. Klein-Partner
+      `
+    },
+    
+    {
+      id: 'familie-unterstuetzung',
+      titel: '👨‍👩‍👧 Familie einbeziehen – steuerfrei!',
+      tags: ['wenig-eigenkapital', 'familie'],
+      erklaerung: `
+        SCHENKUNGSFREIBETRÄGE (alle 10 Jahre neu!):
+        • Eltern → Kind: 400.000€
+        • Großeltern → Enkel: 200.000€
+        • Geschwister: 20.000€
+        
+        OPTIONEN:
+        1. Schenkung (komplett steuerfrei bis Freibetrag)
+        2. Familienkredit (Vertrag schriftlich!)
+        3. Bürgschaft (Familie bürgt, du zahlst)
+        
+        STEUER-TRICK bei Familienkredit:
+        • Käufer setzt Zinsen als Werbungskosten ab (45%)
+        • Verkäufer versteuert nur mit 25% Abgeltungsteuer
+        • Netto-Vorteil: 20%!
+        
+        WICHTIG: Fremdüblicher Vertrag bei Verwandten!
+        → Finanzamt prüft genau
+      `
+    },
+    
+    {
+      id: 'verkaeuferdarlehen',
+      titel: '🤝 Verkäuferdarlehen verhandeln',
+      tags: ['wenig-eigenkapital', 'kreativ'],
+      erklaerung: `
+        Der Verkäufer gibt dir einen Teil als Darlehen!
+        → Wird von Banken oft als EK anerkannt.
+        
+        TYPISCH:
+        • 5-10% des Kaufpreises
+        • Nachrangig im Grundbuch
+        • Zins: Verhandlungssache (3-6%)
+        
+        WANN MACHT VERKÄUFER MIT?
+        • Bei schwer verkäuflichen Objekten
+        • Wenn er keine sofortige Liquidität braucht
+        • Bei Verkäufen in der Familie
+        
+        VORAUSSETZUNG:
+        Schriftlicher, fremdüblicher Darlehensvertrag!
+      `
+    },
+    
+    {
+      id: 'wohnriester',
+      titel: '🏠 Wohn-Riester als Eigenkapital',
+      tags: ['wenig-eigenkapital', 'riester-vorhanden'],
+      erklaerung: `
+        Riester-Guthaben kann für Immobilienkauf entnommen werden!
+        
+        OPTIONEN:
+        • 75% entnehmen (Rest bleibt im Vertrag)
+        • 100% entnehmen (Vertragsauflösung)
+        
+        FÖRDERUNG:
+        • 175€ Grundzulage/Jahr
+        • 300€ je Kind/Jahr
+        
+        ACHTUNG NACHGELAGERTE BESTEUERUNG:
+        • Wohnförderkonto mit 2% p.a. fiktiver Verzinsung
+        • Im Rentenalter wird versteuert!
+        • Option: Sofortzahlung mit 30% Rabatt
+      `
+    }
+  ],
+  
+  // ═══════════════════════════════════════════════════════════════
+  // KATEGORIE 6: FÖRDERUNGEN MAXIMIEREN
+  // ═══════════════════════════════════════════════════════════════
+  
+  foerderungenMaximieren: [
+    {
+      id: 'kfw-stapeln',
+      titel: '🏗️ KfW-Programme stapeln',
+      tags: ['förderung', 'maximieren'],
+      erklaerung: `
+        Mehrere KfW-Programme können KOMBINIERT werden!
+        
+        BEISPIEL für Familie mit 2 Kindern, Altbau Klasse F:
+        
+        1. KfW 308 "Jung kauft Alt": 150.000€ zu 1,12%
+        2. KfW 124 Wohneigentum: 100.000€ zu 3,4%
+        3. KfW 458 Heizungsförderung: bis 21.000€ Zuschuss
+        4. BAFA Einzelmaßnahmen: bis 12.000€ Zuschuss
+        
+        GESAMT-ERSPARNIS: 80.000-100.000€!
+        
+        WICHTIG: Anträge VOR Kaufvertrag/Baubeginn!
+      `
+    },
+    
+    {
+      id: 'landesfoerderung',
+      titel: '🗺️ Landesförderung prüfen',
+      tags: ['förderung', 'regional'],
+      erklaerung: `
+        LANDESFÖRDERBANKEN (Auswahl):
+        
+        NRW.BANK:
+        • Eigentumsförderung: 100.000-184.000€ zu 0,5%!
+        
+        L-Bank (Baden-Württemberg):
+        • Z15-Darlehen bis 100.000€
+        
+        BayernLabo:
+        • Zinsverbilligung bis 3% unter Markt
+        
+        IBB Berlin:
+        • FED-Darlehen bis 230.000€
+        • Braucht nicht 1. Rang → Echter EK-Ersatz!
+        
+        ILB Brandenburg:
+        • Wohneigentumsförderung bis 230.000€ ZINSFREI!
+        
+        PRÜFEN: foerderdatenbank.de
+      `
+    },
+    
+    {
+      id: 'arbeitnehmersparzulage',
+      titel: '💰 Arbeitnehmersparzulage + Wohnungsbauprämie',
+      tags: ['förderung', 'angestellte'],
+      erklaerung: `
+        KOMBINIERT für Eigenkapitalaufbau:
+        
+        ARBEITNEHMERSPARZULAGE 2026:
+        • 9% auf VL bis 470€/Jahr = max. 43€
+        • Einkommensgrenze: 40.000€ (80.000€ verheiratet)
+        
+        WOHNUNGSBAUPRÄMIE 2026:
+        • 10% auf Sparleistung bis 700€/Jahr = max. 70€
+        • Einkommensgrenze: 35.000€ (70.000€ verheiratet)
+        
+        ÜBER 7 JAHRE (Ehepaar):
+        • VL-Einzahlungen: 6.580€
+        • Arbeitnehmersparzulage: 602€
+        • Eigensparbeiträge: 9.800€
+        • Wohnungsbauprämie: 980€
+        • Guthabenzinsen: ca. 500€
+        → GESAMT: ca. 18.500€ für Eigenkapital!
+      `
+    },
+    
+    {
+      id: 'sanierungsfoerderung',
+      titel: '🌱 Sanierungsförderung bis 70%',
+      tags: ['förderung', 'sanierung'],
+      erklaerung: `
+        HEIZUNGSFÖRDERUNG (KfW 458):
+        • Grundförderung: 30%
+        • Einkommensbonus (<40.000€): +30%
+        • Geschwindigkeitsbonus: +20%
+        • MAXIMAL: 70% bzw. 21.000€ Zuschuss!
+        
+        BEG EINZELMASSNAHMEN (BAFA):
+        • Dämmung: 15% (+5% iSFP)
+        • Fenster: 15% (+5% iSFP)
+        • Förderfähig: bis 60.000€ mit iSFP
+        
+        KfW 261/262 Komplettsanierung:
+        • Bis 150.000€ Kredit
+        • Bis 67.500€ Tilgungszuschuss bei EH 40 EE!
+        
+        TIPP: iSFP (individueller Sanierungsfahrplan) erstellen!
+        → Kostet 500-1.000€, aber verdoppelt Fördergrenzen
+      `
+    }
+  ],
+  
+  // ═══════════════════════════════════════════════════════════════
+  // KATEGORIE 7: SPEZIELLE SITUATIONEN
+  // ═══════════════════════════════════════════════════════════════
+  
+  spezialSituationen: [
+    {
+      id: 'selbststaendige',
+      titel: '📊 Selbstständige: So klappt die Finanzierung',
+      tags: ['selbstständig'],
+      erklaerung: `
+        SELBSTSTÄNDIGEN-FREUNDLICHE BANKEN:
+        • Sparkassen/Volksbanken (regional, individuell)
+        • Deutsche Bank (keine pauschalen Aufschläge)
+        • Sparda-Banken (Positiv-Listen für Freiberufler)
+        • ING (keine Zinsaufschläge!)
+        • KfW (behandelt Selbstständige wie Angestellte!)
+        
+        UNTERLAGEN VORBEREITEN:
+        • Steuerbescheide 2-3 Jahre
+        • Bilanzen/EÜR 3 Jahre
+        • Aktuelle BWA (max. 3 Monate alt!)
+        • BWA vom Steuerberater gestempelt
+        
+        TRICK: Partner mit Festanstellung als Hauptkreditnehmer!
+        → Bank prüft primär das sichere Einkommen
+        
+        BÜRGSCHAFTSBANKEN:
+        • Ausfallbürgschaft bis 80%
+        • Programm "Bürgschaft ohne Bank (BoB)"
+      `
+    },
+    
+    {
+      id: 'kapitalanleger-mehrere',
+      titel: '🏢 Mehrere Immobilien finanzieren',
+      tags: ['investor', 'mehrere-objekte'],
+      erklaerung: `
+        MIETEINNAHMEN-ANRECHNUNG:
+        • Konservative Sparkassen: 50-60%
+        • ING, DKB, Filialbanken: 70-75%
+        • Die meisten Banken: 75-80%
+        • Vereinzelt bei Top-Bonität: 100%
+        
+        STRATEGIE:
+        • Positive Cashflow-Kalkulation vorlegen
+        • Eigenes Einkommen sollte Rate auch ohne Miete tragen
+        • Professionelles Mietwertgutachten beifügen
+        
+        CROSS-COLLATERAL:
+        Bestehende Immobilien als Zusatzsicherheit einbringen
+        → Bessere Konditionen, höherer Beleihungsauslauf
+        
+        CASH-OUT-REFINANZIERUNG:
+        Nach Wertsteigerung neu finanzieren
+        → Differenz als EK für nächstes Objekt!
+      `
+    },
+    
+    {
+      id: 'erbbaurecht',
+      titel: '🏠 Erbbaurecht: Grundstück pachten statt kaufen',
+      tags: ['wenig-eigenkapital', 'alternativ'],
+      erklaerung: `
+        Beim Erbbaurecht kaufst du NUR das Gebäude!
+        Das Grundstück wird gepachtet.
+        
+        KONDITIONEN:
+        • Erbbauzins: 3-5% des Bodenwerts/Jahr
+        • Laufzeit: 50-99 Jahre
+        • Deutlich weniger Finanzierungsbedarf!
+        
+        NACHTEILE:
+        • Laufender Erbbauzins (oft indexiert)
+        • Gebäude fällt nach Laufzeit an Eigentümer
+        • Bankfinanzierung schwieriger
+        • Wertsteigerung begrenzt
+        
+        WANN SINNVOLL?
+        • In teuren Städten mit hohen Bodenpreisen
+        • Wenn wenig EK vorhanden
+        • Für Selbstnutzung über 20-30 Jahre
+      `
+    },
+    
+    {
+      id: 'zwangsversteigerung',
+      titel: '⚖️ Zwangsversteigerung: Chancen & Risiken',
+      tags: ['alternativ', 'schnäppchen'],
+      erklaerung: `
+        VORTEILE:
+        • Oft 20-30% unter Marktwert
+        • Keine Maklerkosten
+        • Keine Notarkosten für Kaufvertrag
+        
+        NACHTEILE:
+        • 10% Sicherheitsleistung nötig (Bankbürgschaft)
+        • Keine Besichtigung von innen garantiert
+        • Keine Gewährleistung
+        • Vollfinanzierung praktisch unmöglich
+        
+        EMPFOHLEN:
+        • 20-30% Eigenkapital mitbringen
+        • Vorher Finanzierung klären
+        • Gutachten genau studieren
+        
+        PORTAL: zvg-portal.de
+      `
+    },
+    
+    {
+      id: 'gbr-kauf',
+      titel: '👥 Gemeinsam kaufen (GbR)',
+      tags: ['gemeinschaftskauf'],
+      erklaerung: `
+        Seit 2024: GbR muss als "eGbR" ins Gesellschaftsregister!
+        
+        VORTEILE:
+        • Flexible Anteilsverteilung
+        • Bei Gesellschafterwechsel keine Grundbuchänderung
+        • Mehr Eigenkapital zusammen
+        
+        NACHTEILE:
+        • Unbeschränkte persönliche Haftung ALLER!
+        • Finanzierung komplizierter
+        • Bei Streit kompliziert
+        
+        UNBEDINGT VERTRAGLICH REGELN:
+        • Eigenkapitalanteile
+        • Aufteilung der Rate
+        • Verfahren bei Trennung
+        • Vorkaufsrecht
+        • Todesfall
+        
+        ABSICHERUNG:
+        • Risikolebensversicherung über Restschuld
+        • Verzicht auf Teilungsversteigerung vereinbaren
+      `
+    }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════
+// 🤖 INTELLIGENTE TRICK-AUSWAHL NACH USER-SITUATION
+// ═══════════════════════════════════════════════════════════════
+
+function waehleTricksFuerUser(userProfil) {
+  const {
+    eigenkapital,
+    kaufpreis,
+    einkommen,
+    beruf,  // 'angestellt', 'selbststaendig', 'beamter'
+    familienstand,
+    kinder,
+    bundesland,
+    nutzung,  // 'selbst', 'kapitalanlage'
+    hatLebensversicherung,
+    hatDepot,
+    hatRiester,
+    hatBestehendImmo,
+    energieklasse,
+    sanierungGeplant
+  } = userProfil;
+  
+  const relevantetricks = [];
+  const kaufnebenkosten = kaufpreis * 0.10; // Vereinfacht
+  
+  // ═══════════════════════════════════════════════════════════
+  // IMMER RELEVANTE TRICKS
+  // ═══════════════════════════════════════════════════════════
+  
+  relevantetricks.push(
+    ALLE_TRICKS.kaufpreisOptimierung.find(t => t.id === 'inventar-separat'),
+    ALLE_TRICKS.kaufpreisOptimierung.find(t => t.id === 'preis-verhandeln'),
+    ALLE_TRICKS.finanzierungOptimieren.find(t => t.id === 'banken-vergleichen'),
+    ALLE_TRICKS.finanzierungOptimieren.find(t => t.id === 'kfw-kombinieren'),
+    ALLE_TRICKS.finanzierungOptimieren.find(t => t.id === 'sondertilgung-verhandeln'),
+    ALLE_TRICKS.nebenkostenSparen.find(t => t.id === 'makler-sparen')
+  );
+  
+  // ═══════════════════════════════════════════════════════════
+  // WENIG EIGENKAPITAL
+  // ═══════════════════════════════════════════════════════════
+  
+  if (eigenkapital < kaufnebenkosten) {
+    relevantetricks.push(
+      ALLE_TRICKS.kaufpreisOptimierung.find(t => t.id === 'kaufpreis-erhoehen-nebenkosten'),
+      ALLE_TRICKS.eigenkapitalErsatz.find(t => t.id === 'nachrangdarlehen'),
+      ALLE_TRICKS.eigenkapitalErsatz.find(t => t.id === 'familie-unterstuetzung'),
+      ALLE_TRICKS.eigenkapitalErsatz.find(t => t.id === 'verkaeuferdarlehen'),
+      ALLE_TRICKS.eigenkapitalErsatz.find(t => t.id === 'muskelhypothek')
+    );
+    
+    if (hatLebensversicherung) {
+      relevantetricks.push(ALLE_TRICKS.eigenkapitalErsatz.find(t => t.id === 'policendarlehen'));
+    }
+    if (hatDepot) {
+      relevantetricks.push(ALLE_TRICKS.eigenkapitalErsatz.find(t => t.id === 'lombardkredit'));
+    }
+    if (hatRiester) {
+      relevantetricks.push(ALLE_TRICKS.eigenkapitalErsatz.find(t => t.id === 'wohnriester'));
+    }
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // KAPITALANLEGER
+  // ═══════════════════════════════════════════════════════════
+  
+  if (nutzung === 'kapitalanlage') {
+    relevantetricks.push(
+      ALLE_TRICKS.kaufpreisOptimierung.find(t => t.id === 'kaufpreisaufteilung'),
+      ALLE_TRICKS.steuernOptimieren.find(t => t.id === 'afa-maximieren'),
+      ALLE_TRICKS.steuernOptimieren.find(t => t.id === 'werbungskosten'),
+      ALLE_TRICKS.steuernOptimieren.find(t => t.id === 'anschaffungsnahe-herstellungskosten'),
+      ALLE_TRICKS.steuernOptimieren.find(t => t.id === 'verluste-verrechnen'),
+      ALLE_TRICKS.finanzierungOptimieren.find(t => t.id === 'disagio-nutzen')
+    );
+    
+    if (hatBestehendImmo) {
+      relevantetricks.push(ALLE_TRICKS.spezialSituationen.find(t => t.id === 'kapitalanleger-mehrere'));
+    }
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAMILIE MIT KINDERN
+  // ═══════════════════════════════════════════════════════════
+  
+  if (kinder > 0) {
+    relevantetricks.push({
+      id: 'familie-foerderung',
+      titel: '👨‍👩‍👧‍👦 Spezial: Förderungen für Familien',
+      prioritaet: 'HOCH',
+      erklaerung: `
+        Mit ${kinder} Kind(ern) hast du Zugang zu:
+        
+        KfW 300 "Wohneigentum für Familien":
+        • Nur 1,12% Zins!
+        • Kredit: ${170000 + (kinder - 1) * 20000}€
+        • Einkommensgrenze: ${90000 + kinder * 10000}€
+        
+        KfW 308 "Jung kauft Alt" (bei Energieklasse F/G/H):
+        • Gleicher Zinsvorteil!
+        • Bis 150.000€
+        
+        ERSPARNIS: 30.000-50.000€ gegenüber Bankkredit!
+      `
+    });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // SELBSTSTÄNDIGE
+  // ═══════════════════════════════════════════════════════════
+  
+  if (beruf === 'selbststaendig') {
+    relevantetricks.push(ALLE_TRICKS.spezialSituationen.find(t => t.id === 'selbststaendige'));
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // SANIERUNG GEPLANT
+  // ═══════════════════════════════════════════════════════════
+  
+  if (sanierungGeplant || ['E', 'F', 'G', 'H'].includes(energieklasse)) {
+    relevantetricks.push(
+      ALLE_TRICKS.foerderungenMaximieren.find(t => t.id === 'sanierungsfoerderung'),
+      ALLE_TRICKS.kaufpreisOptimierung.find(t => t.id === 'renovierung-einpreisen')
+    );
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // BUNDESLAND-SPEZIFISCH
+  // ═══════════════════════════════════════════════════════════
+  
+  relevantetricks.push(ALLE_TRICKS.nebenkostenSparen.find(t => t.id === 'grunderwerbsteuer-bundesland'));
+  relevantetricks.push(ALLE_TRICKS.foerderungenMaximieren.find(t => t.id === 'landesfoerderung'));
+  
+  // ═══════════════════════════════════════════════════════════
+  // ERGEBNIS AUFBEREITEN
+  // ═══════════════════════════════════════════════════════════
+  
+  // Duplikate entfernen und null-Werte filtern
+  const uniqueTricks = [...new Set(relevantetricks.filter(t => t !== undefined))];
+  
+  // Nach Ersparnis sortieren (höchste zuerst)
+  return uniqueTricks.sort((a, b) => {
+    const getErsparnis = (t) => {
+      if (typeof t.ersparnis === 'string') {
+        const match = t.ersparnis.match(/[\d.,]+/);
+        return match ? parseFloat(match[0].replace('.', '')) : 0;
+      }
+      return t.ersparnis || 0;
+    };
+    return getErsparnis(b) - getErsparnis(a);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📊 OUTPUT-FORMAT FÜR USER
+// ═══════════════════════════════════════════════════════════════
+
+function formatiereEmpfehlungenFuerUser(tricks, userProfil) {
+  let output = `
+## 💡 Deine personalisierten Spar-Tipps
+
+Basierend auf deiner Situation habe ich ${tricks.length} relevante Strategien gefunden:
+
+`;
+
+  let gesamtErsparnis = 0;
+  
+  tricks.forEach((trick, index) => {
+    output += `
+### ${index + 1}. ${trick.titel}
+
+${trick.erklaerung}
+
+`;
+    if (trick.ersparnis) {
+      output += `**💰 Ersparnis-Potenzial:** ${trick.ersparnis}\n\n`;
+    }
+    if (trick.risiko) {
+      output += `**⚠️ Risiko:** ${trick.risiko}\n\n`;
+    }
+    output += `---\n`;
+  });
+  
+  output += `
+## 📋 Deine To-Do-Liste
+
+1. [ ] Mindestens 5 Banken anfragen (inkl. KfW prüfen)
+2. [ ] Inventar-Liste für Kaufvertrag erstellen
+3. [ ] Landesförderung für ${userProfil.bundesland} prüfen
+4. [ ] Verkäufer auf Preisverhandlung ansprechen
+`;
+
+  return output;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KAUFNEBENKOSTEN-BERECHNUNG (DETAIL)
+// ═══════════════════════════════════════════════════════════════
+
+function berechneDetailierteKaufnebenkosten(kaufpreis, bundesland, mitMakler = true) {
+```
+  // Grunderwerbsteuer nach Bundesland
+  const grunderwerbsteuerSaetze = {
+    'Bayern': 0.035,           // 3,5% - niedrigster!
+    'Sachsen': 0.055,          // 5,5%
+    'Hamburg': 0.055,          // 5,5%
+    'Baden-Württemberg': 0.05, // 5,0%
+    'Rheinland-Pfalz': 0.05,   // 5,0%
+    'Sachsen-Anhalt': 0.05,    // 5,0%
+    'Bremen': 0.05,            // 5,0%
+    'Niedersachsen': 0.05,     // 5,0%
+    'Mecklenburg-Vorpommern': 0.06, // 6,0%
+    'Hessen': 0.06,            // 6,0%
+    'Berlin': 0.06,            // 6,0%
+    'NRW': 0.065,              // 6,5% - höchster!
+    'Brandenburg': 0.065,      // 6,5%
+    'Schleswig-Holstein': 0.065, // 6,5%
+    'Thüringen': 0.065,        // 6,5%
+    'Saarland': 0.065          // 6,5%
+  };
+  
+  const gstSatz = grunderwerbsteuerSaetze[bundesland] || 0.06;
+  
+  // Einzelposten berechnen
+  const posten = {
+    grunderwerbsteuer: {
+      name: 'Grunderwerbsteuer',
+      prozent: gstSatz * 100,
+      betrag: Math.round(kaufpreis * gstSatz),
+      pflicht: true,
+      zahlbar: 'Ca. 4-6 Wochen nach Kaufvertrag',
+      tipp: bundesland === 'Bayern' ? '✅ Bayern hat den niedrigsten Satz!' : 
+            gstSatz >= 0.065 ? '⚠️ Hoher Satz – beim Preis verhandeln!' : null
+    },
+    notar: {
+      name: 'Notarkosten',
+      prozent: 1.5,
+      betrag: Math.round(kaufpreis * 0.015),
+      pflicht: true,
+      zahlbar: 'Bei Beurkundung oder kurz danach',
+      tipp: 'Enthält: Beurkundung, Beratung, Vollzug, Betreuung'
+    },
+    grundbuch: {
+      name: 'Grundbuchamt',
+      prozent: 0.5,
+      betrag: Math.round(kaufpreis * 0.005),
+      pflicht: true,
+      zahlbar: 'Nach Eintragung (ca. 2-4 Monate)',
+      tipp: 'Enthält: Auflassungsvormerkung, Eigentumsumschreibung, Grundschuld'
+    },
+    makler: {
+      name: 'Maklerprovision',
+      prozent: mitMakler ? 3.57 : 0,
+      betrag: mitMakler ? Math.round(kaufpreis * 0.0357) : 0,
+      pflicht: false,
+      zahlbar: 'Bei Kaufvertragsabschluss',
+      tipp: mitMakler ? '💡 Seit 2020: Käufer zahlt max. 50% der Provision' : '✅ Kein Makler = Ersparnis!'
+    }
+  };
+  
+  // Summen
+  const gesamtOhneMakler = posten.grunderwerbsteuer.betrag + posten.notar.betrag + posten.grundbuch.betrag;
+  const gesamtMitMakler = gesamtOhneMakler + posten.makler.betrag;
+  
+  // Prozentsätze
+  const prozentOhneMakler = ((gesamtOhneMakler / kaufpreis) * 100).toFixed(2);
+  const prozentMitMakler = ((gesamtMitMakler / kaufpreis) * 100).toFixed(2);
+  
+  return {
+    posten,
+    zusammenfassung: {
+      ohneMakler: {
+        betrag: gesamtOhneMakler,
+        prozent: prozentOhneMakler
+      },
+      mitMakler: {
+        betrag: gesamtMitMakler,
+        prozent: prozentMitMakler
+      }
+    },
+    bundesland,
+    kaufpreis
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆕 KREDIT-BEWILLIGUNGS-CHANCE BERECHNEN
+// ═══════════════════════════════════════════════════════════════
+
+function berechneKreditChance(eigenkapital, kaufpreis, kaufnebenkosten, monatlichesNetto, schufa = 'gut') {
+  const gesamtkosten = kaufpreis + kaufnebenkosten;
+  const eigenkapitalQuote = eigenkapital / gesamtkosten;
+  const beleihungsauslauf = ((gesamtkosten - eigenkapital) / kaufpreis) * 100;
+  
+  let basisChance = 0;
+  let faktoren = [];
+  let tipps = [];
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 1: Eigenkapital-Quote (wichtigster Faktor!)
+  // ═══════════════════════════════════════════════════════════
+  
+  if (eigenkapital >= kaufnebenkosten + kaufpreis * 0.20) {
+    // 20%+ EK = Sehr gut
+    basisChance = 95;
+    faktoren.push({ name: 'Eigenkapital 20%+', effekt: '+95%', icon: '🟢' });
+  } else if (eigenkapital >= kaufnebenkosten + kaufpreis * 0.10) {
+    // 10% EK = Gut
+    basisChance = 80;
+    faktoren.push({ name: 'Eigenkapital 10-20%', effekt: '+80%', icon: '🟢' });
+  } else if (eigenkapital >= kaufnebenkosten) {
+    // Nur Nebenkosten = Möglich
+    basisChance = 60;
+    faktoren.push({ name: 'Nur Nebenkosten als EK', effekt: '+60%', icon: '🟡' });
+    tipps.push({
+      typ: 'Eigenkapital erhöhen',
+      text: `Mit ${Math.round(kaufpreis * 0.10).toLocaleString()}€ mehr EK steigt deine Chance auf 80%`
+    });
+  } else if (eigenkapital >= kaufnebenkosten * 0.5) {
+    // Nur halbe Nebenkosten = Schwierig
+    basisChance = 35;
+    faktoren.push({ name: 'Unter 50% der Nebenkosten', effekt: '+35%', icon: '🟠' });
+    tipps.push({
+      typ: '110%-Finanzierung nötig',
+      text: 'Nur wenige Banken machen das – Interhyp, Dr. Klein anfragen'
+    });
+  } else if (eigenkapital > 0) {
+    // Fast nichts = Sehr schwierig
+    basisChance = 20;
+    faktoren.push({ name: 'Minimal-Eigenkapital', effekt: '+20%', icon: '🔴' });
+  } else {
+    // 0€ = Extrem schwierig
+    basisChance = 10;
+    faktoren.push({ name: 'Kein Eigenkapital', effekt: '+10%', icon: '🔴' });
+    tipps.push({
+      typ: '⚠️ 0€ Eigenkapital',
+      text: 'Nur in Ausnahmefällen möglich – siehe Profi-Tipps unten!'
+    });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 2: SCHUFA-Score
+  // ═══════════════════════════════════════════════════════════
+  
+  const schufaModifier = {
+    'sehr gut': 5,
+    'gut': 0,
+    'befriedigend': -10,
+    'ausreichend': -25,
+    'schlecht': -50
+  };
+  
+  const schufaEffect = schufaModifier[schufa] || 0;
+  basisChance += schufaEffect;
+  
+  if (schufaEffect !== 0) {
+    faktoren.push({ 
+      name: `SCHUFA: ${schufa}`, 
+      effekt: `${schufaEffect >= 0 ? '+' : ''}${schufaEffect}%`,
+      icon: schufaEffect >= 0 ? '🟢' : '🔴'
+    });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // FAKTOR 3: Einkommensüberschuss
+  // ═══════════════════════════════════════════════════════════
+  
+  // Bank rechnet: Rate darf max. 35-40% des Nettos sein
+  const geschaetzteRate = (gesamtkosten - eigenkapital) * 0.05 / 12; // ~5% Annuität
+  const belastungsquote = geschaetzteRate / monatlichesNetto;
+  
+  if (belastungsquote < 0.30) {
+    basisChance += 10;
+    faktoren.push({ name: 'Niedrige Belastungsquote (<30%)', effekt: '+10%', icon: '🟢' });
+  } else if (belastungsquote < 0.35) {
+    faktoren.push({ name: 'Normale Belastungsquote (30-35%)', effekt: '±0%', icon: '🟡' });
+  } else if (belastungsquote < 0.40) {
+    basisChance -= 10;
+    faktoren.push({ name: 'Hohe Belastungsquote (35-40%)', effekt: '-10%', icon: '🟠' });
+  } else {
+    basisChance -= 25;
+    faktoren.push({ name: 'Sehr hohe Belastungsquote (>40%)', effekt: '-25%', icon: '🔴' });
+    tipps.push({
+      typ: 'Belastungsquote zu hoch',
+      text: 'Günstigere Immobilie suchen oder Eigenkapital erhöhen'
+    });
+  }
+  
+  // Chance begrenzen
+  const finaleChance = Math.max(5, Math.min(98, basisChance));
+  
+  // ═══════════════════════════════════════════════════════════
+  // PROFI-TIPPS JE NACH SITUATION
+  // ═══════════════════════════════════════════════════════════
+  
+  const profiTipps = generiereProfiTipps(eigenkapital, kaufpreis, kaufnebenkosten, finaleChance);
+  
+  return {
+    chance: finaleChance,
+    chanceBewertung: bewerteChance(finaleChance),
+    faktoren,
+    tipps,
+    profiTipps,
+    details: {
+      eigenkapitalQuote: Math.round(eigenkapitalQuote * 100),
+      beleihungsauslauf: Math.round(beleihungsauslauf),
+      belastungsquote: Math.round(belastungsquote * 100),
+      geschaetzteRate: Math.round(geschaetzteRate)
+    }
+  };
+}
+
+function bewerteChance(chance) {
+  if (chance >= 90) return { ampel: '🟢', text: 'Sehr hohe Chance', beschreibung: 'Fast sicher – mehrere Banken werden zusagen' };
+  if (chance >= 75) return { ampel: '🟢', text: 'Gute Chance', beschreibung: 'Realistisch – 2-3 Banken anfragen' };
+  if (chance >= 50) return { ampel: '🟡', text: 'Moderate Chance', beschreibung: 'Möglich – viele Banken anfragen, gut vorbereiten' };
+  if (chance >= 30) return { ampel: '🟠', text: 'Geringe Chance', beschreibung: 'Schwierig – Spezialkreditvermittler nötig' };
+  if (chance >= 15) return { ampel: '🔴', text: 'Sehr geringe Chance', beschreibung: 'Sehr schwierig – Profi-Tricks anwenden!' };
+  return { ampel: '🔴', text: 'Minimal', beschreibung: 'Fast unmöglich – aber es gibt Wege...' };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆕 PROFI-TIPPS FÜR SCHWIERIGE FÄLLE
+// ═══════════════════════════════════════════════════════════════
+
+function generiereProfiTipps(eigenkapital, kaufpreis, kaufnebenkosten, chance) {
+  const tipps = [];
+  const gesamtkosten = kaufpreis + kaufnebenkosten;
+  const fehlendesEK = kaufnebenkosten - eigenkapital;
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 1: Kaufpreis-Erhöhung für Nebenkosten (DER KLASSIKER!)
+  // ═══════════════════════════════════════════════════════════
+  
+  if (eigenkapital < kaufnebenkosten) {
+    const erhoehterkaufpreis = kaufpreis + fehlendesEK;
+    
+    tipps.push({
+      titel: '💡 Kaufpreis erhöhen, Nebenkosten vom Verkäufer',
+      schwierigkeit: 'Mittel',
+      ersparnis: `${fehlendesEK.toLocaleString()}€ weniger EK nötig`,
+      erklaerung: `
+        Verhandle mit dem Verkäufer:
+        • Statt ${kaufpreis.toLocaleString()}€ Kaufpreis
+        • Zahle ${erhoehterkaufpreis.toLocaleString()}€ Kaufpreis
+        • Verkäufer übernimmt ${fehlendesEK.toLocaleString()}€ Nebenkosten
+        
+        Der Verkäufer bekommt das gleiche Geld, aber DU brauchst weniger EK!
+      `,
+      beispiel: {
+        vorher: {
+          kaufpreis: kaufpreis,
+          nebenkosten: kaufnebenkosten,
+          eigenkapitalBedarf: kaufnebenkosten
+        },
+        nachher: {
+          kaufpreis: erhoehterkaufpreis,
+          nebenkosten: Math.round(erhoehterkaufpreis * 0.10),
+          eigenkapitalBedarf: 0,
+          hinweis: 'Bank finanziert den höheren Kaufpreis mit!'
+        }
+      },
+      warnung: '⚠️ Funktioniert nur wenn Bank den höheren Preis akzeptiert (Wertgutachten!)'
+    });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 2: Renovierungskosten einpreisen
+  // ═══════════════════════════════════════════════════════════
+  
+  tipps.push({
+    titel: '🔧 Renovierungskosten in Kaufpreis einrechnen',
+    schwierigkeit: 'Leicht',
+    erklaerung: `
+      Wenn Renovierung geplant ist:
+      • Renovierungskosten schätzen (z.B. 20.000€)
+      • Mit Verkäufer höheren Kaufpreis vereinbaren
+      • Bank finanziert Renovierung gleich mit!
+      
+      Alternativ: KfW-Kredit für Sanierung (wird separat finanziert)
+    `
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 3: Nachrangdarlehen / Eigenkapitalersatz
+  // ═══════════════════════════════════════════════════════════
+  
+  if (chance < 60) {
+    tipps.push({
+      titel: '🏦 Nachrangdarlehen als EK-Ersatz',
+      schwierigkeit: 'Mittel',
+      erklaerung: `
+        Einige Anbieter geben "Eigenkapitalersatz-Darlehen":
+        • Wird wie EK behandelt (Nachrang im Grundbuch)
+        • Höherer Zins (6-9%), aber ermöglicht Kauf
+        • Anbieter: auxmoney, Creditolo, einige Bausparkassen
+        
+        Rechnung: Lieber 7% auf 30.000€ Nachrangdarlehen 
+        als gar kein Eigenheim!
+      `,
+      warnung: '⚠️ Nur wenn Cashflow trotzdem positiv bleibt!'
+    });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 4: Bausparvertrag vorschalten
+  // ═══════════════════════════════════════════════════════════
+  
+  tipps.push({
+    titel: '🏗️ Bausparvertrag als Türöffner',
+    schwierigkeit: 'Zeit nötig',
+    erklaerung: `
+      Bausparkassen sind großzügiger bei der Finanzierung:
+      • Bausparvertrag abschließen (z.B. 50.000€)
+      • Nur 40-50% ansparen nötig
+      • Dann Sofortfinanzierung möglich
+      
+      Vorteil: Niedrigerer Zins nach Zuteilung
+    `
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 5: Familienkredit / Schenkung
+  // ═══════════════════════════════════════════════════════════
+  
+  tipps.push({
+    titel: '👨‍👩‍👧 Familie um Hilfe bitten',
+    schwierigkeit: 'Leicht',
+    erklaerung: `
+      Möglichkeiten:
+      • Schenkung (bis 400.000€ steuerfrei von Eltern!)
+      • Familienkredit (Vertrag schriftlich!)
+      • Bürgschaft (Familie bürgt, du zahlst)
+      
+      Selbst 10.000-20.000€ können den Unterschied machen!
+    `,
+    steuerTipp: 'Freibeträge: Eltern→Kind 400.000€, Großeltern→Enkel 200.000€'
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 6: Günstigeres Objekt / Andere Region
+  // ═══════════════════════════════════════════════════════════
+  
+  if (chance < 50) {
+    const guenstigererPreis = Math.round(kaufpreis * 0.85);
+    
+    tipps.push({
+      titel: '🏠 Günstigeres Objekt wählen',
+      schwierigkeit: 'Kompromiss',
+      erklaerung: `
+        Vielleicht ist ${kaufpreis.toLocaleString()}€ zu ambitioniert.
+        
+        Bei ${guenstigererPreis.toLocaleString()}€ (-15%):
+        • Nebenkosten: ~${Math.round(guenstigererPreis * 0.10).toLocaleString()}€
+        • Deine Chance steigt auf ~${Math.min(chance + 25, 90)}%
+        
+        Alternativen:
+        • Kleinere Wohnung
+        • Anderer Stadtteil
+        • Andere Stadt (bessere Renditen!)
+      `
+    });
+  }
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 7: Makler sparen
+  // ═══════════════════════════════════════════════════════════
+  
+  const maklerErsparnis = Math.round(kaufpreis * 0.0357);
+  
+  tipps.push({
+    titel: '🔍 Ohne Makler kaufen',
+    schwierigkeit: 'Suchen nötig',
+    ersparnis: `${maklerErsparnis.toLocaleString()}€`,
+    erklaerung: `
+      Maklerfreie Objekte finden:
+      • eBay Kleinanzeigen
+      • nebenan.de
+      • Direkt bei Bauträgern
+      • Zwangsversteigerungen (zvg-portal.de)
+      • Lokale Zeitungen
+      
+      Ersparnis: ${maklerErsparnis.toLocaleString()}€ weniger EK nötig!
+    `
+  });
+  
+  // ═══════════════════════════════════════════════════════════
+  // TIPP 8: Muskelhypothek
+  // ═══════════════════════════════════════════════════════════
+  
+  tipps.push({
+    titel: '💪 Eigenleistung als Eigenkapital',
+    schwierigkeit: 'Arbeit nötig',
+    erklaerung: `
+      Bei Sanierungsobjekten:
+      • Eigenleistung wird als EK anerkannt (bis 15% der Baukosten)
+      • Malerarbeiten, Bodenbeläge, Garten = ca. 10-20€/Stunde
+      
+      Beispiel: 200 Stunden Eigenleistung = 4.000€ "EK"
+    `,
+    warnung: 'Realistisch bleiben – nicht alle Banken akzeptieren das!'
+  });
+  
+  return tipps;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🆕 ZUSAMMENFASSUNG FÜR UI: Eigenkapital-Situation
+// ═══════════════════════════════════════════════════════════════
+
+function bewerteEigenkapitalSituation(input) {
+  const { eigenkapital, kaufpreis, bundesland, monatlichesNetto, schufa } = input;
+  
+  // Nebenkosten berechnen
+  const nebenkosten = berechneDetailierteKaufnebenkosten(kaufpreis, bundesland, true);
+  const kaufnebenkostenBetrag = nebenkosten.zusammenfassung.mitMakler.betrag;
+  
+  // Kredit-Chance berechnen
+  const kreditChance = berechneKreditChance(eigenkapital, kaufpreis, kaufnebenkostenBetrag, monatlichesNetto, schufa);
+  
+  // Eigenkapital-Bewertung
+  const ekQuote = eigenkapital / (kaufpreis + kaufnebenkostenBetrag);
+  let ekBewertung;
+  
+  if (eigenkapital >= kaufnebenkostenBetrag + kaufpreis * 0.20) {
+    ekBewertung = { 
+      text: 'Optimal', 
+      icon: '🟢🟢', 
+      erklaerung: 'Du bringst mehr als 20% EK mit – beste Konditionen garantiert!' 
+    };
+  } else if (eigenkapital >= kaufnebenkostenBetrag + kaufpreis * 0.10) {
+    ekBewertung = { 
+      text: 'Gut', 
+      icon: '🟢', 
+      erklaerung: '10-20% EK – solide Finanzierung möglich' 
+    };
+  } else if (eigenkapital >= kaufnebenkostenBetrag) {
+    ekBewertung = { 
+      text: 'Minimum', 
+      icon: '🟡', 
+      erklaerung: 'Nur Nebenkosten als EK – 100% Finanzierung, aber machbar' 
+    };
+  } else if (eigenkapital > 0) {
+    ekBewertung = { 
+      text: 'Unter Minimum', 
+      icon: '🟠', 
+      erklaerung: 'Weniger als Nebenkosten – schwierig, aber Tricks möglich!' 
+    };
+  } else {
+    ekBewertung = { 
+      text: 'Kein EK', 
+      icon: '🔴', 
+      erklaerung: '110%+ Finanzierung nötig – nur mit Profi-Tricks!' 
+    };
+  }
+  
+  return {
+    nebenkosten,
+    kreditChance,
+    ekBewertung,
+    empfohlenesMindestEK: kaufnebenkostenBetrag,
+    empfohlenesOptimalEK: kaufnebenkostenBetrag + kaufpreis * 0.20,
+    differenzZuMinimum: Math.max(0, kaufnebenkostenBetrag - eigenkapital),
+    differenzZuOptimal: Math.max(0, (kaufnebenkostenBetrag + kaufpreis * 0.20) - eigenkapital)
+  };
+}
+```
+
 function berechneEffektivzins(basiszins, beleihungsauslauf) {
   // Banken berechnen Aufschläge je nach Beleihung
   let aufschlag = 0;

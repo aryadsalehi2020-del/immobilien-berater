@@ -9,6 +9,7 @@ import ZinsTilgungChart from './charts/ZinsTilgungChart';
 import BreakEvenCalculator from './BreakEvenCalculator';
 import ScenarioComparison from './ScenarioComparison';
 import InteractiveSliders from './InteractiveSliders';
+import LiveCalculator from './LiveCalculator';
 import SensitivityMatrix from './SensitivityMatrix';
 import InvestmentComparison from './InvestmentComparison';
 import MilestonesTimeline from './MilestonesTimeline';
@@ -727,28 +728,30 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
       {/* Projektionen Tab */}
       {activeTab === 'projektionen' && hasExtendedData && (
         <div className="space-y-8">
-          {/* Interactive Sliders */}
-          <InteractiveSliders
+          {/* NEW: Full Live Calculator */}
+          <LiveCalculator
+            kaufpreis={propertyData?.kaufpreis || 0}
+            monatlicheMiete={propertyData?.aktuelle_miete || 0}
+            hausgeld={propertyData?.hausgeld || propertyData?.nebenkosten || 0}
+            wohnflaeche={propertyData?.wohnflaeche || 0}
+            baujahr={propertyData?.baujahr || null}
             initialValues={{
               eigenkapital: result.cashflow_analyse?.eigenkapital || 0,
               zinssatz: result.cashflow_analyse?.zinssatz_prozent || 3.75,
-              tilgung: result.cashflow_analyse?.tilgung_prozent || 1.25
+              tilgung: result.cashflow_analyse?.tilgung_prozent || 1.5
             }}
-            kaufpreis={propertyData?.kaufpreis || 0}
-            monatlicheMiete={propertyData?.aktuelle_miete || 0}
-            nebenkosten={propertyData?.hausgeld || propertyData?.nebenkosten || 0}
           />
 
           {/* Charts */}
-          <div className="glass-light rounded-3xl shadow-2xl p-10 card-hover">
+          <div className="glass-card rounded-2xl p-8 border border-white/10">
             <CashflowChart szenarien={result.szenarien} />
           </div>
 
-          <div className="glass-light rounded-3xl shadow-2xl p-10 card-hover">
+          <div className="glass-card rounded-2xl p-8 border border-white/10">
             <TilgungsChart tilgungsplan={activeTilgungsplan} />
           </div>
 
-          <div className="glass-light rounded-3xl shadow-2xl p-10 card-hover">
+          <div className="glass-card rounded-2xl p-8 border border-white/10">
             <ZinsTilgungChart tilgungsplan={activeTilgungsplan} />
           </div>
         </div>

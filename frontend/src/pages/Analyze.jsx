@@ -96,15 +96,22 @@ function Analyze() {
   }, []);
 
   return (
-    <div className="p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="p-8 bg-mesh-animated min-h-screen relative">
+      {/* Background Glow Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="glow-orb w-96 h-96 bg-neon-blue/10 -top-48 -right-48" />
+        <div className="glow-orb w-80 h-80 bg-neon-purple/10 bottom-0 left-1/4" style={{ animationDelay: '5s' }} />
+        <div className="glow-orb w-64 h-64 bg-neon-green/5 top-1/2 right-1/4" style={{ animationDelay: '10s' }} />
+      </div>
+
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Header */}
         {step === 'upload' && (
-          <header className="text-center mb-12">
+          <header className="text-center mb-12 fade-in">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-              Neue Analyse
+              <span className="text-gradient-neon">Neue Analyse</span>
             </h1>
-            <p className="text-lg text-slate max-w-2xl mx-auto">
+            <p className="text-lg text-text-secondary max-w-2xl mx-auto">
               Laden Sie ein Exposé hoch oder geben Sie die Daten manuell ein
             </p>
           </header>

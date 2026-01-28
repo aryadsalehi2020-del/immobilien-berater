@@ -76,7 +76,10 @@ function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid md:grid-cols-3 gap-6 relative z-10">
-        <div className="glass-card rounded-2xl p-6 card-3d border border-neon-blue/20 fade-in fade-in-delay-1">
+        <Link
+          to="/library"
+          className="glass-card rounded-2xl p-6 card-3d border border-neon-blue/20 fade-in fade-in-delay-1 cursor-pointer hover:border-neon-blue/50 transition-all"
+        >
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-neon-blue/20 rounded-xl flex items-center justify-center shadow-neon-blue">
               <svg className="w-6 h-6 text-neon-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,9 +90,13 @@ function Dashboard() {
           </div>
           <p className="text-text-secondary text-sm mb-1">Gesamt Analysen</p>
           <p className="text-4xl font-bold text-white text-glow-blue">{stats.totalAnalyses}</p>
-        </div>
+          <p className="text-xs text-neon-blue mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Klicken für Library →</p>
+        </Link>
 
-        <div className="glass-card rounded-2xl p-6 card-3d border border-neon-purple/20 fade-in fade-in-delay-2">
+        <Link
+          to="/library?filter=favorites"
+          className="glass-card rounded-2xl p-6 card-3d border border-neon-purple/20 fade-in fade-in-delay-2 cursor-pointer hover:border-neon-purple/50 transition-all"
+        >
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-neon-purple/20 rounded-xl flex items-center justify-center shadow-neon-purple">
               <svg className="w-6 h-6 text-neon-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,67 +107,29 @@ function Dashboard() {
           </div>
           <p className="text-text-secondary text-sm mb-1">Favoriten</p>
           <p className="text-4xl font-bold text-white text-glow-purple">{stats.favorites}</p>
-        </div>
+        </Link>
 
-        <div className="glass-card rounded-2xl p-6 card-3d border border-neon-green/20 fade-in fade-in-delay-3">
+        <Link
+          to="/analyze"
+          className="glass-card rounded-2xl p-6 card-3d border border-neon-green/20 fade-in fade-in-delay-3 cursor-pointer hover:border-neon-green/50 transition-all"
+        >
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-neon-green/20 rounded-xl flex items-center justify-center" style={{ boxShadow: '0 0 20px rgba(34, 197, 94, 0.3)' }}>
               <svg className="w-6 h-6 text-neon-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <span className="text-neon-green text-xs font-mono uppercase tracking-wider">Avg</span>
-          </div>
-          <p className="text-text-secondary text-sm mb-1">Durchschnitt Score</p>
-          <p className="text-4xl font-bold text-white" style={{ textShadow: '0 0 20px rgba(34, 197, 94, 0.5)' }}>
-            {stats.totalAnalyses > 0
-              ? Math.round(
-                  stats.recentAnalyses.reduce((sum, a) => sum + (a.gesamtscore || 0), 0) /
-                    stats.recentAnalyses.length
-                )
-              : 0}
-          </p>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="glass-card rounded-2xl p-8 border border-white/10 relative z-10 fade-in fade-in-delay-3">
-        <h2 className="text-2xl font-bold text-white mb-6">Schnellzugriff</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Link
-            to="/analyze"
-            className="p-6 btn-neon rounded-xl flex items-center gap-4 group"
-          >
-            <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-all">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </div>
-            <div className="relative z-10">
-              <h3 className="font-bold text-lg">Neue Analyse</h3>
-              <p className="text-sm opacity-80">Immobilie bewerten</p>
-            </div>
-          </Link>
-
-          <Link
-            to="/library"
-            className="p-6 glass-neon rounded-xl flex items-center gap-4 group transition-all duration-300"
-          >
-            <div className="w-12 h-12 bg-neon-purple/20 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-neon-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-lg">Zur Library</h3>
-              <p className="text-text-secondary text-sm">Alle Analysen ansehen</p>
-            </div>
-          </Link>
-        </div>
+            <span className="text-neon-green text-xs font-mono uppercase tracking-wider">New</span>
+          </div>
+          <p className="text-text-secondary text-sm mb-1">Neue Analyse</p>
+          <p className="text-4xl font-bold text-white" style={{ textShadow: '0 0 20px rgba(34, 197, 94, 0.5)' }}>
+            Starten
+          </p>
+        </Link>
       </div>
 
       {/* Recent Analyses */}
-      <div className="glass-card rounded-2xl p-8 border border-white/10 relative z-10 fade-in fade-in-delay-4">
+      <div className="glass-card rounded-2xl p-8 border border-white/10 relative z-10 fade-in fade-in-delay-2">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">Neueste Analysen</h2>
           <Link to="/library" className="text-neon-blue hover:text-neon-purple font-semibold transition-colors flex items-center gap-1">

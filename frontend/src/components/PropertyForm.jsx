@@ -22,7 +22,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
     stellplatz: initialData?.stellplatz || '',
     vermietet: initialData?.vermietet || false,
     aktuelle_miete: initialData?.aktuelle_miete || '',
-    verkäufertyp: initialData?.verkäufertyp || '',
+    verkaufertyp: initialData?.verkaufertyp || '',
     provision: initialData?.provision || '',
   });
 
@@ -51,8 +51,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    
-    // Convert string values to numbers where needed
+
     const processedData = {
       ...formData,
       kaufpreis: formData.kaufpreis ? parseFloat(formData.kaufpreis) : null,
@@ -67,27 +66,28 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
     onAnalyze(processedData, verwendungszweck, finanzierung);
   }, [formData, verwendungszweck, finanzierung, onAnalyze]);
 
-  const inputClass = "w-full px-4 py-3 border-2 border-slate/20 rounded-xl focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none transition-all bg-white text-primary placeholder:text-slate/50";
-  const labelClass = "block text-sm font-semibold text-primary mb-2";
+  const inputClass = "w-full px-4 py-3 bg-surface border border-white/10 rounded-xl focus:ring-2 focus:ring-neon-blue/30 focus:border-neon-blue outline-none transition-all text-white placeholder:text-text-muted";
+  const labelClass = "block text-sm font-semibold text-text-secondary mb-2";
+  const selectClass = "w-full px-4 py-3 bg-surface border border-white/10 rounded-xl focus:ring-2 focus:ring-neon-blue/30 focus:border-neon-blue outline-none transition-all text-white";
 
   return (
     <div className="fade-in">
-      <div className="glass-light rounded-3xl shadow-2xl p-10">
+      <div className="glass-card rounded-3xl p-10 border border-white/10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-primary mb-2">
-              Objektdaten
+            <h2 className="text-3xl font-bold text-white mb-2">
+              <span className="text-gradient-neon">Objektdaten</span>
             </h2>
-            <p className="text-slate">Geben Sie die Immobiliendaten ein</p>
+            <p className="text-text-secondary">Geben Sie die Immobiliendaten ein</p>
           </div>
           <button
             onClick={onBack}
-            className="px-4 py-2 border-2 border-slate/30 text-primary font-medium rounded-xl hover:border-accent hover:bg-accent/5 transition-all flex items-center gap-2"
+            className="px-4 py-2 glass-neon text-text-secondary font-medium rounded-xl hover:text-neon-blue hover:border-neon-blue/50 transition-all flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Zurück
+            Zuruck
           </button>
         </div>
 
@@ -101,8 +101,8 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 onClick={() => setVerwendungszweck('kapitalanlage')}
                 className={`py-5 px-6 rounded-2xl border-2 font-semibold transition-all text-lg
                   ${verwendungszweck === 'kapitalanlage'
-                    ? 'border-accent bg-gradient-gold text-primary shadow-lg'
-                    : 'border-slate/30 text-primary hover:border-accent hover:bg-accent/5'}`}
+                    ? 'border-neon-blue bg-neon-blue/20 text-neon-blue shadow-neon-blue'
+                    : 'border-white/20 text-text-secondary hover:border-neon-blue/50 hover:text-neon-blue'}`}
               >
                 <span className="flex items-center justify-center gap-3">
                   <span className="text-2xl">💰</span>
@@ -114,8 +114,8 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 onClick={() => setVerwendungszweck('eigennutzung')}
                 className={`py-5 px-6 rounded-2xl border-2 font-semibold transition-all text-lg
                   ${verwendungszweck === 'eigennutzung'
-                    ? 'border-accent bg-gradient-gold text-primary shadow-lg'
-                    : 'border-slate/30 text-primary hover:border-accent hover:bg-accent/5'}`}
+                    ? 'border-neon-purple bg-neon-purple/20 text-neon-purple shadow-neon-purple'
+                    : 'border-white/20 text-text-secondary hover:border-neon-purple/50 hover:text-neon-purple'}`}
               >
                 <span className="flex items-center justify-center gap-3">
                   <span className="text-2xl">🏠</span>
@@ -128,7 +128,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
           {/* Hauptdaten */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <div>
-              <label className={labelClass}>Kaufpreis (€) *</label>
+              <label className={labelClass}>Kaufpreis (EUR) *</label>
               <input
                 type="number"
                 name="kaufpreis"
@@ -140,7 +140,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
               />
             </div>
             <div>
-              <label className={labelClass}>Wohnfläche (m²) *</label>
+              <label className={labelClass}>Wohnflache (m2) *</label>
               <input
                 type="number"
                 name="wohnflaeche"
@@ -166,9 +166,9 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
           </div>
 
           {/* Lage */}
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
-            <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl">📍</span>
-            Lage
+          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="w-10 h-10 bg-neon-blue/20 rounded-xl flex items-center justify-center text-xl border border-neon-blue/30">📍</span>
+            <span className="text-neon-blue">Lage</span>
           </h3>
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <div>
@@ -179,7 +179,7 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 value={formData.stadt}
                 onChange={handleChange}
                 required
-                placeholder="z.B. München"
+                placeholder="z.B. Munchen"
                 className={inputClass}
               />
             </div>
@@ -201,16 +201,16 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 name="adresse"
                 value={formData.adresse}
                 onChange={handleChange}
-                placeholder="z.B. Musterstraße 12"
+                placeholder="z.B. Musterstrasse 12"
                 className={inputClass}
               />
             </div>
           </div>
 
           {/* Objektdetails */}
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
-            <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl">🏢</span>
-            Objektdetails
+          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="w-10 h-10 bg-neon-purple/20 rounded-xl flex items-center justify-center text-xl border border-neon-purple/30">🏢</span>
+            <span className="text-neon-purple">Objektdetails</span>
           </h3>
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <div>
@@ -241,12 +241,12 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 name="objekttyp"
                 value={formData.objekttyp}
                 onChange={handleChange}
-                className={inputClass}
+                className={selectClass}
               >
-                <option value="">Bitte wählen</option>
+                <option value="">Bitte wahlen</option>
                 <option value="Eigentumswohnung">Eigentumswohnung</option>
                 <option value="Einfamilienhaus">Einfamilienhaus</option>
-                <option value="Doppelhaushälfte">Doppelhaushälfte</option>
+                <option value="Doppelhaushalfte">Doppelhaushalfte</option>
                 <option value="Reihenhaus">Reihenhaus</option>
                 <option value="Mehrfamilienhaus">Mehrfamilienhaus</option>
               </select>
@@ -257,22 +257,22 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 name="zustand"
                 value={formData.zustand}
                 onChange={handleChange}
-                className={inputClass}
+                className={selectClass}
               >
-                <option value="">Bitte wählen</option>
+                <option value="">Bitte wahlen</option>
                 <option value="Neubau">Neubau</option>
                 <option value="Neuwertig">Neuwertig</option>
                 <option value="Modernisiert">Modernisiert</option>
                 <option value="Gepflegt">Gepflegt</option>
-                <option value="Renovierungsbedürftig">Renovierungsbedürftig</option>
+                <option value="Renovierungsbedurftig">Renovierungsbedurftig</option>
               </select>
             </div>
           </div>
 
           {/* Energie */}
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
-            <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl">⚡</span>
-            Energie
+          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="w-10 h-10 bg-neon-green/20 rounded-xl flex items-center justify-center text-xl border border-neon-green/30">⚡</span>
+            <span className="text-neon-green">Energie</span>
           </h3>
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             <div>
@@ -281,9 +281,9 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
                 name="energieklasse"
                 value={formData.energieklasse}
                 onChange={handleChange}
-                className={inputClass}
+                className={selectClass}
               >
-                <option value="">Bitte wählen</option>
+                <option value="">Bitte wahlen</option>
                 <option value="A+">A+</option>
                 <option value="A">A</option>
                 <option value="B">B</option>
@@ -309,13 +309,13 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
           </div>
 
           {/* Kosten */}
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
-            <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl">💶</span>
-            Kosten
+          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl border border-accent/30">💶</span>
+            <span className="text-accent">Kosten</span>
           </h3>
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <div>
-              <label className={labelClass}>Hausgeld / Monat (€)</label>
+              <label className={labelClass}>Hausgeld / Monat (EUR)</label>
               <input
                 type="number"
                 name="hausgeld"
@@ -326,14 +326,14 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
               />
             </div>
             <div>
-              <label className={labelClass}>Verkäufertyp</label>
+              <label className={labelClass}>Verkaufertyp</label>
               <select
-                name="verkäufertyp"
-                value={formData.verkäufertyp}
+                name="verkaufertyp"
+                value={formData.verkaufertyp}
                 onChange={handleChange}
-                className={inputClass}
+                className={selectClass}
               >
-                <option value="">Bitte wählen</option>
+                <option value="">Bitte wahlen</option>
                 <option value="Privat">Privat</option>
                 <option value="Makler">Makler</option>
               </select>
@@ -352,42 +352,42 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
           </div>
 
           {/* Ausstattung */}
-          <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
-            <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl">✨</span>
-            Ausstattung
+          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="w-10 h-10 bg-neon-pink/20 rounded-xl flex items-center justify-center text-xl border border-neon-pink/30">✨</span>
+            <span className="text-neon-pink">Ausstattung</span>
           </h3>
           <div className="flex flex-wrap gap-6 mb-8">
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-3 cursor-pointer group">
               <input
                 type="checkbox"
                 name="balkon_terrasse"
                 checked={formData.balkon_terrasse}
                 onChange={handleChange}
-                className="w-5 h-5 rounded border-gray-300 text-accent focus:ring-accent"
+                className="w-5 h-5 rounded bg-surface border-white/20 text-neon-blue focus:ring-neon-blue/50"
               />
-              <span>Balkon / Terrasse</span>
+              <span className="text-text-secondary group-hover:text-white transition-colors">Balkon / Terrasse</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-3 cursor-pointer group">
               <input
                 type="checkbox"
                 name="keller"
                 checked={formData.keller}
                 onChange={handleChange}
-                className="w-5 h-5 rounded border-gray-300 text-accent focus:ring-accent"
+                className="w-5 h-5 rounded bg-surface border-white/20 text-neon-blue focus:ring-neon-blue/50"
               />
-              <span>Keller</span>
+              <span className="text-text-secondary group-hover:text-white transition-colors">Keller</span>
             </label>
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Stellplatz:</label>
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-text-secondary">Stellplatz:</label>
               <select
                 name="stellplatz"
                 value={formData.stellplatz}
                 onChange={handleChange}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none"
+                className="px-3 py-2 bg-surface border border-white/10 rounded-lg text-sm focus:ring-2 focus:ring-neon-blue/30 focus:border-neon-blue outline-none text-white"
               >
                 <option value="">Keiner</option>
                 <option value="Tiefgarage">Tiefgarage</option>
-                <option value="Außenstellplatz">Außenstellplatz</option>
+                <option value="Aussenstellplatz">Aussenstellplatz</option>
                 <option value="Garage">Garage</option>
               </select>
             </div>
@@ -396,25 +396,25 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
           {/* Vermietung (nur bei Kapitalanlage) */}
           {verwendungszweck === 'kapitalanlage' && (
             <>
-              <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
-                <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl">🔑</span>
-                Vermietung
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="w-10 h-10 bg-neon-blue/20 rounded-xl flex items-center justify-center text-xl border border-neon-blue/30">🔑</span>
+                <span className="text-neon-blue">Vermietung</span>
               </h3>
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div>
-                  <label className="flex items-center gap-2 cursor-pointer mb-3">
+                  <label className="flex items-center gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
                       name="vermietet"
                       checked={formData.vermietet}
                       onChange={handleChange}
-                      className="w-5 h-5 rounded border-gray-300 text-accent focus:ring-accent"
+                      className="w-5 h-5 rounded bg-surface border-white/20 text-neon-blue focus:ring-neon-blue/50"
                     />
-                    <span>Aktuell vermietet</span>
+                    <span className="text-text-secondary group-hover:text-white transition-colors">Aktuell vermietet</span>
                   </label>
                 </div>
                 <div>
-                  <label className={labelClass}>Aktuelle Kaltmiete / Monat (€)</label>
+                  <label className={labelClass}>Aktuelle Kaltmiete / Monat (EUR)</label>
                   <input
                     type="number"
                     name="aktuelle_miete"
@@ -427,13 +427,13 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
               </div>
 
               {/* Finanzierung */}
-              <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
-                <span className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center text-xl">🏦</span>
-                Finanzierung
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="w-10 h-10 bg-neon-purple/20 rounded-xl flex items-center justify-center text-xl border border-neon-purple/30">🏦</span>
+                <span className="text-neon-purple">Finanzierung</span>
               </h3>
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 <div>
-                  <label className={labelClass}>Eigenkapital (€)</label>
+                  <label className={labelClass}>Eigenkapital (EUR)</label>
                   <input
                     type="number"
                     name="eigenkapital"
@@ -472,10 +472,9 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-5 bg-gradient-gold text-primary font-bold rounded-2xl
-              btn-premium shadow-2xl text-xl mt-4"
+            className="w-full py-5 btn-neon font-bold rounded-2xl text-xl mt-4"
           >
-            <span className="flex items-center justify-center gap-3">
+            <span className="relative z-10 flex items-center justify-center gap-3">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
