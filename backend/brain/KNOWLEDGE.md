@@ -1,187 +1,3 @@
-# AmlakI Knowledge Base
-# Diese Datei wird bei jeder Analyse geladen!
-# Letzte Aktualisierung: Januar 2026
-
-## PHILOSOPHIE
-
-### Goldene Regel: NIEMALS nur "Nein" sagen!
-Auch bei schlechter Bewertung IMMER konstruktive Tipps geben:
-- Preisverhandlung vorschlagen (mit konkreten Zahlen)
-- Förderungen aufzeigen (KfW, BAFA, Landesförderungen)
-- Mieterhöhungspotenzial berechnen
-- Alternative Strategien nennen
-- "Fairen Preis" berechnen und als Verhandlungsziel angeben
-
-### Alle Optionen zeigen!
-Der User entscheidet selbst. Wir zeigen:
-- Optimale Szenarien
-- Grenzwertige Szenarien
-- Riskante Szenarien (mit Warnung, aber trotzdem berechnet!)
-
----
-
-## KFW-FÖRDERPROGRAMME
-
-### KfW 124 - Wohneigentumsprogramm
-- Kredit: Bis 100.000€
-- Zins: ca. 3,4% effektiv
-- Für: Selbstgenutzte Immobilien
-- WICHTIG: Antrag VOR Kaufvertrag!
-
-### KfW 261/262 - Energetische Sanierung
-- Kredit: Bis 150.000€ pro Wohneinheit
-- Tilgungszuschüsse:
-  - EH 40: 20% (max 24.000€)
-  - EH 40 EE: 25% (max 37.500€)
-  - EH 55: 15% (max 18.000€)
-  - EH 70 EE: 15% (max 22.500€)
-  - EH 85: 10% (max 15.000€)
-- Maximaler Zuschuss mit allen Boni: 67.500€!
-- WICHTIG: Antrag VOR Baubeginn, Energieberater erforderlich
-
-### KfW 297/298 - Klimafreundlicher Neubau
-- Kredit: 100.000€ (ohne QNG) / 150.000€ (mit QNG)
-- Zins: ca. 1,13% effektiv
-- Für: Neubau als Effizienzhaus
-- Seit Dezember 2025: EH 55 wieder förderfähig!
-
-### KfW 308 - Jung kauft Alt
-- Kredit: Bis 150.000€ (bei 3+ Kindern)
-- Zins: ca. 1,12% effektiv
-- Einkommensgrenzen: 90.000€ bei 1 Kind, +10.000€ je weiteres
-- Sanierungspflicht: EH 85 EE innerhalb 54 Monaten
-- NUR für Selbstnutzer!
-
-### KfW 458 - Heizungsförderung
-- 30% Grundförderung für alle klimafreundlichen Heizungen
-- +5% Effizienzbonus: Wärmepumpe mit natürlichem Kältemittel
-- +20% Klimabonus: Austausch fossiler Heizung (nur Selbstnutzer)
-- +30% Einkommensbonus: Haushaltseinkommen ≤40.000€
-- Maximale Förderung: 70%
-
----
-
-## BAFA-FÖRDERUNGEN
-
-### Einzelmaßnahmen
-- Dämmung, Fenster, Sonnenschutz: 15% Förderung
-- Mit iSFP-Bonus: 20% + Verdopplung der förderfähigen Kosten!
-- Beispiel: Ohne iSFP 4.500€, mit iSFP 12.000€ Zuschuss!
-
----
-
-## LANDESFÖRDERUNGEN
-
-### NRW (NRW.BANK) - Das großzügigste Programm!
-- Grunddarlehen: Bis 184.000€ zu 0,0% Zinsen für 30 Jahre
-- Kinderbonus: +24.000€ pro Kind
-- Tilgungsnachlass: 10% (muss nicht zurückgezahlt werden!)
-- Einkommensgrenze: ca. 69.000€ Brutto (4 Personen)
-
-### Hessen (WI-Bank)
-- Hessen-Darlehen: Bis 200.000€
-- Zins: 0,60% Sollzins
-- Zinsbindung: 20 Jahre
-
-### Bayern (BayernLabo)
-- Kinderzuschuss: 7.500€ pro Kind (einmalig!)
-- Darlehen: 30-40% der förderfähigen Kosten
-
-### Baden-Württemberg (L-Bank)
-- Z15-Darlehen: Bis 100.000€
-- Zinsverbilligung: 10 Jahre
-
----
-
-## AFA-SYSTEMATIK
-
-### Lineare AfA
-- Ab 2023: 3% über 33 Jahre
-- 1925-2022: 2% über 50 Jahre
-- Vor 1925: 2,5% über 40 Jahre
-
-### Degressive AfA (NEU!)
-- Für Neubauten 10/2023 - 09/2029
-- 5% vom jeweiligen Restwert
-- Nach ca. 13-14 Jahren zu linear wechseln
-
-### Denkmal-AfA
-- Vermietung: 100% in 12 Jahren (8×9% + 4×7%)
-- Selbstnutzung: 90% in 10 Jahren (10×9%)
-- WICHTIG: Abstimmung mit Denkmalschutzbehörde VOR Baubeginn!
-
----
-
-## BEWERTUNGSRICHTLINIEN
-
-### Kaufpreisfaktor
-- < 20: Sehr gut
-- 20-25: Gut/Okay
-- > 25: Teuer
-- > 30: Kritisch
-
-### Bruttorendite
-- > 5%: Sehr gut
-- 4-5%: Gut
-- 3-4%: Mittel
-- < 3%: Kritisch
-
-### Cashflow
-- > 200€: Sehr gut
-- > 0€: Gut (cashflow-positiv)
-- -100 bis 0€: Akzeptabel
-- < -100€: Problematisch
-
----
-
-## DEAL-BREAKER (Finger weg!)
-
-- Erbpacht mit Restlaufzeit < 50 Jahre
-- Zwangsversteigerungsvermerk im Grundbuch
-- Nießbrauch/Wohnrecht ohne klare Regelung
-- Massive Bauschäden (Statik, Asbest)
-- WEG-Governance hochriskant
-- Fehlende Kernunterlagen
-
-Bei diesen trotzdem Alternativen nennen!
-
----
-
-## MARKTDATEN 2025/2026
-
-### Kaufpreise pro m²
-- München: 9.000€ (stabil)
-- Berlin: 5.840€ (+1,6%)
-- Hamburg: 5.500€ (+0,4%)
-- Frankfurt: 5.200€ (stabil)
-- Leipzig: 3.000€ (+2,9%)
-- Bundesdurchschnitt: 3.260-4.250€
-
-### Höchste Renditen
-- Chemnitz: 5,58%
-- Hagen: 5,39%
-- Halle: 5,30%
-- Wuppertal: 5,08%
-
-### A-Städte
-- Rendite: 2,8-3,6%
-
-### Prognose
-- Kaufpreise 2026/2027: +3-4%
-- Mieten: Weiter steigend
-- Bauzinsen: Stabil 3,1-3,7%
-
----
-
-## STANDARD-FINANZIERUNG
-
-- Zinssatz: 3,75%
-- Tilgung: 1,25%
-- Gesamt: 5,0% p.a.
-
----
-
-*Version 3.0 ULTIMATE - Januar 2026*
 # Immobilien-Berater – Claude Code Projektanweisungen (ULTIMATE EDITION)
 
 ## Projekt-Übersicht
@@ -561,6 +377,536 @@ function berechneSzenarien(params) {
   
   return szenarien;
 }
+```
+
+---
+
+## 🆕 FLEXIBLER FINANZIERUNGSRECHNER (LIVE-ANPASSUNG)
+
+### Kernprinzip: User entscheidet ALLES!
+
+Der User kann jeden Wert anpassen und sieht SOFORT die Auswirkungen:
+- Eigenkapital (Slider: 0€ bis Kaufpreis)
+- Zinssatz (Slider: 1% bis 6%)
+- Tilgung (Slider: 1% bis 5%)
+- Laufzeit (Slider: 5 bis 40 Jahre)
+- Sondertilgung (Checkbox + Betrag)
+
+### MASTER-BERECHNUNGSLOGIK
+
+```javascript
+// ═══════════════════════════════════════════════════════════════
+// LIVE-RECHNER: Aktualisiert bei JEDER Eingabeänderung
+// ═══════════════════════════════════════════════════════════════
+
+function berechneAlles(input) {
+  const {
+    // Objekt-Daten
+    kaufpreis,
+    kaltmiete,
+    hausgeld,
+    wohnflaeche,
+    baujahr,
+    
+    // User-Eingaben (LIVE anpassbar!)
+    eigenkapital,        // Slider: 0 bis kaufpreis + nebenkosten
+    zinssatz,            // Slider: 1% bis 6%
+    tilgungssatz,        // Slider: 1% bis 5%
+    zinsbindung,         // Dropdown: 5, 10, 15, 20, 25, 30 Jahre
+    sondertilgungProJahr, // Optional: 0 bis 10% der Kreditsumme
+    mietsteigerungProJahr, // Default: 2%
+    wertsteigerungProJahr, // Default: 2%
+    instandhaltungProQm,   // Default: 9€/m²/Jahr
+    grenzsteuersatz,       // Für Steuerberechnung: 0% bis 45%
+  } = input;
+
+  // ═══════════════════════════════════════════════════════════
+  // SCHRITT 1: KAUFNEBENKOSTEN
+  // ═══════════════════════════════════════════════════════════
+  
+  const kaufnebenkosten = berechneKaufnebenkosten(kaufpreis, input.bundesland);
+  const gesamtkosten = kaufpreis + kaufnebenkosten;
+  
+  // ═══════════════════════════════════════════════════════════
+  // SCHRITT 2: FINANZIERUNGSSTRUKTUR
+  // ═══════════════════════════════════════════════════════════
+  
+  const kredit = gesamtkosten - eigenkapital;
+  const beleihungsauslauf = (kredit / kaufpreis) * 100;
+  
+  // Zinsaufschlag je nach Beleihung
+  const effektivzins = berechneEffektivzins(zinssatz, beleihungsauslauf);
+  
+  // ═══════════════════════════════════════════════════════════
+  // SCHRITT 3: ANNUITÄTENBERECHNUNG (EXAKTE FORMEL!)
+  // ═══════════════════════════════════════════════════════════
+  
+  const annuitaet = berechneAnnuitaet(kredit, effektivzins, tilgungssatz);
+  
+  // ═══════════════════════════════════════════════════════════
+  // SCHRITT 4: MONATLICHE WERTE
+  // ═══════════════════════════════════════════════════════════
+  
+  const monatlicheRate = annuitaet / 12;
+  const nichtUmlagefaehigesHausgeld = hausgeld * 0.35;
+  const instandhaltung = (instandhaltungProQm * wohnflaeche) / 12;
+  const mietausfallReserve = kaltmiete * 0.02;
+  
+  const cashflowVorSteuern = kaltmiete 
+    - monatlicheRate 
+    - nichtUmlagefaehigesHausgeld 
+    - instandhaltung 
+    - mietausfallReserve;
+  
+  // ═══════════════════════════════════════════════════════════
+  // SCHRITT 5: RENDITE-KENNZAHLEN
+  // ═══════════════════════════════════════════════════════════
+  
+  const renditen = berechneRenditen(input, kredit, cashflowVorSteuern);
+  
+  // ═══════════════════════════════════════════════════════════
+  // SCHRITT 6: 30-JAHRES-PROJEKTION
+  // ═══════════════════════════════════════════════════════════
+  
+  const projektion = berechne30JahresProjektion(input, kredit, effektivzins);
+  
+  // ═══════════════════════════════════════════════════════════
+  // SCHRITT 7: STEUEREFFEKT
+  // ═══════════════════════════════════════════════════════════
+  
+  const steuereffekt = berechneSteuereffekt(input, kredit);
+  
+  // ═══════════════════════════════════════════════════════════
+  // RETURN: ALLE ERGEBNISSE
+  // ═══════════════════════════════════════════════════════════
+  
+  return {
+    // Finanzierung
+    kredit,
+    eigenkapital,
+    beleihungsauslauf,
+    effektivzins,
+    monatlicheRate,
+    
+    // Cashflow
+    cashflowVorSteuern,
+    cashflowNachSteuern: cashflowVorSteuern + (steuereffekt.monatlich),
+    
+    // Renditen
+    ...renditen,
+    
+    // Projektion (für Charts!)
+    projektion,
+    
+    // Steuer
+    steuereffekt,
+    
+    // Bewertung
+    bewertung: bewerteCashflow(cashflowVorSteuern)
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DETAIL-FUNKTIONEN
+// ═══════════════════════════════════════════════════════════════
+
+function berechneKaufnebenkosten(kaufpreis, bundesland) {
+  const grunderwerbsteuer = {
+    'Bayern': 0.035,
+    'Sachsen': 0.055,
+    'Baden-Württemberg': 0.05,
+    'Hessen': 0.06,
+    'Berlin': 0.06,
+    'NRW': 0.065,
+    'Brandenburg': 0.065,
+    'Schleswig-Holstein': 0.065,
+    'Thüringen': 0.065,
+    'Saarland': 0.065,
+    // Default
+    'default': 0.06
+  };
+  
+  const gst = kaufpreis * (grunderwerbsteuer[bundesland] || grunderwerbsteuer['default']);
+  const notar = kaufpreis * 0.015;
+  const grundbuch = kaufpreis * 0.005;
+  const makler = kaufpreis * 0.0357; // 3,57% (kann 0 sein wenn privat)
+  
+  return {
+    grunderwerbsteuer: gst,
+    notar,
+    grundbuch,
+    makler,
+    gesamt: gst + notar + grundbuch + makler,
+    gesamtOhneMakler: gst + notar + grundbuch
+  };
+}
+
+function berechneEffektivzins(basiszins, beleihungsauslauf) {
+  // Banken berechnen Aufschläge je nach Beleihung
+  let aufschlag = 0;
+  
+  if (beleihungsauslauf > 100) aufschlag = 0.008;      // 110%+ = +0,8%
+  else if (beleihungsauslauf > 90) aufschlag = 0.005;  // 90-100% = +0,5%
+  else if (beleihungsauslauf > 80) aufschlag = 0.003;  // 80-90% = +0,3%
+  else if (beleihungsauslauf > 60) aufschlag = 0.001;  // 60-80% = +0,1%
+  // Unter 60% = Bestkonditionen (kein Aufschlag)
+  
+  return basiszins + aufschlag;
+}
+
+function berechneAnnuitaet(kredit, zinssatz, tilgungssatz) {
+  // Einfache Formel: Kredit × (Zins + Tilgung)
+  return kredit * (zinssatz + tilgungssatz);
+}
+
+function berechneRenditen(input, kredit, cashflowMonat) {
+  const { kaufpreis, kaltmiete, eigenkapital, hausgeld } = input;
+  const kaufnebenkosten = kaufpreis * 0.10; // Vereinfacht 10%
+  const gesamtinvestition = kaufpreis + kaufnebenkosten;
+  
+  // Jahreswerte
+  const jahresmiete = kaltmiete * 12;
+  const jahresCashflow = cashflowMonat * 12;
+  const nichtUmlagefaehig = hausgeld * 0.35 * 12;
+  
+  // Bruttorendite
+  const bruttorendite = (jahresmiete / kaufpreis) * 100;
+  
+  // Nettomietrendite
+  const nettomietrendite = ((jahresmiete - nichtUmlagefaehig) / gesamtinvestition) * 100;
+  
+  // Kaufpreisfaktor
+  const kaufpreisfaktor = kaufpreis / jahresmiete;
+  
+  // Eigenkapitalrendite (Cashflow-basiert)
+  const eigenkapitalrendite = eigenkapital > 0 
+    ? (jahresCashflow / eigenkapital) * 100 
+    : Infinity;
+  
+  // Objektrendite (vor Finanzierung)
+  const objektrendite = ((jahresmiete - nichtUmlagefaehig) / kaufpreis) * 100;
+  
+  // Leverage-Effekt
+  const fremdkapitalquote = kredit / gesamtinvestition;
+  const eigenkapitalquote = 1 - fremdkapitalquote;
+  const leverageFaktor = fremdkapitalquote / eigenkapitalquote;
+  
+  return {
+    bruttorendite: Math.round(bruttorendite * 100) / 100,
+    nettomietrendite: Math.round(nettomietrendite * 100) / 100,
+    kaufpreisfaktor: Math.round(kaufpreisfaktor * 10) / 10,
+    eigenkapitalrendite: Math.round(eigenkapitalrendite * 100) / 100,
+    objektrendite: Math.round(objektrendite * 100) / 100,
+    leverageFaktor: Math.round(leverageFaktor * 100) / 100
+  };
+}
+
+function berechne30JahresProjektion(input, kredit, zinssatz) {
+  const { 
+    kaltmiete, 
+    hausgeld, 
+    kaufpreis, 
+    tilgungssatz,
+    mietsteigerungProJahr = 0.02,
+    wertsteigerungProJahr = 0.02,
+    sondertilgungProJahr = 0
+  } = input;
+  
+  const jahresrate = kredit * (zinssatz + tilgungssatz);
+  const nichtUmlagefaehig = hausgeld * 0.35;
+  
+  let restschuld = kredit;
+  let immowert = kaufpreis;
+  let gesamtCashflow = 0;
+  let gesamtTilgung = 0;
+  let gesamtZinsen = 0;
+  
+  const jahre = [];
+  
+  for (let jahr = 1; jahr <= 30; jahr++) {
+    // Mietsteigerung
+    const aktuelleMiete = kaltmiete * Math.pow(1 + mietsteigerungProJahr, jahr);
+    const jahresmiete = aktuelleMiete * 12;
+    
+    // Zins & Tilgung
+    const zinsenJahr = restschuld * zinssatz;
+    const tilgungJahr = jahresrate - zinsenJahr + sondertilgungProJahr;
+    restschuld = Math.max(0, restschuld - tilgungJahr);
+    
+    // Wertsteigerung
+    immowert = kaufpreis * Math.pow(1 + wertsteigerungProJahr, jahr);
+    
+    // Cashflow
+    const cashflowJahr = jahresmiete - jahresrate - (nichtUmlagefaehig * 12);
+    
+    gesamtCashflow += cashflowJahr;
+    gesamtTilgung += tilgungJahr;
+    gesamtZinsen += zinsenJahr;
+    
+    jahre.push({
+      jahr,
+      miete: Math.round(jahresmiete),
+      zinsen: Math.round(zinsenJahr),
+      tilgung: Math.round(tilgungJahr),
+      restschuld: Math.round(restschuld),
+      cashflow: Math.round(cashflowJahr),
+      immowert: Math.round(immowert),
+      eigenkapitalImObjekt: Math.round(immowert - restschuld),
+      cashflowKumuliert: Math.round(gesamtCashflow)
+    });
+    
+    // Wenn abbezahlt, aufhören
+    if (restschuld <= 0) break;
+  }
+  
+  return {
+    jahre,
+    zusammenfassung: {
+      jahreBisSchuldenfrei: jahre.findIndex(j => j.restschuld <= 0) + 1 || 30,
+      gesamtCashflow: Math.round(gesamtCashflow),
+      gesamtZinsen: Math.round(gesamtZinsen),
+      gesamtTilgung: Math.round(gesamtTilgung),
+      endwertImmobilie: Math.round(immowert),
+      endRestschuld: Math.round(restschuld),
+      vermoegenszuwachs: Math.round(immowert - restschuld)
+    }
+  };
+}
+
+function berechneSteuereffekt(input, kredit) {
+  const { 
+    kaufpreis, 
+    baujahr, 
+    zinssatz, 
+    grenzsteuersatz = 0.42,
+    wohnflaeche
+  } = input;
+  
+  // Gebäudeanteil (typisch 80% des Kaufpreises)
+  const gebaeudewert = kaufpreis * 0.80;
+  
+  // AfA-Satz nach Baujahr
+  let afaSatz;
+  if (baujahr >= 2023) afaSatz = 0.03;
+  else if (baujahr >= 1925) afaSatz = 0.02;
+  else afaSatz = 0.025;
+  
+  const afaJahr = gebaeudewert * afaSatz;
+  const zinsenJahr = kredit * zinssatz;
+  const werbungskosten = 500; // Pauschale für Fahrtkosten, etc.
+  
+  const absetzbarGesamt = afaJahr + zinsenJahr + werbungskosten;
+  const steuerersparnisJahr = absetzbarGesamt * grenzsteuersatz;
+  
+  return {
+    afaJahr: Math.round(afaJahr),
+    zinsenJahr: Math.round(zinsenJahr),
+    werbungskosten,
+    absetzbarGesamt: Math.round(absetzbarGesamt),
+    steuerersparnisJahr: Math.round(steuerersparnisJahr),
+    monatlich: Math.round(steuerersparnisJahr / 12)
+  };
+}
+
+function bewerteCashflow(cashflow) {
+  if (cashflow >= 200) return { ampel: '🟢', text: 'Sehr gut', score: 95 };
+  if (cashflow >= 100) return { ampel: '🟢', text: 'Gut', score: 85 };
+  if (cashflow >= 0) return { ampel: '🟢', text: 'Cashflow-neutral', score: 70 };
+  if (cashflow >= -100) return { ampel: '🟡', text: 'Leicht negativ', score: 55 };
+  if (cashflow >= -200) return { ampel: '🟠', text: 'Negativ', score: 40 };
+  return { ampel: '🔴', text: 'Stark negativ', score: 20 };
+}
+```
+
+### SLIDER-KONFIGURATION FÜR UI
+
+```javascript
+const SLIDER_CONFIG = {
+  eigenkapital: {
+    label: 'Eigenkapital',
+    min: 0,
+    max: (kaufpreis) => kaufpreis * 1.1, // Bis 110% (inkl. Nebenkosten)
+    step: 1000,
+    default: (kaufpreis) => kaufpreis * 0.1, // 10% als Standard
+    format: (val) => `${val.toLocaleString()}€`,
+    einfluss: 'Mehr EK = Weniger Kredit = Niedrigere Rate = Besserer Cashflow'
+  },
+  
+  zinssatz: {
+    label: 'Zinssatz',
+    min: 0.01,
+    max: 0.08,
+    step: 0.001,
+    default: 0.038,
+    format: (val) => `${(val * 100).toFixed(2)}%`,
+    einfluss: 'Höherer Zins = Höhere Rate = Schlechterer Cashflow'
+  },
+  
+  tilgung: {
+    label: 'Anfängliche Tilgung',
+    min: 0.01,
+    max: 0.05,
+    step: 0.0025,
+    default: 0.015,
+    format: (val) => `${(val * 100).toFixed(2)}%`,
+    einfluss: 'Höhere Tilgung = Schneller schuldenfrei, aber höhere Rate'
+  },
+  
+  zinsbindung: {
+    label: 'Zinsbindung',
+    options: [5, 10, 15, 20, 25, 30],
+    default: 15,
+    format: (val) => `${val} Jahre`,
+    einfluss: 'Längere Bindung = Mehr Sicherheit, aber leicht höherer Zins'
+  },
+  
+  sondertilgung: {
+    label: 'Jährliche Sondertilgung',
+    min: 0,
+    max: (kredit) => kredit * 0.1, // Max 10% p.a.
+    step: 1000,
+    default: 0,
+    format: (val) => `${val.toLocaleString()}€/Jahr`,
+    einfluss: 'Schneller schuldenfrei, mehr Flexibilität'
+  },
+  
+  mietsteigerung: {
+    label: 'Erwartete Mietsteigerung',
+    min: 0,
+    max: 0.05,
+    step: 0.005,
+    default: 0.02,
+    format: (val) => `${(val * 100).toFixed(1)}%/Jahr`,
+    einfluss: 'Höhere Steigerung = Besserer Cashflow in Zukunft'
+  },
+  
+  wertsteigerung: {
+    label: 'Erwartete Wertsteigerung',
+    min: 0,
+    max: 0.05,
+    step: 0.005,
+    default: 0.02,
+    format: (val) => `${(val * 100).toFixed(1)}%/Jahr`,
+    einfluss: 'Höhere Steigerung = Mehr Vermögen bei Verkauf'
+  }
+};
+```
+
+### SZENARIEN-VERGLEICH (Automatisch generiert)
+
+```javascript
+function generiereVergleichsSzenarien(basisInput) {
+  const szenarien = [
+    {
+      name: '100% Finanzierung (Maximaler Hebel)',
+      eigenkapital: basisInput.kaufnebenkosten,
+      beschreibung: 'Nur Nebenkosten als EK, maximaler Leverage-Effekt'
+    },
+    {
+      name: '90% Finanzierung',
+      eigenkapital: basisInput.kaufpreis * 0.10 + basisInput.kaufnebenkosten,
+      beschreibung: '10% vom Kaufpreis + Nebenkosten'
+    },
+    {
+      name: '80% Finanzierung (Bankstandard)',
+      eigenkapital: basisInput.kaufpreis * 0.20 + basisInput.kaufnebenkosten,
+      beschreibung: 'Klassische Finanzierung, gute Konditionen'
+    },
+    {
+      name: '70% Finanzierung (Konservativ)',
+      eigenkapital: basisInput.kaufpreis * 0.30 + basisInput.kaufnebenkosten,
+      beschreibung: 'Niedrigeres Risiko, beste Zinskonditionen'
+    },
+    {
+      name: '60% Finanzierung (Sehr sicher)',
+      eigenkapital: basisInput.kaufpreis * 0.40 + basisInput.kaufnebenkosten,
+      beschreibung: 'Minimales Risiko, aber viel Kapital gebunden'
+    },
+    {
+      name: 'Cashflow-Neutral',
+      eigenkapital: 'berechnen', // Wird dynamisch berechnet
+      beschreibung: 'Genau so viel EK, dass Cashflow = 0'
+    },
+    {
+      name: '+100€ Cashflow',
+      eigenkapital: 'berechnen',
+      beschreibung: 'Genug EK für 100€ monatlichen Überschuss'
+    },
+    {
+      name: '+200€ Cashflow',
+      eigenkapital: 'berechnen',
+      beschreibung: 'Genug EK für 200€ monatlichen Überschuss'
+    }
+  ];
+  
+  // Berechne alle Szenarien
+  return szenarien.map(szenario => {
+    let ek = szenario.eigenkapital;
+    
+    // Berechne EK für Cashflow-Ziele
+    if (ek === 'berechnen') {
+      if (szenario.name.includes('Neutral')) {
+        ek = berechneEKFuerCashflow(basisInput, 0);
+      } else if (szenario.name.includes('+100')) {
+        ek = berechneEKFuerCashflow(basisInput, 100);
+      } else if (szenario.name.includes('+200')) {
+        ek = berechneEKFuerCashflow(basisInput, 200);
+      }
+    }
+    
+    const ergebnis = berechneAlles({ ...basisInput, eigenkapital: ek });
+    
+    return {
+      ...szenario,
+      eigenkapital: ek,
+      ergebnis
+    };
+  });
+}
+
+function berechneEKFuerCashflow(input, zielCashflow) {
+  const { kaufpreis, kaltmiete, hausgeld, zinssatz, tilgungssatz } = input;
+  const kaufnebenkosten = kaufpreis * 0.10;
+  const nichtUmlagefaehig = hausgeld * 0.35;
+  const instandhaltung = 50; // Vereinfacht
+  const mietausfall = kaltmiete * 0.02;
+  
+  // Verfügbar für Rate = Miete - NK - Ziel-Cashflow
+  const verfuegbarFuerRate = kaltmiete - nichtUmlagefaehig - instandhaltung - mietausfall - zielCashflow;
+  
+  // Max Kredit bei dieser Rate
+  const maxKredit = (verfuegbarFuerRate * 12) / (zinssatz + tilgungssatz);
+  
+  // Benötigtes EK
+  const gesamtkosten = kaufpreis + kaufnebenkosten;
+  const benoetigtesEK = Math.max(gesamtkosten - maxKredit, 0);
+  
+  return Math.round(benoetigtesEK);
+}
+```
+
+### LIVE-UPDATE TRIGGER
+
+```javascript
+// Diese Funktion wird bei JEDER Änderung eines Sliders aufgerufen
+function onInputChange(inputName, neuerWert, alleInputs) {
+  // 1. Input aktualisieren
+  alleInputs[inputName] = neuerWert;
+  
+  // 2. Alles neu berechnen
+  const ergebnis = berechneAlles(alleInputs);
+  
+  // 3. UI aktualisieren
+  updateAnzeige(ergebnis);
+  updateCharts(ergebnis.projektion);
+  updateSzenarien(generiereVergleichsSzenarien(alleInputs));
+  
+  // 4. Bewertung aktualisieren
+  updateBewertung(ergebnis.bewertung);
+}
+
+// Debounce für Performance (nicht bei jedem Pixel-Move updaten)
+const debouncedOnChange = debounce(onInputChange, 50);
 ```
 
 ### Feature 2: Interaktive Diagramme (PFLICHT!)

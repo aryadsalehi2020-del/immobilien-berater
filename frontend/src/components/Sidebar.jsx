@@ -52,34 +52,40 @@ function Sidebar() {
   ];
 
   return (
-    <div className="w-64 glass border-r border-slate/20 flex flex-col h-screen sticky top-0">
+    <div className="w-64 glass-card border-r border-neon-blue/20 flex flex-col h-screen sticky top-0 relative overflow-hidden">
+      {/* Animated Glow Orbs */}
+      <div className="glow-orb w-32 h-32 bg-neon-blue/30 -top-16 -left-16" />
+      <div className="glow-orb w-24 h-24 bg-neon-purple/20 bottom-20 -right-12" style={{ animationDelay: '2s' }} />
+
       {/* Logo */}
-      <div className="p-6 border-b border-slate/20">
-        <NavLink to="/dashboard" className="block">
+      <div className="p-6 border-b border-white/10 relative z-10">
+        <NavLink to="/dashboard" className="block group">
           <div className="flex items-baseline gap-2">
             <h1 className="text-3xl font-black">
-              <span className="text-accent text-4xl">A</span>
+              <span className="text-neon-blue text-4xl text-glow-blue">A</span>
               <span className="text-white">mlak</span>
-              <span className="text-accent text-4xl">I</span>
+              <span className="text-neon-purple text-4xl text-glow-purple">I</span>
             </h1>
-            <span className="text-slate/50 text-[10px]">by Arya Salehi</span>
+            <span className="text-text-muted text-[10px]">by Arya Salehi</span>
           </div>
-          <p className="text-accent text-xs tracking-wide mt-1">Immobilien Intelligence</p>
+          <p className="text-gradient-neon text-xs tracking-wide mt-1 font-semibold">
+            Immobilien Intelligence
+          </p>
         </NavLink>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
+      <nav className="flex-1 p-4 relative z-10">
         <ul className="space-y-2">
           {navItems.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                     isActive
-                      ? 'bg-gradient-gold text-primary font-bold shadow-lg'
-                      : 'text-slate hover:bg-accent/10 hover:text-accent'
+                      ? 'bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 text-neon-blue font-bold border border-neon-blue/50 shadow-neon-blue'
+                      : 'text-text-secondary hover:bg-white/5 hover:text-neon-blue hover:border-neon-blue/30 border border-transparent'
                   }`
                 }
               >
@@ -92,21 +98,21 @@ function Sidebar() {
       </nav>
 
       {/* User Info & Logout */}
-      <div className="p-4 border-t border-slate/20">
-        <div className="flex items-center gap-3 px-4 py-3 bg-slate/10 rounded-xl mb-3">
-          <div className="w-10 h-10 bg-gradient-gold rounded-full flex items-center justify-center text-primary font-bold">
+      <div className="p-4 border-t border-white/10 relative z-10">
+        <div className="flex items-center gap-3 px-4 py-3 glass-neon rounded-xl mb-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-neon-blue to-neon-purple rounded-full flex items-center justify-center text-white font-bold shadow-neon-blue">
             {user?.username?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white font-semibold text-sm truncate">
               {user?.username || 'User'}
             </p>
-            <p className="text-slate text-xs truncate">{user?.email}</p>
+            <p className="text-text-secondary text-xs truncate">{user?.email}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-slate/30 text-slate hover:border-red-400 hover:text-red-400 rounded-xl transition-all"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-white/20 text-text-secondary hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
