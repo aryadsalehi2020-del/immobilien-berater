@@ -979,17 +979,45 @@ def get_ai_system_prompt() -> str:
     """
     Gibt den vollständigen System-Prompt für die KI zurück.
 
+    V3.0: LIVE-DATEN PFLICHT!
+    Die KI muss die recherchierten Marktdaten verwenden.
+
     Lädt zuerst aus der KNOWLEDGE.md Datei (falls vorhanden),
     dann wird der Standard-Prompt hinzugefügt.
 
     Um das Wissen zu ändern: Bearbeite backend/brain/KNOWLEDGE.md
     """
+    # V3.0 Live-Daten Hinweis
+    v3_live_data_instruction = """
+🔴🔴🔴 V3.0 WICHTIGSTE REGEL 🔴🔴🔴
+
+Du MUSST bei JEDER Immobilienbewertung die LIVE-RECHERCHIERTEN MARKTDATEN verwenden!
+
+NIEMALS statische €/m²-Preise annehmen!
+IMMER den aktuellen Stadtteil + Immobilientyp aus den Marktdaten verwenden!
+
+Bei der Bewertung von "kaufpreis_qm":
+1. Lies die LIVE-Marktdaten für diesen Standort
+2. Vergleiche: Objekt-€/m² vs. Markt-Durchschnitt-€/m²
+3. Begründe mit KONKRETEN ZAHLEN: "Bei einem Marktdurchschnitt von X€/m² liegt dieses Objekt mit Y€/m² Z% über/unter Markt"
+
+BEISPIEL KORREKT:
+"Der Quadratmeterpreis von 4.200€ liegt 15% über dem Marktdurchschnitt von 3.650€/m² für München-Sendling. Score: 60/100"
+
+BEISPIEL FALSCH:
+"Der Preis erscheint angemessen für die Lage." (❌ Keine konkreten Zahlen!)
+
+🔴🔴🔴 ENDE V3.0 REGEL 🔴🔴🔴
+"""
+
     # Versuche Knowledge aus Datei zu laden
     file_knowledge = load_knowledge_from_file()
 
     if file_knowledge:
-        # Kombiniere Datei-Wissen mit dem technischen System-Prompt
+        # Kombiniere V3.0-Anweisung + Datei-Wissen + technischer Prompt
         return f"""Du bist AmlakI - der beste Immobilienberater Deutschlands!
+
+{v3_live_data_instruction}
 
 ## DEIN WISSEN (aus KNOWLEDGE.md):
 
@@ -1000,5 +1028,7 @@ def get_ai_system_prompt() -> str:
 {SYSTEM_PROMPT_IMMOBILIEN_BERATER}
 """
 
-    # Fallback: Nur eingebauter Prompt
-    return SYSTEM_PROMPT_IMMOBILIEN_BERATER
+    # Fallback: V3.0 Anweisung + eingebauter Prompt
+    return f"""{v3_live_data_instruction}
+
+{SYSTEM_PROMPT_IMMOBILIEN_BERATER}"""

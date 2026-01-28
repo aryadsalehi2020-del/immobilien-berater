@@ -225,8 +225,48 @@ function Dashboard() {
         </div>
       )}
 
+      {/* Profi-Tools Quick Access */}
+      <div className="glass-card rounded-2xl p-6 border border-white/10 relative z-10 fade-in fade-in-delay-2">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-xl font-bold text-white flex items-center gap-3">
+            <span className="w-10 h-10 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-xl flex items-center justify-center border border-neon-blue/30 text-lg">
+              🛠️
+            </span>
+            Profi-Tools
+          </h2>
+          <Link to="/tools" className="text-neon-blue hover:text-neon-purple font-semibold transition-colors flex items-center gap-1 text-sm">
+            Alle Tools
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-blue/30 hover:bg-neon-blue/5 transition-all group">
+            <span className="text-2xl mb-2 block">🤖</span>
+            <h4 className="font-bold text-white group-hover:text-neon-blue transition-colors">AI Berater</h4>
+            <p className="text-xs text-text-muted mt-1">Fragen zu Immobilien & Finanzierung</p>
+          </Link>
+          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-green/30 hover:bg-neon-green/5 transition-all group">
+            <span className="text-2xl mb-2 block">📈</span>
+            <h4 className="font-bold text-white group-hover:text-neon-green transition-colors">30-Jahre-Projektion</h4>
+            <p className="text-xs text-text-muted mt-1">Cashflow & Vermögen über Zeit</p>
+          </Link>
+          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-purple/30 hover:bg-neon-purple/5 transition-all group">
+            <span className="text-2xl mb-2 block">🔮</span>
+            <h4 className="font-bold text-white group-hover:text-neon-purple transition-colors">Szenarien-Simulator</h4>
+            <p className="text-xs text-text-muted mt-1">"Was wäre wenn" Analysen</p>
+          </Link>
+          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-accent/30 hover:bg-accent/5 transition-all group">
+            <span className="text-2xl mb-2 block">⚖️</span>
+            <h4 className="font-bold text-white group-hover:text-accent transition-colors">Fairer Preis</h4>
+            <p className="text-xs text-text-muted mt-1">Marktwert & Verhandlungsziel</p>
+          </Link>
+        </div>
+      </div>
+
       {/* Recent Analyses */}
-      <div className="glass-card rounded-2xl p-8 border border-white/10 relative z-10 fade-in fade-in-delay-2">
+      <div className="glass-card rounded-2xl p-8 border border-white/10 relative z-10 fade-in fade-in-delay-3">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <span className="text-xl">📊</span>
@@ -311,46 +351,6 @@ function Dashboard() {
             })}
           </div>
         )}
-      </div>
-
-      {/* Profi-Tools Quick Access */}
-      <div className="glass-card rounded-2xl p-6 border border-white/10 relative z-10 fade-in fade-in-delay-3">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-white flex items-center gap-3">
-            <span className="w-10 h-10 bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-xl flex items-center justify-center border border-neon-blue/30 text-lg">
-              🛠️
-            </span>
-            Profi-Tools
-          </h2>
-          <Link to="/tools" className="text-neon-blue hover:text-neon-purple font-semibold transition-colors flex items-center gap-1 text-sm">
-            Alle Tools
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-blue/30 hover:bg-neon-blue/5 transition-all group">
-            <span className="text-2xl mb-2 block">🤖</span>
-            <h4 className="font-bold text-white group-hover:text-neon-blue transition-colors">AI Berater</h4>
-            <p className="text-xs text-text-muted mt-1">Fragen zu Immobilien & Finanzierung</p>
-          </Link>
-          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-green/30 hover:bg-neon-green/5 transition-all group">
-            <span className="text-2xl mb-2 block">📈</span>
-            <h4 className="font-bold text-white group-hover:text-neon-green transition-colors">30-Jahre-Projektion</h4>
-            <p className="text-xs text-text-muted mt-1">Cashflow & Vermögen über Zeit</p>
-          </Link>
-          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-neon-purple/30 hover:bg-neon-purple/5 transition-all group">
-            <span className="text-2xl mb-2 block">🔮</span>
-            <h4 className="font-bold text-white group-hover:text-neon-purple transition-colors">Szenarien-Simulator</h4>
-            <p className="text-xs text-text-muted mt-1">"Was wäre wenn" Analysen</p>
-          </Link>
-          <Link to="/tools" className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-accent/30 hover:bg-accent/5 transition-all group">
-            <span className="text-2xl mb-2 block">⚖️</span>
-            <h4 className="font-bold text-white group-hover:text-accent transition-colors">Fairer Preis</h4>
-            <p className="text-xs text-text-muted mt-1">Marktwert & Verhandlungsziel</p>
-          </Link>
-        </div>
       </div>
 
       {/* Quick Links */}

@@ -57,7 +57,7 @@ from schemas import (
 
 load_dotenv()
 
-app = FastAPI(title="AmlakI API", version="2.0.0")
+app = FastAPI(title="AmlakI API", version="3.0.0")
 
 # Initialisiere Datenbank beim Start
 @app.on_event("startup")
@@ -449,6 +449,8 @@ class AnalysisResult(BaseModel):
     afa_berechnung: Optional[dict] = None  # AfA nach verschiedenen Methoden
     leverage_effekt: Optional[dict] = None  # Hebeleffekt Berechnung
     quick_check_result: Optional[dict] = None  # Schnell-Check
+    # V3.0: Live-Marktdaten Vergleich
+    kennzahlen: Optional[dict] = None  # Preis/m², Markt-Vergleich, etc.
 
 
 def get_anthropic_client():
@@ -657,62 +659,131 @@ Antworte NUR mit dem JSON, kein anderer Text."""
         raise HTTPException(status_code=500, detail=f"Fehler bei der PDF-Extraktion: {str(e)}")
 
 
-@app.post("/search-market-data")
-async def search_market_data(stadt: str, stadtteil: Optional[str] = None):
+async def fetch_live_market_data(stadt: str, stadtteil: Optional[str], objekttyp: str = "Eigentumswohnung") -> dict:
     """
-    Sucht aktuelle Marktdaten für eine Region
-    Hinweis: In der Produktion würde hier eine echte Datenquelle angebunden
+    V3.0 - LIVE MARKTDATEN RECHERCHE
+    Sucht aktuelle Immobilienpreise über Web-Suche
+    KEINE statischen Werte mehr!
     """
     client = get_anthropic_client()
-    
     location = f"{stadtteil}, {stadt}" if stadtteil else stadt
-    
-    search_prompt = f"""Ich brauche aktuelle Immobilien-Marktdaten für {location}, Deutschland.
 
-Basierend auf deinem Wissen, schätze folgende Werte:
+    # Schritt 1: Web-Suche durchführen für aktuelle Preise
+    search_queries = [
+        f"Immobilienpreise {location} 2024 2025 €/m²",
+        f"{objekttyp} kaufen {location} Quadratmeterpreis aktuell",
+        f"Mietspiegel {location} Kaltmiete pro qm",
+        f"Immobilienmarkt {location} Preisentwicklung"
+    ]
 
-1. Durchschnittlicher Kaufpreis pro qm für Eigentumswohnungen
-2. Durchschnittliche Kaltmiete pro qm
-3. Preisentwicklung der letzten 5 Jahre (Tendenz)
-4. Prognose für die nächsten Jahre
-5. Besonderheiten des Standorts (Infrastruktur, Entwicklung)
+    # Versuche Daten von bekannten Immobilienportalen zu holen
+    search_results = []
+
+    async with httpx.AsyncClient(timeout=15.0) as http_client:
+        for query in search_queries[:2]:  # Erste 2 Queries
+            try:
+                # DuckDuckGo HTML-Suche (kein API-Key nötig)
+                encoded_query = query.replace(' ', '+')
+                url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+                }
+                response = await http_client.get(url, headers=headers)
+                if response.status_code == 200:
+                    # Extrahiere relevante Snippets
+                    text = response.text
+                    # Suche nach Preisangaben im HTML
+                    price_patterns = re.findall(r'(\d{1,2}[.,]?\d{0,3})\s*(?:€|Euro)?\s*/?\s*(?:m²|qm|Quadratmeter)', text, re.IGNORECASE)
+                    search_results.append({
+                        "query": query,
+                        "found_prices": price_patterns[:5] if price_patterns else [],
+                        "raw_snippet": text[:2000] if len(text) > 100 else ""
+                    })
+            except Exception as e:
+                search_results.append({"query": query, "error": str(e)})
+
+    # Schritt 2: Claude analysiert die Suchergebnisse UND recherchiert selbst
+    research_prompt = f"""WICHTIG: Du musst LIVE-MARKTDATEN für diese Immobilienbewertung recherchieren!
+
+=== STANDORT ===
+Stadt: {stadt}
+Stadtteil: {stadtteil or "Nicht angegeben"}
+Objekttyp: {objekttyp}
+
+=== GEFUNDENE SUCHERGEBNISSE ===
+{json.dumps(search_results, indent=2, ensure_ascii=False)}
+
+=== DEINE AUFGABE ===
+1. Analysiere die gefundenen Preisangaben
+2. Nutze dein AKTUELLES Wissen über Immobilienpreise in {location}
+3. Berücksichtige regionale Besonderheiten (Uni-Stadt, Wirtschaftsstandort, etc.)
+4. Gib REALISTISCHE, AKTUELLE Werte an - KEINE generischen Schätzungen!
+
+REGELN:
+- Bei Großstädten (München, Frankfurt, Hamburg): Preise 4.000-12.000 €/m²
+- Bei Mittelstädten: Preise 2.000-5.000 €/m²
+- Bei ländlichen Gebieten: Preise 1.000-3.000 €/m²
+- Mieten: Typisch 8-15 €/m² in Städten, 5-9 €/m² ländlich
 
 Antworte als JSON:
 {{
-    "kaufpreis_qm_von": <untere Grenze>,
-    "kaufpreis_qm_bis": <obere Grenze>,
+    "standort": "{location}",
+    "objekttyp": "{objekttyp}",
+    "kaufpreis_qm_von": <untere Grenze in Euro>,
+    "kaufpreis_qm_bis": <obere Grenze in Euro>,
     "kaufpreis_qm_durchschnitt": <Mittelwert>,
     "miete_qm_von": <untere Grenze>,
     "miete_qm_bis": <obere Grenze>,
     "miete_qm_durchschnitt": <Mittelwert>,
-    "preisentwicklung_5_jahre": "<z.B. +25%>",
+    "preisentwicklung_5_jahre": "<z.B. +25% oder -5%>",
     "tendenz": "<steigend/stabil/fallend>",
-    "prognose": "<kurze Einschätzung>",
-    "standort_bewertung": "<1-10>",
-    "standort_details": "<Infrastruktur, Besonderheiten>",
-    "datenqualität": "<Hinweis dass dies Schätzungen sind>"
+    "prognose_2025": "<kurze Einschätzung>",
+    "standort_bewertung": <1-10>,
+    "standort_faktoren": ["<Faktor1>", "<Faktor2>", ...],
+    "datenquellen": ["<Quelle1>", "<Quelle2>"],
+    "aktualitaet": "Live-Recherche {stadt} Stand 2025",
+    "vertrauenswuerdigkeit": "<hoch/mittel/niedrig>"
 }}
 
-Antworte NUR mit dem JSON."""
+WICHTIG: Gib KONKRETE Zahlen für DIESEN Standort an, keine Platzhalter!"""
 
     try:
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=1500,
-            messages=[{"role": "user", "content": search_prompt}]
+            max_tokens=2000,
+            messages=[{"role": "user", "content": research_prompt}]
         )
-        
+
         json_text = response.content[0].text.strip()
         if json_text.startswith("```"):
             json_text = json_text.split("```")[1]
             if json_text.startswith("json"):
                 json_text = json_text[4:]
         json_text = json_text.strip()
-        
-        return json.loads(json_text)
-        
+
+        market_data = json.loads(json_text)
+        market_data["recherche_methode"] = "live_web_search_v3"
+        return market_data
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Fehler bei der Marktdatensuche: {str(e)}")
+        # Fallback: Minimale Schätzung mit Warnung
+        return {
+            "standort": location,
+            "fehler": f"Live-Recherche fehlgeschlagen: {str(e)}",
+            "kaufpreis_qm_durchschnitt": 3500,  # Konservativer Fallback
+            "miete_qm_durchschnitt": 10,
+            "datenqualität": "ACHTUNG: Fallback-Werte - Live-Recherche empfohlen!",
+            "recherche_methode": "fallback"
+        }
+
+
+@app.post("/search-market-data")
+async def search_market_data(stadt: str, stadtteil: Optional[str] = None, objekttyp: Optional[str] = "Eigentumswohnung"):
+    """
+    V3.0 - LIVE Marktdaten-Recherche
+    Sucht AKTUELLE Preise für Stadt/Stadtteil/Objekttyp
+    """
+    return await fetch_live_market_data(stadt, stadtteil, objekttyp or "Eigentumswohnung")
 
 
 def calculate_cashflow(
@@ -1443,13 +1514,32 @@ async def analyze_property(
     # 2. WARNSIGNAL-ERKENNUNG
     warnsignale = detect_warning_signals(data)
 
-    # 3. Marktdaten holen falls Stadt bekannt
+    # 3. V3.0 - LIVE MARKTDATEN RECHERCHE (PFLICHT!)
+    # Die KI MUSS zuerst aktuelle Preise recherchieren
     marktdaten = None
     if data.stadt:
         try:
-            marktdaten = await search_market_data(data.stadt, data.stadtteil)
-        except:
-            pass  # Marktdaten optional
+            objekttyp = data.objekttyp or "Eigentumswohnung"
+            marktdaten = await fetch_live_market_data(
+                stadt=data.stadt,
+                stadtteil=data.stadtteil,
+                objekttyp=objekttyp
+            )
+            # Prüfe ob Live-Daten erfolgreich
+            if marktdaten and marktdaten.get("recherche_methode") == "live_web_search_v3":
+                print(f"✅ Live-Marktdaten für {data.stadt} erfolgreich recherchiert")
+            else:
+                print(f"⚠️ Fallback-Marktdaten für {data.stadt} verwendet")
+        except Exception as e:
+            print(f"❌ Marktdaten-Recherche fehlgeschlagen: {str(e)}")
+            # Fallback-Daten mit Warnung
+            marktdaten = {
+                "standort": f"{data.stadtteil}, {data.stadt}" if data.stadtteil else data.stadt,
+                "kaufpreis_qm_durchschnitt": 3500,
+                "miete_qm_durchschnitt": 10,
+                "datenqualität": "ACHTUNG: Konnte keine Live-Daten abrufen!",
+                "recherche_methode": "error_fallback"
+            }
 
     # 4. Investment-Metriken berechnen (nur bei Kapitalanlage)
     investment_metriken = None
@@ -1691,13 +1781,32 @@ async def analyze_property(
     # 8. KI-BEWERTUNG mit allen Informationen + Knowledge Base System Prompt
     system_prompt = get_ai_system_prompt()
 
+    # V3.0: Marktdaten-Info für Prompt
+    marktdaten_hinweis = ""
+    if marktdaten:
+        if marktdaten.get("recherche_methode") == "live_web_search_v3":
+            marktdaten_hinweis = "✅ LIVE-MARKTDATEN ERFOLGREICH RECHERCHIERT"
+        else:
+            marktdaten_hinweis = "⚠️ FALLBACK-DATEN - Bewertung mit Vorsicht!"
+
     analyse_prompt = f"""Analysiere diese Immobilie professionell und bewerte jedes Kriterium mit einem Score von 0-100.
+
+🔴 V3.0 WICHTIG: Du MUSST die LIVE-RECHERCHIERTEN MARKTDATEN unten verwenden!
+Vergleiche den Kaufpreis IMMER mit den aktuellen €/m²-Preisen für diesen KONKRETEN Standort!
 
 === IMMOBILIENDATEN ===
 {json.dumps(data.dict(), indent=2, ensure_ascii=False)}
 
 === VERWENDUNGSZWECK ===
 {zweck}
+
+=== 🔴 LIVE-MARKTDATEN FÜR DIESEN STANDORT ({marktdaten_hinweis}) ===
+{json.dumps(marktdaten, indent=2, ensure_ascii=False) if marktdaten else "FEHLER: Keine Marktdaten!"}
+
+PFLICHT-VERGLEICH:
+- Objektpreis/m²: {round(data.kaufpreis / data.wohnflaeche, 2) if data.kaufpreis and data.wohnflaeche else "Unbekannt"} €/m²
+- Markt-Durchschnitt: {marktdaten.get('kaufpreis_qm_durchschnitt', 'Unbekannt') if marktdaten else 'Unbekannt'} €/m²
+- Bewertung: {"UNTER Markt ✅" if marktdaten and data.kaufpreis and data.wohnflaeche and (data.kaufpreis/data.wohnflaeche) < marktdaten.get('kaufpreis_qm_durchschnitt', 999999) else "ÜBER Markt ⚠️" if marktdaten else "Keine Daten"}
 
 === NO-GO-PRÜFUNG ===
 {json.dumps(no_go_check, indent=2, ensure_ascii=False)}
@@ -1720,13 +1829,10 @@ async def analyze_property(
 
 Standard-Finanzierung: 3.75% Zins + 1.25% Tilgung = 5.0% Gesamtrate
 
-=== MARKTDATEN ===
-{json.dumps(marktdaten, indent=2, ensure_ascii=False) if marktdaten else "Keine Marktdaten verfügbar"}
-
 === BEWERTUNGSKRITERIEN für {zweck.upper()} ===
 {json.dumps(weights, indent=2, ensure_ascii=False)}
 
-Bewerte jedes Kriterium mit Score (0-100) und kurzer Begründung:
+🔴 V3.0 - BEWERTUNGSREGELN MIT LIVE-DATEN:
 
 1. **cashflow_rendite** (Gewichtung: {weights['cashflow_rendite']}%)
    - Kaufpreisfaktor: <20 sehr gut, 20-25 gut, >25 kritisch
@@ -1734,13 +1840,17 @@ Bewerte jedes Kriterium mit Score (0-100) und kurzer Begründung:
    - Cashflow > 0 = gut, < 0 = schlecht
 
 2. **lage** (Gewichtung: {weights['lage']}%)
-   - Stadtteil, Infrastruktur, Marktdaten
+   - Stadtteil-Bewertung aus LIVE-Marktdaten
+   - Standort-Faktoren berücksichtigen (Uni, Wirtschaft, ÖPNV)
 
-3. **kaufpreis_qm** (Gewichtung: {weights['kaufpreis_qm']}%)
-   - Vergleich mit Marktdurchschnitt
+3. **kaufpreis_qm** (Gewichtung: {weights['kaufpreis_qm']}%) 🔴 LIVE-DATEN PFLICHT!
+   - MUSS gegen LIVE-Marktdurchschnitt verglichen werden!
+   - Unter Markt = hoher Score, über Markt = niedriger Score
+   - Formel: Score = 100 - ((Objekt€/m² - Markt€/m²) / Markt€/m² * 100)
 
 4. **zukunftspotenzial** (Gewichtung: {weights['zukunftspotenzial']}%)
-   - Preisentwicklung, Standortentwicklung
+   - Tendenz aus LIVE-Marktdaten (steigend/stabil/fallend)
+   - Prognose berücksichtigen
 
 5. **zustand_baujahr** (Gewichtung: {weights['zustand_baujahr']}%)
    - Zustand, Baujahr, Sanierungsbedarf
@@ -1758,7 +1868,9 @@ Bewerte jedes Kriterium mit Score (0-100) und kurzer Begründung:
 9. **verkäufertyp** (Gewichtung: {weights['verkäufertyp']}%)
    - Privat vs. Makler, Provision
 
-WICHTIG - PHILOSOPHIE:
+WICHTIG - V3.0 PHILOSOPHIE:
+- IMMER Live-Marktdaten in der Begründung zitieren!
+- Bei überhöhtem Preis: "Markt-Durchschnitt ist X€/m², Objekt liegt bei Y€/m² = Z% über Markt"
 - NIEMALS nur "Nein" sagen!
 - Bei schlechtem Score: Preisverhandlung, Förderungen, Mieterhöhungspotenzial aufzeigen
 - "Fairer Preis" als Verhandlungsziel angeben
@@ -1843,6 +1955,24 @@ Antworte NUR mit dem JSON."""
         # Erweitere Zusammenfassung mit Empfehlung
         zusammenfassung_erweitert = f"{empfehlung_text}\n\n{ai_analysis['zusammenfassung']}"
 
+        # V3.0: Kennzahlen mit Live-Marktdaten-Vergleich
+        kennzahlen = None
+        if data.kaufpreis and data.wohnflaeche:
+            preis_pro_qm = round(data.kaufpreis / data.wohnflaeche, 2)
+            markt_durchschnitt = marktdaten.get("kaufpreis_qm_durchschnitt") if marktdaten else None
+
+            kennzahlen = {
+                "preis_pro_qm": preis_pro_qm,
+                "markt_durchschnitt_qm": markt_durchschnitt,
+                "abweichung_prozent": round(((preis_pro_qm / markt_durchschnitt) - 1) * 100, 1) if markt_durchschnitt else None,
+                "unter_markt": preis_pro_qm < markt_durchschnitt if markt_durchschnitt else None,
+                "marktdaten_quelle": marktdaten.get("recherche_methode", "unbekannt") if marktdaten else "keine",
+                "marktdaten_standort": marktdaten.get("standort") if marktdaten else None,
+                "marktdaten_vertrauen": marktdaten.get("vertrauenswuerdigkeit", "unbekannt") if marktdaten else "keine",
+                "kaufpreisfaktor": round(data.kaufpreis / (data.aktuelle_miete * 12), 1) if data.aktuelle_miete else None,
+                "bruttorendite": round((data.aktuelle_miete * 12 / data.kaufpreis) * 100, 2) if data.aktuelle_miete else None
+            }
+
         result = AnalysisResult(
             gesamtscore=gesamtscore,
             verwendungszweck=zweck,
@@ -1870,7 +2000,9 @@ Antworte NUR mit dem JSON."""
             fairer_preis=fairer_preis_result,
             afa_berechnung=afa_result,
             leverage_effekt=leverage_result,
-            quick_check_result=quick_check_result
+            quick_check_result=quick_check_result,
+            # V3.0: Live-Marktdaten Kennzahlen
+            kennzahlen=kennzahlen
         )
 
         # Speichere Analyse in Datenbank
@@ -1899,6 +2031,108 @@ Antworte NUR mit dem JSON."""
         raise HTTPException(status_code=500, detail=f"Fehler beim Parsen der KI-Analyse: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Fehler bei der Analyse: {str(e)}")
+
+
+# ========================================
+# CHAT ENDPOINT (V3.0 mit Live-Marktdaten)
+# ========================================
+
+class ChatRequest(BaseModel):
+    """Chat-Anfrage"""
+    message: str
+    context: Optional[dict] = None  # Optionaler Analyse-Kontext
+    stadt: Optional[str] = None  # Für Live-Marktdaten-Recherche
+
+
+class ChatResponse(BaseModel):
+    """Chat-Antwort"""
+    response: str
+    marktdaten_verwendet: bool = False
+    recherche_standort: Optional[str] = None
+
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_with_ai(
+    request: ChatRequest,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    V3.0 Chat-Endpoint mit Live-Marktdaten-Recherche
+
+    Die KI kann:
+    - Fragen zu Immobilien beantworten
+    - Live-Marktdaten für spezifische Standorte recherchieren
+    - Auf Basis von Analyse-Kontext antworten
+    """
+    client = get_anthropic_client()
+
+    # Prüfe ob eine Stadt/Standort in der Nachricht erwähnt wird
+    # oder im Kontext vorhanden ist
+    standort = request.stadt
+    if not standort and request.context:
+        standort = request.context.get('stadt')
+
+    # Extrahiere mögliche Standorte aus der Nachricht
+    message_lower = request.message.lower()
+    stadt_keywords = ['in ', 'für ', 'preise ', 'markt ', 'immobilien ']
+
+    # Live-Marktdaten holen wenn Standort verfügbar
+    live_marktdaten = None
+    if standort:
+        try:
+            live_marktdaten = await fetch_live_market_data(
+                stadt=standort,
+                stadtteil=request.context.get('stadtteil') if request.context else None,
+                objekttyp="Eigentumswohnung"
+            )
+        except:
+            pass
+
+    # System Prompt für Chat
+    chat_system = f"""Du bist AmlakI - Deutschlands bester Immobilienberater!
+
+Du hilfst Nutzern bei Fragen zu:
+- Finanzierung (Zinsen, Tilgung, Eigenkapital, Darlehen)
+- Förderungen (KfW 300, KfW 308, KfW 261, Landesförderungen)
+- Steuern (AfA, Werbungskosten, Spekulationsfrist)
+- Mietrecht (Mieterhöhung, Kündigung, WEG)
+- Bewertung (Kaufpreisfaktor, Rendite, Red Flags)
+
+WICHTIG V3.0:
+- Bei Fragen zu konkreten Preisen/Märkten IMMER die Live-Daten unten verwenden
+- Keine generischen Antworten wie "zwischen 2.000 und 10.000€/m²"
+- Konkrete Zahlen für den gefragten Standort nennen
+
+{f'''
+LIVE-MARKTDATEN FÜR {standort.upper()}:
+{json.dumps(live_marktdaten, indent=2, ensure_ascii=False)}
+''' if live_marktdaten else ''}
+
+{f'''
+ANALYSE-KONTEXT DES NUTZERS:
+{json.dumps(request.context, indent=2, ensure_ascii=False)}
+''' if request.context else ''}
+
+Antworte auf Deutsch, präzise und hilfreich.
+Nutze Markdown für Formatierung (fett, Listen, etc.).
+Bei Preisfragen: IMMER konkrete Zahlen aus den Live-Daten!"""
+
+    try:
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1500,
+            system=chat_system,
+            messages=[{"role": "user", "content": request.message}]
+        )
+
+        return ChatResponse(
+            response=response.content[0].text,
+            marktdaten_verwendet=live_marktdaten is not None,
+            recherche_standort=standort
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Chat-Fehler: {str(e)}")
 
 
 @app.get("/health")

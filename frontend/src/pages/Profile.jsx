@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useUserProfile, INVESTMENT_GOALS, RISK_PROFILES, EXPERIENCE_LEVELS } from '../contexts/UserProfileContext';
 import UserProfileForm from '../components/UserProfileForm';
+import UserGoalsForm from '../components/UserGoalsForm';
 import CreditChanceIndicator from '../components/CreditChanceIndicator';
 import SmartTipsPanel from '../components/SmartTipsPanel';
 import { formatCurrency, ENERGY_CLASSES } from '../constants';

@@ -3,6 +3,12 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Knowledge categories for quick access
 const QUICK_QUESTIONS = [
+  { category: '🔴 Marktpreise', questions: [
+    'Was kostet eine Wohnung in München pro qm?',
+    'Wie sind die Immobilienpreise in Hamburg?',
+    'Was sind aktuelle Mietpreise in Berlin?',
+    'Wie hat sich der Markt in Frankfurt entwickelt?'
+  ]},
   { category: 'Finanzierung', questions: [
     'Was ist der Unterschied zwischen Zinsbindung und Laufzeit?',
     'Wie viel Eigenkapital brauche ich wirklich?',
@@ -40,12 +46,13 @@ function AIChat({ analysisContext }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hallo! Ich bin Ihr persönlicher Immobilien-Berater. Ich kenne alle Tricks zu Finanzierung, Förderungen, Steuern und mehr. Stellen Sie mir eine Frage oder wählen Sie ein Thema!'
+      content: 'Hallo! Ich bin Ihr persönlicher Immobilien-Berater mit **Live-Marktdaten**! 🔴\n\nIch kann aktuelle Preise für jeden Stadtteil recherchieren. Fragen Sie mich z.B.:\n- "Was kostet eine Wohnung in München-Schwabing?"\n- "Wie sind die Mietpreise in Hamburg-Eimsbüttel?"\n\nOder wählen Sie ein Thema unten!'
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [stadtInput, setStadtInput] = useState(analysisContext?.stadt || '');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -64,6 +71,10 @@ function AIChat({ analysisContext }) {
     setInput('');
     setIsLoading(true);
 
+    // Extrahiere Stadt aus der Frage wenn möglich
+    const stadtMatch = question.match(/(?:in|für|nach)\s+([A-ZÄÖÜa-zäöüß-]+(?:\s+[A-ZÄÖÜa-zäöüß-]+)?)/i);
+    const detectedStadt = stadtMatch ? stadtMatch[1] : stadtInput;
+
     try {
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
@@ -73,15 +84,23 @@ function AIChat({ analysisContext }) {
         },
         body: JSON.stringify({
           message: question,
-          context: analysisContext || null
+          context: analysisContext || null,
+          stadt: detectedStadt || null
         })
       });
 
       if (response.ok) {
         const data = await response.json();
+        // Zeige Info wenn Live-Daten verwendet wurden
+        let responseText = data.response;
+        if (data.marktdaten_verwendet) {
+          responseText = `🔴 *Live-Daten für ${data.recherche_standort}*\n\n${responseText}`;
+        }
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: data.response
+          content: responseText,
+          liveData: data.marktdaten_verwendet,
+          standort: data.recherche_standort
         }]);
       } else {
         // Fallback to local knowledge base

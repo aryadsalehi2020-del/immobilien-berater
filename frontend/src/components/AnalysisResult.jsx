@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 // Chart components
 import CashflowChart from './charts/CashflowChart';
@@ -16,10 +16,21 @@ import MilestonesTimeline from './MilestonesTimeline';
 import RentalVariations from './RentalVariations';
 import FinancingOptions from './FinancingOptions';
 
-function ScoreCircle({ score }) {
+// Dynamic Scoring
+import { useUserProfile, INVESTMENT_GOALS } from '../contexts/UserProfileContext';
+import {
+  calculateDynamicWeights,
+  calculateAdjustedScore,
+  getWeightDifferences,
+  generatePersonalizedWarnings,
+  getProfileBasedRecommendation
+} from '../utils/dynamicWeights';
+
+function ScoreCircle({ score, adjustedScore = null, showAdjusted = false }) {
   const radius = 60;
+  const displayScore = showAdjusted && adjustedScore !== null ? adjustedScore : score;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
+  const offset = circumference - (displayScore / 100) * circumference;
 
   const getScoreColor = (score) => {
     if (score >= 70) return '#10b981'; // green
@@ -36,11 +47,13 @@ function ScoreCircle({ score }) {
     return 'Kritisch';
   };
 
+  const scoreDiff = adjustedScore !== null ? adjustedScore - score : 0;
+
   return (
     <div className="relative w-48 h-48 mx-auto">
       {/* Outer glow ring */}
       <div className="absolute inset-0 rounded-full animate-glow opacity-30"
-           style={{ background: `radial-gradient(circle, ${getScoreColor(score)}40, transparent)` }}></div>
+           style={{ background: `radial-gradient(circle, ${getScoreColor(displayScore)}40, transparent)` }}></div>
 
       <svg className="w-full h-full transform -rotate-90">
         {/* Background circle */}
@@ -58,7 +71,7 @@ function ScoreCircle({ score }) {
           cy="96"
           r={radius}
           fill="none"
-          stroke={getScoreColor(score)}
+          stroke={getScoreColor(displayScore)}
           strokeWidth="12"
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -66,25 +79,30 @@ function ScoreCircle({ score }) {
           className="score-circle"
           style={{
             '--score-offset': offset,
-            filter: `drop-shadow(0 0 8px ${getScoreColor(score)}80)`
+            filter: `drop-shadow(0 0 8px ${getScoreColor(displayScore)}80)`
           }}
         />
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-5xl font-black mb-1" style={{ color: getScoreColor(score) }}>
-          {Math.round(score)}
+        <span className="text-5xl font-black mb-1" style={{ color: getScoreColor(displayScore) }}>
+          {Math.round(displayScore)}
         </span>
+        {showAdjusted && adjustedScore !== null && scoreDiff !== 0 && (
+          <span className={`text-xs font-bold ${scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
+            ({scoreDiff > 0 ? '+' : ''}{scoreDiff} personalisiert)
+          </span>
+        )}
         <span className="text-xs text-slate/60 font-medium uppercase tracking-wider">von 100</span>
         <span className="text-sm font-bold text-accent mt-2 px-3 py-1 bg-accent/10 rounded-full">
-          {getScoreLabel(score)}
+          {getScoreLabel(displayScore)}
         </span>
       </div>
     </div>
   );
 }
 
-function CriterionBar({ criterion }) {
+function CriterionBar({ criterion, weightDiff = null, showAdjusted = false }) {
   const getBarColor = (score) => {
     if (score >= 70) return 'from-green-400 to-emerald-500';
     if (score >= 50) return 'from-yellow-400 to-orange-400';
@@ -109,20 +127,50 @@ function CriterionBar({ criterion }) {
     nebenkosten: 'Nebenkosten',
     grundriss: 'Grundriss',
     'verkäufertyp': 'Verkäufertyp',
+    'verkaeufertyp': 'Verkäufertyp',
   };
 
+  const displayWeight = showAdjusted && weightDiff ? weightDiff.adjusted : criterion.gewichtung;
+  const hasWeightChange = weightDiff && Math.abs(weightDiff.diff) >= 1;
+
   return (
-    <div className="mb-6 p-4 bg-slate/5 rounded-xl border border-slate/10 hover:border-accent/30 transition-all">
+    <div className={`mb-6 p-4 rounded-xl border transition-all ${
+      hasWeightChange && showAdjusted
+        ? weightDiff.direction === 'up'
+          ? 'bg-green-500/5 border-green-500/20 hover:border-green-500/40'
+          : 'bg-slate/5 border-slate/10 hover:border-slate/20'
+        : 'bg-slate/5 border-slate/10 hover:border-accent/30'
+    }`}>
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           <span className="text-lg">{getScoreEmoji(criterion.score)}</span>
           <span className="text-base font-semibold text-primary">
             {criterionLabels[criterion.name] || criterion.name}
           </span>
+          {hasWeightChange && showAdjusted && (
+            <span className={`text-xs px-1.5 py-0.5 rounded ${
+              weightDiff.direction === 'up'
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-slate/20 text-slate/60'
+            }`}>
+              {weightDiff.direction === 'up' ? '↑ Wichtiger' : '↓ Weniger wichtig'}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate/60 bg-slate/10 px-2 py-1 rounded-full">
-            {criterion.gewichtung}% Gewichtung
+          <span className={`text-xs px-2 py-1 rounded-full ${
+            hasWeightChange && showAdjusted
+              ? weightDiff.direction === 'up'
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-slate/10 text-slate/60'
+              : 'bg-slate/10 text-slate/60'
+          }`}>
+            {displayWeight}% Gewichtung
+            {hasWeightChange && showAdjusted && (
+              <span className="ml-1">
+                ({weightDiff.diff > 0 ? '+' : ''}{weightDiff.diff})
+              </span>
+            )}
           </span>
           <span className="text-lg font-bold text-primary">
             {Math.round(criterion.score)}
@@ -153,6 +201,40 @@ const TABS = [
 function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
   const [activeTab, setActiveTab] = useState('uebersicht');
   const [selectedScenario, setSelectedScenario] = useState(null);
+  const [showPersonalized, setShowPersonalized] = useState(true);
+
+  // Dynamic Scoring Integration
+  let userProfileContext;
+  try {
+    userProfileContext = useUserProfile();
+  } catch (e) {
+    userProfileContext = null;
+  }
+
+  const profile = userProfileContext?.profile;
+  const isProfileComplete = userProfileContext?.isProfileComplete;
+
+  // Berechne dynamische Scores und Warnungen
+  const dynamicData = useMemo(() => {
+    if (!profile || !isProfileComplete) {
+      return {
+        adjustedScore: null,
+        weightDiffs: {},
+        warnings: [],
+        recommendation: null
+      };
+    }
+
+    const adjustedScore = calculateAdjustedScore(result.kriterien, profile);
+    const weightDiffs = getWeightDifferences(profile);
+    const warnings = generatePersonalizedWarnings(result, profile);
+    const recommendation = getProfileBasedRecommendation(
+      showPersonalized ? adjustedScore : result.gesamtscore,
+      profile
+    );
+
+    return { adjustedScore, weightDiffs, warnings, recommendation };
+  }, [result, profile, isProfileComplete, showPersonalized]);
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('de-DE', {
@@ -174,16 +256,30 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
       {/* Header Card with Score */}
       <div className="glass-light rounded-3xl shadow-2xl p-10 card-hover">
         <div className="flex flex-col md:flex-row items-center gap-10">
-          <ScoreCircle score={result.gesamtscore} />
+          <ScoreCircle
+            score={result.gesamtscore}
+            adjustedScore={dynamicData.adjustedScore}
+            showAdjusted={showPersonalized && isProfileComplete}
+          />
 
           <div className="flex-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full mb-4">
-              <span className="text-2xl">
-                {result.verwendungszweck === 'kapitalanlage' ? '\u{1F4B0}' : '\u{1F3E0}'}
-              </span>
-              <span className="text-accent font-semibold">
-                {result.verwendungszweck === 'kapitalanlage' ? 'Kapitalanlage' : 'Eigennutzung'}
-              </span>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full">
+                <span className="text-2xl">
+                  {result.verwendungszweck === 'kapitalanlage' ? '\u{1F4B0}' : '\u{1F3E0}'}
+                </span>
+                <span className="text-accent font-semibold">
+                  {result.verwendungszweck === 'kapitalanlage' ? 'Kapitalanlage' : 'Eigennutzung'}
+                </span>
+              </div>
+              {isProfileComplete && profile && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-neon-purple/10 border border-neon-purple/30 rounded-full">
+                  <span>{INVESTMENT_GOALS[profile.goal]?.icon}</span>
+                  <span className="text-neon-purple text-sm font-medium">
+                    {INVESTMENT_GOALS[profile.goal]?.label}
+                  </span>
+                </div>
+              )}
             </div>
 
             <h2 className="text-3xl font-bold text-primary mb-4">
@@ -191,8 +287,52 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
             </h2>
 
             <p className="text-slate text-lg leading-relaxed">{result.zusammenfassung}</p>
+
+            {/* Personalized Recommendation */}
+            {isProfileComplete && dynamicData.recommendation && (
+              <div className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${
+                dynamicData.recommendation.action === 'invest'
+                  ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                  : dynamicData.recommendation.action === 'consider'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                    : dynamicData.recommendation.action === 'caution'
+                      ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                      : 'bg-red-500/10 border-red-500/30 text-red-400'
+              }`}>
+                <span className="text-lg">{dynamicData.recommendation.emoji}</span>
+                <span className="font-medium">{dynamicData.recommendation.text}</span>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Personalized Toggle */}
+        {isProfileComplete && dynamicData.adjustedScore !== null && (
+          <div className="mt-6 pt-6 border-t border-slate/10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowPersonalized(!showPersonalized)}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${
+                    showPersonalized ? 'bg-neon-purple' : 'bg-slate/30'
+                  }`}
+                >
+                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                    showPersonalized ? 'left-7' : 'left-1'
+                  }`} />
+                </button>
+                <span className="text-sm text-slate">
+                  Personalisierte Bewertung ({INVESTMENT_GOALS[profile.goal]?.label})
+                </span>
+              </div>
+              {showPersonalized && dynamicData.adjustedScore !== result.gesamtscore && (
+                <span className="text-xs text-slate/60">
+                  Basis-Score: {Math.round(result.gesamtscore)} | Angepasst: {dynamicData.adjustedScore}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate/10">
           <button
@@ -249,6 +389,52 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
       {/* Tab Content */}
       {activeTab === 'uebersicht' && (
         <>
+          {/* Personalized Warnings */}
+          {isProfileComplete && dynamicData.warnings.length > 0 && showPersonalized && (
+            <div className="glass-light rounded-3xl shadow-2xl p-8 fade-in card-hover border-2 border-neon-purple/20">
+              <h3 className="text-xl font-bold text-primary mb-6 flex items-center gap-3">
+                <span className="w-10 h-10 bg-neon-purple/20 rounded-xl flex items-center justify-center text-xl">
+                  🎯
+                </span>
+                Personalisierte Hinweise
+                <span className="text-xs bg-neon-purple/20 text-neon-purple px-2 py-1 rounded-full ml-2">
+                  {INVESTMENT_GOALS[profile.goal]?.label}
+                </span>
+              </h3>
+
+              <div className="space-y-3">
+                {dynamicData.warnings.map((warning, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-xl flex items-start gap-3 ${
+                      warning.type === 'critical'
+                        ? 'bg-red-500/10 border border-red-500/30'
+                        : warning.type === 'warning'
+                          ? 'bg-amber-500/10 border border-amber-500/30'
+                          : warning.type === 'positive'
+                            ? 'bg-green-500/10 border border-green-500/30'
+                            : 'bg-blue-500/10 border border-blue-500/30'
+                    }`}
+                  >
+                    <span className="text-2xl flex-shrink-0">{warning.icon}</span>
+                    <div>
+                      {warning.title && (
+                        <p className={`font-bold mb-1 ${
+                          warning.type === 'critical' ? 'text-red-400' :
+                          warning.type === 'warning' ? 'text-amber-400' :
+                          warning.type === 'positive' ? 'text-green-400' : 'text-blue-400'
+                        }`}>
+                          {warning.title}
+                        </p>
+                      )}
+                      <p className="text-slate text-sm leading-relaxed">{warning.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Break-Even Calculator (new) */}
           {result.breakeven_eigenkapital && result.verwendungszweck === 'kapitalanlage' && (
             <div className="fade-in-delay-1">
@@ -365,14 +551,32 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
                 {'\u{1F4CA}'}
               </span>
               Detailbewertung
+              {isProfileComplete && showPersonalized && Object.keys(dynamicData.weightDiffs).length > 0 && (
+                <span className="text-xs bg-neon-purple/20 text-neon-purple px-2 py-1 rounded-full ml-2">
+                  Gewichtung angepasst
+                </span>
+              )}
             </h3>
 
             <div className="space-y-6">
               {result.kriterien
                 .filter(k => k.gewichtung > 0)
-                .sort((a, b) => b.gewichtung - a.gewichtung)
+                .sort((a, b) => {
+                  // Bei personalisierter Ansicht nach angepasster Gewichtung sortieren
+                  if (showPersonalized && isProfileComplete) {
+                    const aWeight = dynamicData.weightDiffs[a.name]?.adjusted || a.gewichtung;
+                    const bWeight = dynamicData.weightDiffs[b.name]?.adjusted || b.gewichtung;
+                    return bWeight - aWeight;
+                  }
+                  return b.gewichtung - a.gewichtung;
+                })
                 .map((criterion, index) => (
-                  <CriterionBar key={criterion.name} criterion={criterion} />
+                  <CriterionBar
+                    key={criterion.name}
+                    criterion={criterion}
+                    weightDiff={dynamicData.weightDiffs[criterion.name]}
+                    showAdjusted={showPersonalized && isProfileComplete}
+                  />
                 ))}
             </div>
           </div>
@@ -417,6 +621,97 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData }) {
               </ul>
             </div>
           </div>
+
+          {/* V3.0 Kennzahlen & Markt-Vergleich */}
+          {result.kennzahlen && (
+            <div className="glass-light rounded-3xl shadow-2xl p-8 fade-in-delay-3 card-hover border-2 border-neon-blue/20">
+              <h3 className="text-2xl font-bold text-primary mb-6 flex items-center gap-3">
+                <span className="w-12 h-12 bg-gradient-to-br from-neon-blue to-neon-purple rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                  📊
+                </span>
+                Markt-Vergleich (Live-Daten)
+                {result.kennzahlen.marktdaten_quelle === 'live_web_search_v3' && (
+                  <span className="text-xs bg-neon-green/20 text-neon-green px-2 py-1 rounded-full ml-2">✓ Live</span>
+                )}
+              </h3>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {/* Preis pro qm */}
+                <div className="p-5 bg-gradient-to-br from-slate/5 to-slate/10 rounded-2xl border border-slate/20">
+                  <p className="text-sm text-slate/70 mb-2 font-medium">Objekt-Preis</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {result.kennzahlen.preis_pro_qm?.toLocaleString('de-DE')} €/m²
+                  </p>
+                </div>
+
+                {/* Markt-Durchschnitt */}
+                <div className="p-5 bg-gradient-to-br from-slate/5 to-slate/10 rounded-2xl border border-slate/20">
+                  <p className="text-sm text-slate/70 mb-2 font-medium">Markt-Durchschnitt</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {result.kennzahlen.markt_durchschnitt_qm?.toLocaleString('de-DE') || '---'} €/m²
+                  </p>
+                </div>
+
+                {/* Abweichung */}
+                <div className={`p-5 rounded-2xl border ${
+                  result.kennzahlen.unter_markt
+                    ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300'
+                    : 'bg-gradient-to-br from-red-50 to-orange-50 border-red-300'
+                }`}>
+                  <p className="text-sm text-slate/70 mb-2 font-medium">Abweichung vom Markt</p>
+                  <p className={`text-2xl font-bold ${
+                    result.kennzahlen.unter_markt ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {result.kennzahlen.abweichung_prozent > 0 ? '+' : ''}
+                    {result.kennzahlen.abweichung_prozent?.toFixed(1) || '---'}%
+                  </p>
+                  <p className={`text-sm mt-1 font-semibold ${
+                    result.kennzahlen.unter_markt ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                    {result.kennzahlen.unter_markt ? '✓ Unter Markt' : '⚠ Über Markt'}
+                  </p>
+                </div>
+
+                {/* Kaufpreisfaktor */}
+                {result.kennzahlen.kaufpreisfaktor && (
+                  <div className={`p-5 rounded-2xl border ${
+                    result.kennzahlen.kaufpreisfaktor < 20
+                      ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300'
+                      : result.kennzahlen.kaufpreisfaktor < 25
+                        ? 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300'
+                        : 'bg-gradient-to-br from-red-50 to-orange-50 border-red-300'
+                  }`}>
+                    <p className="text-sm text-slate/70 mb-2 font-medium">Kaufpreisfaktor</p>
+                    <p className={`text-2xl font-bold ${
+                      result.kennzahlen.kaufpreisfaktor < 20 ? 'text-green-600' :
+                      result.kennzahlen.kaufpreisfaktor < 25 ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {result.kennzahlen.kaufpreisfaktor}
+                    </p>
+                    <p className="text-xs text-slate/60 mt-1">
+                      {'<'}20 gut, {'<'}25 ok, {'>'}25 hoch
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Datenquelle Info */}
+              <div className="flex items-center justify-between text-sm border-t border-slate/10 pt-4">
+                <span className="text-slate/60">
+                  📍 Standort: {result.kennzahlen.marktdaten_standort || 'Nicht angegeben'}
+                </span>
+                <span className={`px-2 py-1 rounded text-xs ${
+                  result.kennzahlen.marktdaten_vertrauen === 'hoch'
+                    ? 'bg-green-100 text-green-700'
+                    : result.kennzahlen.marktdaten_vertrauen === 'mittel'
+                      ? 'bg-yellow-100 text-yellow-700'
+                      : 'bg-slate-100 text-slate-700'
+                }`}>
+                  Vertrauen: {result.kennzahlen.marktdaten_vertrauen || 'unbekannt'}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Market Data */}
           {result.marktdaten && (

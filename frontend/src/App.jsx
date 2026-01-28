@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { UserProfileProvider } from './contexts/UserProfileContext';
 
 // Pages
 import Login from './pages/Login';
@@ -51,6 +52,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <UserProfileProvider>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<RootRedirect />} />
@@ -132,6 +134,7 @@ function App() {
           {/* 404 */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </UserProfileProvider>
       </AuthProvider>
     </BrowserRouter>
   );

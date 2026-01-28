@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { formatCurrency } from '../constants';
+import { useAuth } from '../contexts/AuthContext';
 
 function FairPriceCalculator({ analysisData }) {
+  const { token } = useAuth();
   const [values, setValues] = useState({
     kaufpreis: analysisData?.kaufpreis || 300000,
     kaltmiete: analysisData?.kaltmiete || 950,
@@ -13,6 +15,37 @@ function FairPriceCalculator({ analysisData }) {
     zinssatz: 3.8,
     tilgungssatz: 1.5
   });
+  const [stadtInput, setStadtInput] = useState('');
+  const [isLoadingMarkt, setIsLoadingMarkt] = useState(false);
+  const [marktdatenInfo, setMarktdatenInfo] = useState(null);
+
+  const fetchLiveMarktdaten = async () => {
+    if (!stadtInput.trim()) return;
+    setIsLoadingMarkt(true);
+    try {
+      const response = await fetch(`http://localhost:8000/search-market-data?stadt=${encodeURIComponent(stadtInput)}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.kaufpreis_qm_durchschnitt) {
+          setValues(v => ({ ...v, vergleichspreisProQm: Math.round(data.kaufpreis_qm_durchschnitt) }));
+          setMarktdatenInfo({
+            standort: data.standort,
+            quelle: data.recherche_methode === 'live_web_search_v3' ? 'Live-Recherche' : 'Schätzung',
+            preis: data.kaufpreis_qm_durchschnitt
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Marktdaten-Fehler:', error);
+    } finally {
+      setIsLoadingMarkt(false);
+    }
+  };
 
   const calculation = useMemo(() => {
     const {
@@ -132,6 +165,43 @@ function FairPriceCalculator({ analysisData }) {
         </p>
       </div>
 
+      {/* Live-Marktdaten Section */}
+      <div className="glass-card rounded-2xl p-4 border border-neon-blue/30 bg-neon-blue/5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+          <div className="flex-1">
+            <label className="block text-sm text-neon-blue font-medium mb-2">🔴 Live-Marktdaten laden</label>
+            <input
+              type="text"
+              value={stadtInput}
+              onChange={(e) => setStadtInput(e.target.value)}
+              placeholder="Stadt eingeben (z.B. München, Hamburg-Eimsbüttel)"
+              className="w-full px-3 py-2 bg-surface border border-neon-blue/30 rounded-lg text-white placeholder-text-muted focus:ring-2 focus:ring-neon-blue/30 focus:border-neon-blue outline-none transition-all"
+            />
+          </div>
+          <button
+            onClick={fetchLiveMarktdaten}
+            disabled={isLoadingMarkt || !stadtInput.trim()}
+            className="px-4 py-2 bg-neon-blue text-white rounded-lg font-medium hover:bg-neon-blue/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+          >
+            {isLoadingMarkt ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Lade...
+              </>
+            ) : (
+              <>📊 Preise abrufen</>
+            )}
+          </button>
+        </div>
+        {marktdatenInfo && (
+          <div className="mt-3 p-2 bg-neon-green/10 border border-neon-green/30 rounded-lg text-sm">
+            <span className="text-neon-green font-medium">✓ {marktdatenInfo.standort}:</span>
+            <span className="text-white ml-2">{marktdatenInfo.preis.toLocaleString('de-DE')} €/m²</span>
+            <span className="text-text-muted ml-2">({marktdatenInfo.quelle})</span>
+          </div>
+        )}
+      </div>
+
       {/* Input Section */}
       <div className="glass-card rounded-2xl p-6 border border-white/10">
         <h4 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-4">Objektdaten</h4>
@@ -164,7 +234,10 @@ function FairPriceCalculator({ analysisData }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-text-secondary mb-2">Vergleichspreis €/m²</label>
+            <label className="block text-sm text-text-secondary mb-2">
+              Vergleichspreis €/m²
+              {marktdatenInfo && <span className="text-neon-green text-xs ml-1">(Live)</span>}
+            </label>
             <input
               type="number"
               value={values.vergleichspreisProQm}
