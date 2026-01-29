@@ -235,39 +235,19 @@ h1, h2, h3, h4 {
     -10px 10px 0 rgba(168, 85, 247, 0.05);
 }
 
-/* Card Hover with Neon Glow */
+/* Card Hover with Subtle Glow */
 .card-hover {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
-.card-hover::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(135deg, #00d4ff, #a855f7, #ec4899, #00d4ff);
-  background-size: 400% 400%;
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.card-hover:hover::before {
-  opacity: 1;
-  animation: borderGlow 3s ease infinite;
-}
-
 .card-hover:hover {
-  transform: translateY(-4px) scale(1.01);
+  transform: translateY(-4px);
+  border-color: rgba(0, 212, 255, 0.4) !important;
   box-shadow:
-    0 20px 60px rgba(0, 212, 255, 0.2),
-    0 0 40px rgba(168, 85, 247, 0.15);
-}
-
-@keyframes borderGlow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(0, 212, 255, 0.1),
+    0 0 40px rgba(168, 85, 247, 0.05);
 }
 
 /* ============================================
