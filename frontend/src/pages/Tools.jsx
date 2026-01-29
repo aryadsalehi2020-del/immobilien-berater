@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import AIChat from '../components/AIChat';
 import ProjectionCharts from '../components/ProjectionCharts';
 import ScenarioSimulator from '../components/ScenarioSimulator';
@@ -41,6 +41,11 @@ const getToolColors = (color, isActive) => {
 
 function Tools() {
   const [activeTool, setActiveTool] = useState('chat');
+
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Demo data for tools
   const demoAnalysis = useMemo(() => ({

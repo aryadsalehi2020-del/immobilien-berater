@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserProfileProvider } from './contexts/UserProfileContext';
 
@@ -17,6 +17,22 @@ import Tools from './pages/Tools';
 // Components
 import Sidebar from './components/Sidebar';
 import ProtectedRoute from './components/ProtectedRoute';
+
+// Scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Also scroll the main content area
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+      mainContent.scrollTo(0, 0);
+    }
+  }, [pathname]);
+
+  return null;
+}
 
 // Layout Component für eingeloggte User
 function DashboardLayout({ children }) {
@@ -51,6 +67,7 @@ function RootRedirect() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <UserProfileProvider>
         <Routes>
