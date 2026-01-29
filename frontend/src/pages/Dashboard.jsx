@@ -11,7 +11,6 @@ function Dashboard() {
     totalAnalyses: 0,
     favorites: 0,
     recentAnalyses: [],
-    averageScore: 0,
     bestAnalysis: null
   });
   const [loading, setLoading] = useState(true);
@@ -29,9 +28,6 @@ function Dashboard() {
 
       if (response.ok) {
         const analyses = await response.json();
-        const avgScore = analyses.length > 0
-          ? analyses.reduce((sum, a) => sum + (a.gesamtscore || 0), 0) / analyses.length
-          : 0;
         const best = analyses.length > 0
           ? analyses.reduce((prev, curr) => (curr.gesamtscore || 0) > (prev.gesamtscore || 0) ? curr : prev)
           : null;
@@ -40,7 +36,6 @@ function Dashboard() {
           totalAnalyses: analyses.length,
           favorites: analyses.filter(a => a.is_favorite).length,
           recentAnalyses: analyses.slice(0, 5),
-          averageScore: avgScore,
           bestAnalysis: best
         });
         setLastUpdated(new Date());
@@ -109,7 +104,7 @@ function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid md:grid-cols-4 gap-5 relative z-10">
+      <div className="grid md:grid-cols-3 gap-5 relative z-10">
         <Link
           to="/library"
           className="glass-card rounded-2xl p-6 card-3d border border-neon-blue/20 fade-in fade-in-delay-1 cursor-pointer hover:border-neon-blue/50 transition-all group"
@@ -143,24 +138,6 @@ function Dashboard() {
           <p className="text-4xl font-bold text-white text-glow-purple">{stats.favorites}</p>
           <p className="text-xs text-neon-purple/60 mt-2 group-hover:text-neon-purple transition-colors">Favoriten anzeigen →</p>
         </Link>
-
-        <div className="glass-card rounded-2xl p-6 border border-accent/20 fade-in fade-in-delay-3">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center" style={{ boxShadow: '0 0 20px rgba(251, 191, 36, 0.3)' }}>
-              <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <span className="text-accent text-xs font-mono uppercase tracking-wider">Avg</span>
-          </div>
-          <p className="text-text-secondary text-sm mb-1">Durchschnitt Score</p>
-          <p className="text-4xl font-bold text-white text-glow-gold">
-            {stats.averageScore > 0 ? Math.round(stats.averageScore) : '-'}
-          </p>
-          <p className="text-xs text-text-muted mt-2">
-            {stats.averageScore >= 70 ? 'Sehr gut' : stats.averageScore >= 50 ? 'Gut' : stats.averageScore > 0 ? 'Verbesserbar' : 'Noch keine Daten'}
-          </p>
-        </div>
 
         <Link
           to="/analyze"
