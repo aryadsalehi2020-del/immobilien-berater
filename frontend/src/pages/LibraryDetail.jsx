@@ -17,9 +17,10 @@ function LibraryDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ title: '', notes: '' });
+  const [editForm, setEditForm] = useState({ title: '' });
   const [activeTool, setActiveTool] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isReanalyzing, setIsReanalyzing] = useState(false);
 
   useEffect(() => {
     fetchAnalysis();
@@ -88,6 +89,44 @@ function LibraryDetail() {
       }
     } catch (error) {
       console.error('Failed to save changes:', error);
+    }
+  };
+
+  // Neu-Analyse mit anderem Verwendungszweck
+  const handleSwitchVerwendungszweck = async (newVerwendungszweck) => {
+    if (!analysis || analysis.verwendungszweck === newVerwendungszweck) return;
+
+    setIsReanalyzing(true);
+    try {
+      const response = await fetch('http://localhost:8000/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          property_data: analysis.property_data,
+          verwendungszweck: newVerwendungszweck,
+          eigenkapital: analysis.eigenkapital || 0,
+          zinssatz: analysis.zinssatz || 3.75,
+          tilgung: analysis.tilgung || 1.25,
+        }),
+      });
+
+      if (response.ok) {
+        const newResult = await response.json();
+        // Update die Analyse mit neuem Ergebnis
+        setAnalysis(prev => ({
+          ...prev,
+          verwendungszweck: newVerwendungszweck,
+          analysis_result: newResult,
+          gesamtscore: newResult.gesamtscore
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to reanalyze:', error);
+    } finally {
+      setIsReanalyzing(false);
     }
   };
 
@@ -274,33 +313,54 @@ function LibraryDetail() {
           </div>
         </div>
 
-        {/* Notes Section */}
-        {isEditing ? (
+        {/* Daten bearbeiten Button */}
+        {isEditing && (
           <div className="mt-4">
-            <label className="block text-sm font-medium text-text-secondary mb-2">Notizen</label>
-            <textarea
-              value={editForm.notes}
-              onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-              placeholder="Notizen zur Analyse..."
-              rows={3}
-              className="w-full px-4 py-3 bg-surface border border-white/10 rounded-xl focus:ring-2 focus:ring-neon-blue/30 focus:border-neon-blue outline-none transition-all text-white placeholder:text-text-muted"
-            />
-          </div>
-        ) : analysis.notes && (
-          <div className="mt-4 p-4 bg-neon-blue/10 rounded-xl border border-neon-blue/30">
-            <p className="text-sm font-medium text-neon-blue mb-1">Notizen:</p>
-            <p className="text-text-secondary">{analysis.notes}</p>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Titel bearbeiten</label>
           </div>
         )}
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
-          <div className="text-center p-3 bg-white/5 rounded-xl">
-            <p className="text-xs text-text-muted mb-1">Verwendungszweck</p>
-            <p className="font-bold text-neon-blue capitalize">
-              {analysis.verwendungszweck === 'kapitalanlage' ? 'Kapitalanlage' : 'Eigennutzung'}
-            </p>
+        {/* Verwendungszweck Switch */}
+        <div className="mt-6 pt-6 border-t border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-text-muted">Analysieren als:</span>
+            <div className="inline-flex items-center rounded-full border border-white/20 p-1">
+              <button
+                onClick={() => handleSwitchVerwendungszweck('kapitalanlage')}
+                disabled={isReanalyzing}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                  analysis.verwendungszweck === 'kapitalanlage'
+                    ? 'bg-neon-blue/20 text-neon-blue'
+                    : 'text-text-muted hover:text-white cursor-pointer'
+                } ${isReanalyzing ? 'opacity-50' : ''}`}
+              >
+                <span className="text-lg">💰</span>
+                <span className="font-semibold text-sm">Kapitalanlage</span>
+              </button>
+              <button
+                onClick={() => handleSwitchVerwendungszweck('eigennutzung')}
+                disabled={isReanalyzing}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                  analysis.verwendungszweck === 'eigennutzung'
+                    ? 'bg-neon-purple/20 text-neon-purple'
+                    : 'text-text-muted hover:text-white cursor-pointer'
+                } ${isReanalyzing ? 'opacity-50' : ''}`}
+              >
+                <span className="text-lg">🏠</span>
+                <span className="font-semibold text-sm">Eigennutzung</span>
+              </button>
+            </div>
           </div>
+          {isReanalyzing && (
+            <div className="flex items-center justify-center gap-2 text-neon-blue text-sm mb-4">
+              <div className="w-4 h-4 spinner-neon rounded-full"></div>
+              <span>Neu-Analyse läuft...</span>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
           <div className="text-center p-3 bg-white/5 rounded-xl">
             <p className="text-xs text-text-muted mb-1">Kaufpreis</p>
             <p className="font-bold text-neon-green">
@@ -419,13 +479,24 @@ function LibraryDetail() {
 
         {activeTool === 'chat' && (
           <div className="border-t border-white/10 pt-6 mt-4 h-96">
-            <AIChat analysisContext={{
-              kaufpreis: analysis.kaufpreis,
-              kaltmiete: analysis.kaltmiete,
-              stadt: analysis.stadt,
-              eigenkapital: analysis.eigenkapital,
-              gesamtscore: analysis.gesamtscore
-            }} />
+            <AIChat
+              analysisContext={{
+                ...analysis.property_data,
+                kaufpreis: analysis.kaufpreis,
+                stadt: analysis.stadt,
+                stadtteil: analysis.stadtteil,
+                wohnflaeche: analysis.wohnflaeche,
+                eigenkapital: analysis.eigenkapital,
+                zinssatz: analysis.zinssatz,
+                tilgung: analysis.tilgung,
+                verwendungszweck: analysis.verwendungszweck,
+                gesamtscore: analysis.gesamtscore,
+                cashflow_monatlich: analysis.analysis_result?.cashflow_analyse?.monatlicher_cashflow,
+                bruttorendite: analysis.analysis_result?.kennzahlen?.bruttorendite,
+                kaufpreisfaktor: analysis.analysis_result?.kennzahlen?.kaufpreisfaktor
+              }}
+              isProjectSpecific={true}
+            />
           </div>
         )}
       </div>

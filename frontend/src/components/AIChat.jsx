@@ -41,14 +41,34 @@ const QUICK_QUESTIONS = [
   ]}
 ];
 
-function AIChat({ analysisContext }) {
+function AIChat({ analysisContext, isProjectSpecific = false }) {
   const { token } = useAuth();
-  const [messages, setMessages] = useState([
-    {
+
+  // Erstelle projektspezifische Begrüßung
+  const getInitialMessage = () => {
+    if (isProjectSpecific && analysisContext) {
+      const stadt = analysisContext.stadt || 'unbekannt';
+      const kaufpreis = analysisContext.kaufpreis ? `${(analysisContext.kaufpreis / 1000).toFixed(0)}k€` : 'unbekannt';
+      const score = analysisContext.gesamtscore ? `${Math.round(analysisContext.gesamtscore)}/100` : '';
+
+      return {
+        role: 'assistant',
+        content: `Ich bin Ihr Berater für **diese Immobilie** in ${stadt} (${kaufpreis})! 🏠\n\n` +
+          (score ? `Aktueller Score: **${score}**\n\n` : '') +
+          `Fragen Sie mich spezifisch zu diesem Objekt:\n` +
+          `- "Ist der Preis angemessen?"\n` +
+          `- "Wie kann ich den Cashflow verbessern?"\n` +
+          `- "Welche Förderungen passen hier?"\n` +
+          `- "Was sind die Risiken bei dieser Immobilie?"`
+      };
+    }
+    return {
       role: 'assistant',
       content: 'Hallo! Ich bin Ihr persönlicher Immobilien-Berater mit **Live-Marktdaten**! 🔴\n\nIch kann aktuelle Preise für jeden Stadtteil recherchieren. Fragen Sie mich z.B.:\n- "Was kostet eine Wohnung in München-Schwabing?"\n- "Wie sind die Mietpreise in Hamburg-Eimsbüttel?"\n\nOder wählen Sie ein Thema unten!'
-    }
-  ]);
+    };
+  };
+
+  const [messages, setMessages] = useState([getInitialMessage()]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);

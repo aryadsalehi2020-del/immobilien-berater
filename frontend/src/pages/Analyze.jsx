@@ -92,7 +92,14 @@ function Analyze() {
 
   // Neu-Analyse mit anderem Verwendungszweck
   const handleSwitchVerwendungszweck = useCallback(async (newVerwendungszweck) => {
-    if (!propertyData || !lastFinanzierung) return;
+    if (!propertyData) return;
+
+    // Verwende lastFinanzierung oder Default-Werte
+    const finanzierung = lastFinanzierung || {
+      eigenkapital: 0,
+      zinssatz: 3.75,
+      tilgung: 1.25
+    };
 
     setError(null);
     setStep('analyzing');
@@ -100,6 +107,7 @@ function Analyze() {
       ? 'Bewerte als Kapitalanlage...'
       : 'Bewerte als Eigennutzung...');
     setLastVerwendungszweck(newVerwendungszweck);
+    setLastFinanzierung(finanzierung);
 
     try {
       const response = await fetch(`${API_BASE}/analyze`, {
@@ -111,9 +119,9 @@ function Analyze() {
         body: JSON.stringify({
           property_data: propertyData,
           verwendungszweck: newVerwendungszweck,
-          eigenkapital: lastFinanzierung.eigenkapital,
-          zinssatz: lastFinanzierung.zinssatz,
-          tilgung: lastFinanzierung.tilgung,
+          eigenkapital: finanzierung.eigenkapital,
+          zinssatz: finanzierung.zinssatz,
+          tilgung: finanzierung.tilgung,
         }),
       });
 
@@ -127,6 +135,7 @@ function Analyze() {
       setStep('result');
     } catch (err) {
       setError(err.message);
+      setStep('result'); // Bleibe auf result Seite bei Fehler
     }
   }, [propertyData, lastFinanzierung, token]);
 
