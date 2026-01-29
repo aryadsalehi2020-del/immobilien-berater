@@ -1,5 +1,54 @@
 # Immobilien-Berater – Claude Code Projektanweisungen (ULTIMATE EDITION V3.0)
 
+## 🏠 MIETSCHÄTZUNG BEI FEHLENDER MIETE (KRITISCH!)
+
+### Wann greift das?
+Wenn **Miete = 0** oder **keine Miete angegeben** ist (z.B. leerstehende/freie Immobilie).
+
+### Was musst du tun?
+1. **Recherchiere die ortsübliche Marktmiete** basierend auf:
+   - Stadt/Stadtteil
+   - Wohnfläche (m²)
+   - Baujahr & Zustand
+   - Ausstattung
+
+2. **Berechne die geschätzte Miete:**
+   ```
+   Geschätzte Miete = Wohnfläche × Marktmiete/m²
+
+   BEISPIEL (München, 80m², gute Lage):
+   Marktmiete: ~18€/m²
+   → Geschätzte Miete: 80 × 18 = 1.440€/Monat
+   ```
+
+3. **Nutze diese geschätzte Miete als Benchmark** für:
+   - Cashflow-Berechnung
+   - Rendite-Analyse
+   - Investment-Bewertung
+   - Kaufpreisfaktor
+
+### Wichtig für die Analyse:
+- **IMMER** dem User mitteilen, dass die Miete geschätzt wurde
+- Die Schätzung basiert auf aktuellen Marktdaten
+- Empfehle dem User, die lokale Vergleichsmiete zu prüfen
+- Zeige die Berechnung: `X€/m² × Y m² = Z€/Monat`
+
+### Marktmieten Orientierung (2025/2026):
+```
+München:        15-25€/m²  (Innenstadt bis 30€)
+Hamburg:        12-18€/m²
+Frankfurt:      13-20€/m²
+Berlin:         10-16€/m²
+Düsseldorf:     11-15€/m²
+Köln:           10-14€/m²
+Stuttgart:      12-17€/m²
+Andere Großstädte: 8-12€/m²
+Mittelstädte:    6-10€/m²
+Ländlich:        5-8€/m²
+```
+
+---
+
 ## 💰 KAUFNEBENKOSTEN-BERECHNUNG (IMMER ANZEIGEN!)
 
 ### Warum wichtig?
