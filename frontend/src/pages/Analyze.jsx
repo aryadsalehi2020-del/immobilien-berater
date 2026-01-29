@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import FileUpload from '../components/FileUpload';
 import PropertyForm from '../components/PropertyForm';
 import AnalysisResult from '../components/AnalysisResult';
 import LoadingState from '../components/LoadingState';
-import UserGoalsForm from '../components/UserGoalsForm';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserProfile, INVESTMENT_GOALS } from '../contexts/UserProfileContext';
 
@@ -15,7 +15,6 @@ function Analyze() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState(null);
   const [loadingMessage, setLoadingMessage] = useState('');
-  const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [lastFinanzierung, setLastFinanzierung] = useState(null);
   const [lastVerwendungszweck, setLastVerwendungszweck] = useState(null);
   const { token } = useAuth();
@@ -186,8 +185,11 @@ function Analyze() {
         )}
 
         {/* Investor Profile Prompt */}
-        {step === 'upload' && !isProfileComplete && !showProfileSetup && (
-          <div className="mb-8 glass-card rounded-2xl p-6 border-2 border-accent/30 fade-in">
+        {step === 'upload' && !isProfileComplete && (
+          <Link
+            to="/profile"
+            className="mb-8 glass-card rounded-2xl p-6 border-2 border-accent/30 fade-in block hover:border-accent/50 transition-all group"
+          >
             <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="w-12 h-12 bg-accent/20 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
                 🎯
@@ -198,21 +200,14 @@ function Analyze() {
                   Richte dein Investoren-Profil ein für Scores, die auf dein Ziel optimiert sind.
                 </p>
               </div>
-              <button
-                onClick={() => setShowProfileSetup(true)}
-                className="px-4 py-2 bg-accent/20 border border-accent/30 text-accent rounded-xl font-medium hover:bg-accent/30 transition-all text-sm"
-              >
+              <span className="px-4 py-2 bg-accent/20 border border-accent/30 text-accent rounded-xl font-medium group-hover:bg-accent/30 transition-all text-sm flex items-center gap-2">
                 Jetzt einrichten
-              </button>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
             </div>
-          </div>
-        )}
-
-        {/* Inline Profile Setup */}
-        {step === 'upload' && showProfileSetup && (
-          <div className="mb-8 fade-in">
-            <UserGoalsForm compact onComplete={() => setShowProfileSetup(false)} />
-          </div>
+          </Link>
         )}
 
         {/* Active Profile Badge */}
@@ -226,12 +221,12 @@ function Analyze() {
               <p className="text-text-secondary text-sm flex-1">
                 Scores werden personalisiert
               </p>
-              <button
-                onClick={() => setShowProfileSetup(true)}
+              <Link
+                to="/profile"
                 className="text-neon-blue hover:text-neon-purple text-sm font-medium transition-colors"
               >
                 Ändern
-              </button>
+              </Link>
             </div>
           </div>
         )}
