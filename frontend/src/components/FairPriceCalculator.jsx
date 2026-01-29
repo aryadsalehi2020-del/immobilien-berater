@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { formatCurrency } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE } from '../config';
 
 function FairPriceCalculator({ analysisData }) {
   const { token } = useAuth();
@@ -23,7 +24,7 @@ function FairPriceCalculator({ analysisData }) {
     if (!stadtInput.trim()) return;
     setIsLoadingMarkt(true);
     try {
-      const response = await fetch(`http://localhost:8000/search-market-data?stadt=${encodeURIComponent(stadtInput)}`, {
+      const response = await fetch(`${API_BASE}/search-market-data?stadt=${encodeURIComponent(stadtInput)}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

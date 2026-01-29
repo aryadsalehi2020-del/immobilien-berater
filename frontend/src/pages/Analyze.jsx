@@ -4,8 +4,7 @@ import PropertyForm from '../components/PropertyForm';
 import AnalysisResult from '../components/AnalysisResult';
 import LoadingState from '../components/LoadingState';
 import { useAuth } from '../contexts/AuthContext';
-
-const API_BASE = 'http://localhost:8000';
+import { API_BASE } from '../config';
 
 function Analyze() {
   const [step, setStep] = useState('upload'); // upload, form, analyzing, result
@@ -196,7 +195,7 @@ function Analyze() {
   }, []);
 
   return (
-    <div className="p-8 bg-mesh-animated min-h-screen relative">
+    <div className="p-4 md:p-8 bg-mesh-animated min-h-screen relative">
       {/* Background Glow Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="glow-orb w-96 h-96 bg-neon-blue/10 -top-48 -right-48" />

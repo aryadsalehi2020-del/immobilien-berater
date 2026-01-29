@@ -39,7 +39,7 @@ function DashboardLayout({ children }) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pt-[60px] md:pt-0">
         {children}
       </main>
     </div>

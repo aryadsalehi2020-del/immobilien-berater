@@ -58,7 +58,7 @@ function FileUpload({ onFileUpload, onManualEntry }) {
 
         {/* Drop Zone */}
         <div
-          className={`border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all duration-300
+          className={`border-2 border-dashed rounded-2xl p-8 md:p-16 text-center cursor-pointer transition-all duration-300
             ${isDragging
               ? 'border-neon-blue bg-neon-blue/10 scale-[1.02] shadow-neon-blue'
               : 'border-white/20 hover:border-neon-blue/50 hover:bg-white/5'}
@@ -148,7 +148,7 @@ function FileUpload({ onFileUpload, onManualEntry }) {
       </div>
 
       {/* Feature Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mt-12">
+      <div className="grid md:grid-cols-3 gap-4 md:gap-6 mt-8 md:mt-12">
         <div className="glass-card rounded-2xl p-6 border border-neon-blue/20 card-3d fade-in fade-in-delay-1">
           <div className="w-14 h-14 bg-neon-blue/20 rounded-xl flex items-center justify-center mb-4 shadow-neon-blue">
             <svg className="w-7 h-7 text-neon-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">

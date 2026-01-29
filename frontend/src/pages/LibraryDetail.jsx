@@ -7,6 +7,7 @@ import ScenarioSimulator from '../components/ScenarioSimulator';
 import FairPriceCalculator from '../components/FairPriceCalculator';
 import AIChat from '../components/AIChat';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { API_BASE } from '../config';
 
 function LibraryDetail() {
   const { id } = useParams();
@@ -29,7 +30,7 @@ function LibraryDetail() {
   const fetchAnalysis = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8000/library/${id}`, {
+      const response = await fetch(`${API_BASE}/library/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -54,7 +55,7 @@ function LibraryDetail() {
 
   const toggleFavorite = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/library/${id}`, {
+      const response = await fetch(`${API_BASE}/library/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +74,7 @@ function LibraryDetail() {
 
   const saveChanges = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/library/${id}`, {
+      const response = await fetch(`${API_BASE}/library/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +99,7 @@ function LibraryDetail() {
 
     setIsReanalyzing(true);
     try {
-      const response = await fetch('http://localhost:8000/analyze', {
+      const response = await fetch(`${API_BASE}/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +137,7 @@ function LibraryDetail() {
 
   const confirmDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/library/${id}`, {
+      const response = await fetch(`${API_BASE}/library/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -173,7 +174,7 @@ function LibraryDetail() {
 
   if (loading) {
     return (
-      <div className="p-8 bg-mesh-animated min-h-screen relative">
+      <div className="p-4 md:p-8 bg-mesh-animated min-h-screen relative">
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="glow-orb w-96 h-96 bg-neon-blue/10 -top-48 -right-48" />
         </div>
@@ -187,7 +188,7 @@ function LibraryDetail() {
 
   if (error) {
     return (
-      <div className="p-8 bg-mesh-animated min-h-screen relative">
+      <div className="p-4 md:p-8 bg-mesh-animated min-h-screen relative">
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="glow-orb w-96 h-96 bg-red-500/10 -top-48 -right-48" />
         </div>
@@ -215,7 +216,7 @@ function LibraryDetail() {
   }
 
   return (
-    <div className="p-8 space-y-6 bg-mesh-animated min-h-screen relative">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6 bg-mesh-animated min-h-screen relative">
       {/* Background Glow Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="glow-orb w-96 h-96 bg-neon-blue/10 -top-48 -right-48" />

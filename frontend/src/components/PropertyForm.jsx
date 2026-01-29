@@ -52,13 +52,29 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
     }));
   }, []);
 
+  const [validationError, setValidationError] = useState(null);
+
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
+    setValidationError(null);
+
+    // Validation
+    const kaufpreis = formData.kaufpreis ? parseFloat(formData.kaufpreis) : 0;
+    const wohnflaeche = formData.wohnflaeche ? parseFloat(formData.wohnflaeche) : 0;
+
+    if (!kaufpreis || kaufpreis < 1000) {
+      setValidationError('Bitte geben Sie einen gültigen Kaufpreis ein (min. 1.000€)');
+      return;
+    }
+    if (!wohnflaeche || wohnflaeche < 5) {
+      setValidationError('Bitte geben Sie eine gültige Wohnfläche ein (min. 5 m²)');
+      return;
+    }
 
     const processedData = {
       ...formData,
-      kaufpreis: formData.kaufpreis ? parseFloat(formData.kaufpreis) : null,
-      wohnflaeche: formData.wohnflaeche ? parseFloat(formData.wohnflaeche) : null,
+      kaufpreis: kaufpreis,
+      wohnflaeche: wohnflaeche,
       zimmer: formData.zimmer ? parseFloat(formData.zimmer) : null,
       baujahr: formData.baujahr ? parseInt(formData.baujahr) : null,
       nebenkosten: formData.nebenkosten ? parseFloat(formData.nebenkosten) : null,
@@ -95,6 +111,18 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Validation Error */}
+          {validationError && (
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-300">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {validationError}
+              </div>
+            </div>
+          )}
+
           {/* Verwendungszweck - WICHTIG: Ändert die Bewertungskriterien */}
           <div className="mb-10 p-6 glass-card rounded-2xl border-2 border-accent/30">
             <div className="flex items-center gap-3 mb-4">

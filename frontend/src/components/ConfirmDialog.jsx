@@ -56,7 +56,7 @@ function ConfirmDialog({
       />
 
       {/* Dialog */}
-      <div className="relative glass-card rounded-2xl p-6 max-w-md w-full border border-white/20 shadow-2xl animate-scale-in">
+      <div className="relative glass-card rounded-2xl p-5 md:p-6 max-w-sm md:max-w-md w-full border border-white/20 shadow-2xl animate-scale-in">
         <div className="flex items-start gap-4">
           <div className={`w-12 h-12 ${style.iconBg} rounded-xl flex items-center justify-center flex-shrink-0`}>
             {style.icon}
@@ -74,7 +74,7 @@ function ConfirmDialog({
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-3 border border-white/20 text-text-secondary hover:border-white/40 hover:text-white rounded-xl transition-all font-medium"
+            className="flex-1 px-4 py-3.5 md:py-3 min-h-[44px] border border-white/20 text-text-secondary hover:border-white/40 hover:text-white rounded-xl transition-all font-medium active:bg-white/10"
           >
             {cancelText}
           </button>
@@ -83,7 +83,7 @@ function ConfirmDialog({
               onConfirm();
               onClose();
             }}
-            className={`flex-1 px-4 py-3 rounded-xl transition-all font-bold ${style.confirmBtn}`}
+            className={`flex-1 px-4 py-3.5 md:py-3 min-h-[44px] rounded-xl transition-all font-bold active:opacity-80 ${style.confirmBtn}`}
           >
             {confirmText}
           </button>

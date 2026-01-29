@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE } from '../config';
 
 // Knowledge categories for quick access
 const QUICK_QUESTIONS = [
@@ -96,7 +97,7 @@ function AIChat({ analysisContext, isProjectSpecific = false }) {
     const detectedStadt = stadtMatch ? stadtMatch[1] : stadtInput;
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -431,7 +432,7 @@ Stellen Sie mir eine konkrete Frage oder wählen Sie eine der Schnellfragen!`;
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-white/10">
+      <div className="p-3 md:p-4 border-t border-white/10">
         <div className="flex gap-2">
           <input
             type="text"
@@ -439,12 +440,12 @@ Stellen Sie mir eine konkrete Frage oder wählen Sie eine der Schnellfragen!`;
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder="Stellen Sie eine Frage..."
-            className="flex-1 px-4 py-3 bg-surface border border-white/10 rounded-xl focus:ring-2 focus:ring-neon-blue/30 focus:border-neon-blue outline-none transition-all text-white placeholder-text-muted"
+            className="flex-1 px-4 py-3.5 md:py-3 min-h-[44px] bg-surface border border-white/10 rounded-xl focus:ring-2 focus:ring-neon-blue/30 focus:border-neon-blue outline-none transition-all text-white placeholder-text-muted text-base"
           />
           <button
             onClick={() => handleSend()}
             disabled={isLoading || !input.trim()}
-            className="px-6 py-3 btn-neon rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 md:px-6 py-3.5 md:py-3 min-h-[44px] btn-neon rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed active:opacity-80"
           >
             <span className="relative z-10">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

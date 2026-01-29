@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { formatCurrency, formatDate, getScoreColor } from '../constants';
+import { API_BASE } from '../config';
 
 function Library() {
   const { token } = useAuth();
@@ -29,7 +30,7 @@ function Library() {
 
   const fetchAnalyses = async () => {
     try {
-      const response = await fetch('http://localhost:8000/library', {
+      const response = await fetch(`${API_BASE}/library`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -48,7 +49,7 @@ function Library() {
 
   const toggleFavorite = async (id, currentStatus) => {
     try {
-      const response = await fetch(`http://localhost:8000/library/${id}`, {
+      const response = await fetch(`${API_BASE}/library/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ function Library() {
 
   const deleteAnalysis = async (id) => {
     try {
-      const response = await fetch(`http://localhost:8000/library/${id}`, {
+      const response = await fetch(`${API_BASE}/library/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -134,7 +135,7 @@ function Library() {
   ];
 
   return (
-    <div className="p-8 space-y-6 bg-mesh-animated min-h-screen relative">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6 bg-mesh-animated min-h-screen relative">
       {/* Background Glow Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="glow-orb w-96 h-96 bg-neon-purple/10 -top-48 -left-48" />

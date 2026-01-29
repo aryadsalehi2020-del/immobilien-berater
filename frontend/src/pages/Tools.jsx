@@ -292,7 +292,7 @@ function Tools() {
   const currentToolData = getCurrentToolData();
 
   return (
-    <div className="p-8 bg-mesh-animated min-h-screen relative">
+    <div className="p-4 md:p-8 bg-mesh-animated min-h-screen relative">
       {/* Background Glow Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="glow-orb w-96 h-96 bg-neon-blue/10 -top-48 -right-48" />

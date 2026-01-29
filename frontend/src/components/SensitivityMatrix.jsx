@@ -66,8 +66,11 @@ function SensitivityMatrix({ sensitivity }) {
         <span className="text-xs text-slate/60">Positiv</span>
       </div>
 
+      {/* Mobile scroll hint */}
+      <p className="text-xs text-text-muted mb-2 md:hidden">← Tabelle horizontal scrollen →</p>
+
       {/* Matrix Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-2 px-2">
         <table className="w-full border-collapse">
           <thead>
             <tr>

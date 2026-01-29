@@ -1,10 +1,29 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handleLogout = () => {
     logout();
@@ -69,22 +88,23 @@ function Sidebar() {
     }
   ];
 
-  return (
-    <div className="w-64 glass-card border-r border-neon-blue/20 flex flex-col h-screen sticky top-0 relative overflow-hidden">
+  // Sidebar content (shared between mobile and desktop)
+  const SidebarContent = () => (
+    <>
       {/* Animated Glow Orbs */}
       <div className="glow-orb w-32 h-32 bg-neon-blue/30 -top-16 -left-16" />
       <div className="glow-orb w-24 h-24 bg-neon-purple/20 bottom-20 -right-12" style={{ animationDelay: '2s' }} />
 
       {/* Logo */}
-      <div className="p-6 border-b border-white/10 relative z-10">
+      <div className="p-4 md:p-6 border-b border-white/10 relative z-10">
         <NavLink to="/dashboard" className="block group">
           <div className="flex items-baseline gap-2">
-            <h1 className="text-3xl font-black">
-              <span className="text-neon-blue text-4xl text-glow-blue">A</span>
+            <h1 className="text-2xl md:text-3xl font-black">
+              <span className="text-neon-blue text-3xl md:text-4xl text-glow-blue">A</span>
               <span className="text-white">mlak</span>
-              <span className="text-neon-purple text-4xl text-glow-purple">I</span>
+              <span className="text-neon-purple text-3xl md:text-4xl text-glow-purple">I</span>
             </h1>
-            <span className="text-text-muted text-[10px]">by Arya Salehi</span>
+            <span className="text-text-muted text-[10px] hidden md:inline">by Arya Salehi</span>
           </div>
           <p className="text-gradient-neon text-xs tracking-wide mt-1 font-semibold">
             Immobilien Intelligence
@@ -93,22 +113,22 @@ function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 relative z-10">
-        <ul className="space-y-2">
+      <nav className="flex-1 p-3 md:p-4 relative z-10 overflow-y-auto">
+        <ul className="space-y-1 md:space-y-2">
           {navItems.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                  `flex items-center gap-3 px-4 py-3.5 md:py-3 rounded-xl transition-all duration-300 min-h-[44px] ${
                     isActive
                       ? 'bg-gradient-to-r from-neon-blue/20 to-neon-purple/20 text-neon-blue font-bold border border-neon-blue/50 shadow-neon-blue'
-                      : 'text-text-secondary hover:bg-white/5 hover:text-neon-blue hover:border-neon-blue/30 border border-transparent'
+                      : 'text-text-secondary hover:bg-white/5 hover:text-neon-blue hover:border-neon-blue/30 border border-transparent active:bg-white/10'
                   }`
                 }
               >
                 {item.icon}
-                <span>{item.label}</span>
+                <span className="text-sm md:text-base">{item.label}</span>
               </NavLink>
             </li>
           ))}
@@ -116,9 +136,9 @@ function Sidebar() {
       </nav>
 
       {/* User Info & Logout */}
-      <div className="p-4 border-t border-white/10 relative z-10">
-        <div className="flex items-center gap-3 px-4 py-3 glass-neon rounded-xl mb-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-neon-blue to-neon-purple rounded-full flex items-center justify-center text-white font-bold shadow-neon-blue">
+      <div className="p-3 md:p-4 border-t border-white/10 relative z-10">
+        <div className="flex items-center gap-3 px-3 md:px-4 py-3 glass-neon rounded-xl mb-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-neon-blue to-neon-purple rounded-full flex items-center justify-center text-white font-bold shadow-neon-blue flex-shrink-0">
             {user?.username?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
@@ -130,7 +150,7 @@ function Sidebar() {
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-white/20 text-text-secondary hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3.5 md:py-3 border border-white/20 text-text-secondary hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300 min-h-[44px] active:bg-red-500/20"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -138,7 +158,69 @@ function Sidebar() {
           <span className="font-medium">Abmelden</span>
         </button>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Header Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 glass-card border-b border-neon-blue/20 px-4 py-3 flex items-center justify-between">
+        <NavLink to="/dashboard" className="flex items-baseline gap-1">
+          <span className="text-neon-blue text-2xl font-black text-glow-blue">A</span>
+          <span className="text-white text-xl font-black">mlak</span>
+          <span className="text-neon-purple text-2xl font-black text-glow-purple">I</span>
+        </NavLink>
+
+        {/* Hamburger Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-11 h-11 flex items-center justify-center rounded-xl border border-white/20 text-white hover:border-neon-blue/50 hover:text-neon-blue transition-all active:bg-white/10"
+          aria-label={isOpen ? 'Menü schließen' : 'Menü öffnen'}
+        >
+          {isOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar (Slide-in) */}
+      <div className={`
+        md:hidden fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] glass-card border-r border-neon-blue/20
+        flex flex-col z-50 transform transition-transform duration-300 ease-out overflow-hidden
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-xl border border-white/20 text-text-secondary hover:text-white hover:border-white/40 z-20"
+          aria-label="Menü schließen"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <SidebarContent />
+      </div>
+
+      {/* Desktop Sidebar (Always visible) */}
+      <div className="hidden md:flex w-64 glass-card border-r border-neon-blue/20 flex-col h-screen sticky top-0 relative overflow-hidden">
+        <SidebarContent />
+      </div>
+    </>
   );
 }
 

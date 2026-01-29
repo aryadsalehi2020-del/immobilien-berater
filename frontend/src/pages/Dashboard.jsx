@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserProfile, INVESTMENT_GOALS } from '../contexts/UserProfileContext';
 import { formatCurrency, formatDate, getScoreColor } from '../constants';
+import { API_BASE } from '../config';
 
 function Dashboard() {
   const { user, token } = useAuth();
@@ -20,7 +21,7 @@ function Dashboard() {
   const fetchDashboardData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     try {
-      const response = await fetch('http://localhost:8000/library', {
+      const response = await fetch(`${API_BASE}/library`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -65,7 +66,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="p-8 space-y-8 bg-mesh-animated min-h-screen relative">
+    <div className="p-4 md:p-8 space-y-6 md:space-y-8 bg-mesh-animated min-h-screen relative">
       {/* Background Glow Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="glow-orb w-96 h-96 bg-neon-blue/10 -top-48 -right-48" />
@@ -76,10 +77,10 @@ function Dashboard() {
       <div className="relative z-10 fade-in">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
               {getGreeting()}, <span className="text-gradient-neon">{user?.full_name || user?.username}</span>!
             </h1>
-            <p className="text-text-secondary text-lg">
+            <p className="text-text-secondary text-base md:text-lg">
               Hier ist eine Übersicht Ihrer Immobilienanalysen
             </p>
           </div>

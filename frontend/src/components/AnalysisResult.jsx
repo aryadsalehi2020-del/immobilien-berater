@@ -343,7 +343,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                   }`} />
                 </button>
                 <span className="text-sm text-text-secondary">
-                  Personalisierte Bewertung ({INVESTMENT_GOALS[profile.goal]?.label})
+                  Personalisierte Bewertung ({INVESTMENT_GOALS[profile?.goal]?.label || 'Individuell'})
                 </span>
               </div>
               {showPersonalized && dynamicData.adjustedScore !== result.gesamtscore && (
@@ -811,7 +811,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
             </h3>
 
             <div className="space-y-6">
-              {result.kriterien
+              {(result.kriterien || [])
                 .filter(k => k.gewichtung > 0)
                 .sort((a, b) => {
                   // Bei personalisierter Ansicht nach angepasster Gewichtung sortieren
@@ -845,7 +845,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                 Stärken
               </h3>
               <ul className="space-y-3">
-                {result.stärken.map((item, index) => (
+                {(result.stärken || []).map((item, index) => (
                   <li key={index} className="flex items-start gap-3 p-3 bg-green-500/10 rounded-xl">
                     <span className="text-green-500 text-lg font-bold flex-shrink-0">{'\u2713'}</span>
                     <span className="text-white leading-relaxed">{item}</span>
@@ -864,7 +864,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                 Schwächen
               </h3>
               <ul className="space-y-3">
-                {result.schwächen.map((item, index) => (
+                {(result.schwächen || []).map((item, index) => (
                   <li key={index} className="flex items-start gap-3 p-3 bg-red-500/10 rounded-xl">
                     <span className="text-red-500 text-lg font-bold flex-shrink-0">!</span>
                     <span className="text-white leading-relaxed">{item}</span>

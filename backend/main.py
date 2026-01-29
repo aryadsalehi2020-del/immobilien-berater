@@ -64,10 +64,10 @@ app = FastAPI(title="AmlakI API", version="3.0.0")
 def startup_event():
     init_db()
 
-# CORS für lokale Entwicklung
+# CORS - Erlaubt alle Origins für Entwicklung und Mobile-Testing
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:5173", "https://immobilien-berater-frontend.onrender.com"],
+    allow_origins=["*"],  # Alle Origins erlauben (für lokales Netzwerk/Mobile)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -1047,7 +1047,7 @@ def calculate_tilgungsplan(
         # Sicherstellen, dass wir nicht mehr tilgen als Restschuld
         if tilgung_jahr > restschuld:
             tilgung_jahr = restschuld
-            zinsen_jahr = restschuld * (zinssatz / 100)
+            # Zinsen bleiben korrekt - bereits auf Basis der Restschuld zu Jahresbeginn berechnet
 
         restschuld = max(0, restschuld - tilgung_jahr)
         gesamte_zinsen += zinsen_jahr
@@ -1080,9 +1080,10 @@ def calculate_tilgungsplan(
         aktuelle_miete *= (1 + mietsteigerung / 100)
         immobilienwert *= (1 + wertsteigerung / 100)
 
-        # Wenn Kredit abbezahlt, breche ab
+        # Wenn Kredit abbezahlt, setze Werte auf 0 aber berechne weiter für vollständige Projektion
         if restschuld <= 0:
-            break
+            restschuld = 0
+            # Weitere Jahre haben keine Kreditkosten mehr
 
     # Zusammenfassung
     letztes_jahr = jahres_projektionen[-1] if jahres_projektionen else None

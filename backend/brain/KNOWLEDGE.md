@@ -1,53 +1,260 @@
-# Immobilien-Berater – Claude Code Projektanweisungen (ULTIMATE EDITION V3.0)
+# Immobilien-Berater – Claude Code Projektanweisungen (ULTIMATE EDITION V4.0)
 
-## 🏠 MIETSCHÄTZUNG BEI FEHLENDER MIETE (KRITISCH!)
+---
 
-### Wann greift das?
-Wenn **Miete = 0** oder **keine Miete angegeben** ist (z.B. leerstehende/freie Immobilie).
+# 🚨 TEIL 0: KRITISCHE ANWEISUNGEN (IMMER ZUERST LESEN!)
 
-### Was musst du tun?
-1. **Recherchiere die ortsübliche Marktmiete** basierend auf:
-   - Stadt/Stadtteil
-   - Wohnfläche (m²)
-   - Baujahr & Zustand
-   - Ausstattung
+## ⚡ WORKFLOW BEI JEDER IMMOBILIEN-ANFRAGE
 
-2. **Berechne die geschätzte Miete:**
-   ```
-   Geschätzte Miete = Wohnfläche × Marktmiete/m²
-
-   BEISPIEL (München, 80m², gute Lage):
-   Marktmiete: ~18€/m²
-   → Geschätzte Miete: 80 × 18 = 1.440€/Monat
-   ```
-
-3. **Nutze diese geschätzte Miete als Benchmark** für:
-   - Cashflow-Berechnung
-   - Rendite-Analyse
-   - Investment-Bewertung
-   - Kaufpreisfaktor
-
-### Wichtig für die Analyse:
-- **IMMER** dem User mitteilen, dass die Miete geschätzt wurde
-- Die Schätzung basiert auf aktuellen Marktdaten
-- Empfehle dem User, die lokale Vergleichsmiete zu prüfen
-- Zeige die Berechnung: `X€/m² × Y m² = Z€/Monat`
-
-### Marktmieten Orientierung (2025/2026):
 ```
-München:        15-25€/m²  (Innenstadt bis 30€)
-Hamburg:        12-18€/m²
-Frankfurt:      13-20€/m²
-Berlin:         10-16€/m²
-Düsseldorf:     11-15€/m²
-Köln:           10-14€/m²
-Stuttgart:      12-17€/m²
-Andere Großstädte: 8-12€/m²
-Mittelstädte:    6-10€/m²
-Ländlich:        5-8€/m²
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  🔴 DIESER WORKFLOW IST PFLICHT BEI JEDER IMMOBILIEN-ANALYSE!              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+SCHRITT 1: DATEN SAMMELN
+├─ Was hat der User angegeben?
+├─ Was fehlt? (Miete, Bundesland, Wohnfläche, etc.)
+└─ Bei fehlenden kritischen Daten → NACHFRAGEN oder RECHERCHIEREN
+
+SCHRITT 2: MIETPREIS PRÜFEN (KRITISCH!)
+├─ Miete angegeben und > 0? → Weiter zu Schritt 3
+├─ Miete = 0 oder "leer"/"frei"/"bezugsfrei"? → SOFORT MIETRECHERCHE!
+└─ Geschätzte Miete IMMER als "⚠️ GESCHÄTZT" kennzeichnen!
+
+SCHRITT 3: KAUFNEBENKOSTEN BERECHNEN (PFLICHT!)
+├─ Bundesland ermitteln (aus PLZ/Adresse)
+├─ Grunderwerbsteuer + Notar + Grundbuch + Makler berechnen
+└─ IMMER dem User anzeigen – niemals weglassen!
+
+SCHRITT 4: LIVE-MARKTRECHERCHE
+├─ Stadtteil + Immobilientyp recherchieren
+├─ €/m² Kaufpreise in der Region finden
+├─ Marktwert schätzen
+└─ Deal-Qualität bewerten
+
+SCHRITT 5: VOLLSTÄNDIGE ANALYSE
+├─ Cashflow berechnen
+├─ Renditen berechnen (Brutto, Netto, EK-Rendite)
+├─ Deal-Score + Investment-Score berechnen
+└─ Empfehlung generieren
+
+SCHRITT 6: OUTPUT GENERIEREN
+├─ ALLE PFLICHT-ELEMENTE anzeigen (siehe unten)
+├─ Verbesserungsvorschläge geben
+└─ Nächste Schritte empfehlen
 ```
 
 ---
+
+## 🔴 PFLICHT-ANZEIGE BEI JEDER ANALYSE
+
+**Diese Elemente MÜSSEN in JEDER Immobilien-Analyse erscheinen:**
+
+```
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ PFLICHT-OUTPUT (Mindestens diese Informationen!)                             ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║ 1. KAUFPREIS + KAUFNEBENKOSTEN                                              ║
+║    ├─ Kaufpreis: XXX.XXX€                                                   ║
+║    ├─ Grunderwerbsteuer (X,X%): XX.XXX€                                     ║
+║    ├─ Notar + Grundbuch (~2%): XX.XXX€                                      ║
+║    ├─ Makler (falls ja): XX.XXX€                                            ║
+║    ├─ NEBENKOSTEN GESAMT: XX.XXX€ (XX,X%)                                   ║
+║    └─ GESAMTINVESTITION: XXX.XXX€                                           ║
+║                                                                              ║
+║ 2. MIETEINNAHMEN                                                            ║
+║    ├─ Kaltmiete: X.XXX€/Monat                                               ║
+║    ├─ [Falls geschätzt]: ⚠️ GESCHÄTZTE MARKTMIETE                           ║
+║    └─ Jahresmiete: XX.XXX€                                                  ║
+║                                                                              ║
+║ 3. KENNZAHLEN                                                               ║
+║    ├─ Bruttorendite: X,X%                                                   ║
+║    ├─ Kaufpreisfaktor: XX,X                                                 ║
+║    ├─ €/m²: X.XXX€                                                          ║
+║    └─ Cashflow (geschätzt): ±XXX€/Monat                                     ║
+║                                                                              ║
+║ 4. BEWERTUNG                                                                ║
+║    ├─ Deal-Score: XX/100                                                    ║
+║    ├─ Investment-Score: XX/100                                              ║
+║    └─ Gesamt-Empfehlung: 🟢/🟡/🔴                                            ║
+║                                                                              ║
+║ 5. NÄCHSTE SCHRITTE                                                         ║
+║    └─ Konkrete Handlungsempfehlungen                                        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+# 🏠 AUTOMATISCHE MIETSCHÄTZUNG BEI LEERSTAND
+
+## Wann wird eine Mietschätzung benötigt?
+
+```javascript
+function brauchtMietschaetzung(immobilie) {
+  return (
+    immobilie.kaltmiete === 0 ||
+    immobilie.kaltmiete === null ||
+    immobilie.kaltmiete === undefined ||
+    immobilie.status === 'leerstehend' ||
+    immobilie.status === 'leer' ||
+    immobilie.status === 'frei' ||
+    immobilie.status === 'bezugsfrei' ||
+    immobilie.status === 'unvermietet'
+  );
+}
+```
+
+## 🔴 PFLICHT-WORKFLOW BEI FEHLENDER MIETE
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ⚠️ MIETE = 0 ODER NICHT ANGEGEBEN? → DIESER WORKFLOW IST PFLICHT!          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+SCHRITT 1: LIVE-RECHERCHE DURCHFÜHREN
+├─ Suche: "[Stadtteil] [Stadt] [Immobilientyp] mieten €/m² 2025"
+├─ Suche: "[Stadtteil] [Stadt] Mietspiegel 2025"
+├─ Suche: "[Stadtteil] Mietpreis Wohnung/Haus aktuell"
+└─ Mindestens 2-3 Quellen finden!
+
+SCHRITT 2: MARKTMIETE ERMITTELN
+├─ Durchschnittliche €/m² aus Recherche extrahieren
+├─ Bei mehreren Quellen: Mittelwert bilden
+├─ Qualität der Daten bewerten (Hoch/Mittel/Niedrig)
+└─ Bei unsicheren Daten: Konservativen Wert nehmen (unteres Drittel)
+
+SCHRITT 3: MIETE BERECHNEN
+├─ Geschätzte Miete = Wohnfläche × Marktmiete/m²
+├─ Anpassungen für Zustand/Ausstattung vornehmen (-20% bis +15%)
+└─ Ergebnis IMMER als "⚠️ GESCHÄTZT" kennzeichnen!
+
+SCHRITT 4: USER INFORMIEREN
+├─ Klar kommunizieren: "Die Miete wurde geschätzt"
+├─ Berechnungsweg zeigen: "X€/m² × Y m² = Z€/Monat"
+├─ Datenquellen nennen
+└─ Empfehlung: "Prüfen Sie lokale Vergleichsangebote auf ImmoScout24"
+```
+
+## Output-Format für geschätzte Miete
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+⚠️ MIETSCHÄTZUNG – Keine Ist-Miete angegeben!
+═══════════════════════════════════════════════════════════════════════════════
+
+🔍 RECHERCHE-ERGEBNIS FÜR: [Stadtteil], [Stadt]
+
+Durchschnittliche Marktmiete (€/m²):
+├─ Quelle 1 (ImmoScout24): 14,50 €/m²
+├─ Quelle 2 (Mietspiegel): 13,80 €/m²
+└─ Durchschnitt: 14,15 €/m²
+
+📊 MIETSCHÄTZUNG FÜR DIESES OBJEKT:
+
+Basis-Marktmiete:          14,15 €/m²
+Anpassungen:
+├─ Zustand (Gepflegt):     ±0%
+├─ Energieklasse D:        -5%
+└─ Balkon vorhanden:       +3%
+Angepasste Miete:          13,87 €/m²
+
+═══════════════════════════════════════════════════════════════════════════════
+💰 GESCHÄTZTE KALTMIETE: 1.110 €/Monat (bei 80 m²)
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠️ WICHTIGER HINWEIS:
+Dies ist eine SCHÄTZUNG basierend auf Marktdaten. Die tatsächlich erzielbare
+Miete kann abweichen. Empfehlung: Lokale Vergleichsangebote prüfen!
+
+Alle folgenden Berechnungen basieren auf dieser geschätzten Miete.
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+---
+
+# 🎯 ENTSCHEIDUNGSBAUM FÜR DIE KI
+
+## Wann mache ich was?
+
+```
+USER FRAGT NACH IMMOBILIEN-ANALYSE
+│
+├─► Hat User Adresse/Stadtteil angegeben?
+│   ├─ JA → Live-Recherche für Marktpreise starten
+│   └─ NEIN → Nachfragen: "In welchem Stadtteil/welcher Stadt liegt die Immobilie?"
+│
+├─► Hat User Kaufpreis angegeben?
+│   ├─ JA → Weiter
+│   └─ NEIN → Nachfragen ODER aus Exposé/Recherche ermitteln
+│
+├─► Hat User Miete angegeben?
+│   ├─ JA und > 0 → Als Ist-Miete verwenden
+│   ├─ JA und = 0 oder "leer"/"frei" → MIETSCHÄTZUNG durchführen!
+│   └─ NEIN → MIETSCHÄTZUNG durchführen!
+│
+├─► Kann ich das Bundesland ermitteln?
+│   ├─ JA → Kaufnebenkosten berechnen
+│   └─ NEIN → Aus PLZ/Stadt/Adresse ableiten oder nachfragen
+│
+├─► Alle Pflichtdaten vorhanden?
+│   ├─ JA → Vollständige Analyse durchführen
+│   └─ NEIN → Fehlende Daten auflisten und nachfragen
+│
+└─► IMMER am Ende:
+    ├─ Kaufnebenkosten anzeigen (PFLICHT!)
+    ├─ Deal-Score + Investment-Score berechnen
+    ├─ Verbesserungsvorschläge machen
+    └─ Nächste Schritte empfehlen
+```
+
+## Was zeige ich IMMER an?
+
+```
+PFLICHT-OUTPUT-CHECKLISTE (vor dem Senden prüfen!):
+
+□ Kaufpreis + Kaufnebenkosten (aufgeschlüsselt nach Posten!)
+□ Gesamtinvestition (Kaufpreis + Nebenkosten)
+□ Miete (Ist oder geschätzt - KLAR KENNZEICHNEN!)
+□ Bruttorendite
+□ Kaufpreisfaktor
+□ €/m² Kaufpreis
+□ Marktvergleich (€/m² vs. Region)
+□ Geschätzter Cashflow
+□ Deal-Score (0-100) mit Kategorie
+□ Investment-Score (0-100) mit Kategorie
+□ Gesamt-Empfehlung (🟢 Kaufen / 🟡 Prüfen / 🔴 Finger weg)
+□ Mindestens 2 Verbesserungsvorschläge
+□ Konkrete nächste Schritte
+
+ERST WENN ALLE PUNKTE ERFÜLLT → OUTPUT SENDEN!
+```
+
+## Wann frage ich nach vs. wann schätze ich?
+
+```
+NACHFRAGEN wenn:
+├─ Stadt/Region komplett unbekannt
+├─ Immobilientyp unklar (ETW vs. Haus vs. MFH)
+├─ Wohnfläche fehlt komplett
+└─ Mehrere kritische Daten fehlen gleichzeitig
+
+SCHÄTZEN/RECHERCHIEREN wenn:
+├─ Miete fehlt oder = 0 → Mietrecherche starten!
+├─ Bundesland fehlt → Aus PLZ/Stadt ableiten
+├─ €/m² für Region fehlt → Live-Recherche
+├─ Hausgeld fehlt → Schätzung (2,50-4,50€/m² je nach Ausstattung)
+├─ Energieklasse fehlt → Aus Baujahr schätzen
+└─ Zustand unklar → Aus Baujahr/Beschreibung ableiten
+```
+
+---
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AB HIER: VOLLSTÄNDIGE WISSENSDATENBANK (8.500+ Zeilen)
+# ═══════════════════════════════════════════════════════════════════════════════
+
 
 ## 💰 KAUFNEBENKOSTEN-BERECHNUNG (IMMER ANZEIGEN!)
 
@@ -8593,3 +8800,22 @@ function quickCheck(immobilie) {
 *Knowledge Base Version 3.0 ULTIMATE – Januar 2026*
 *Integriert: Mega-Research mit allen 13 Themenbereichen + Checklisten*
 *Basierend auf: Deep Research Session vom 28.01.2026*
+
+---
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VERSION INFO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+*CLAUDE.md Version 4.0 – Januar 2026*
+
+**NEU in V4.0:**
+- 🚨 TEIL 0: Kritische Anweisungen mit Pflicht-Workflow
+- ✅ Pflicht-Anzeige-Box (was IMMER gezeigt werden muss)
+- 🏠 Automatische Mietschätzung bei Leerstand (mit Live-Recherche)
+- 🎯 Entscheidungsbaum für die KI (wann nachfragen vs. schätzen)
+- 📋 Selbstprüfungs-Checkliste vor Output
+
+**Inhalt:** ~8.800 Zeilen strukturiertes Immobilienwissen
+
+**Basiert auf:** Ultimate Edition V3.0 + Workflow-Optimierung

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -12,6 +12,22 @@ import {
   Area,
   ComposedChart
 } from 'recharts';
+
+// Hook for responsive chart height
+const useChartHeight = (desktopHeight = 350, mobileHeight = 250) => {
+  const [height, setHeight] = useState(desktopHeight);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      setHeight(window.innerWidth < 768 ? mobileHeight : desktopHeight);
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, [desktopHeight, mobileHeight]);
+
+  return height;
+};
 
 function CashflowChart({ szenarien }) {
   if (!szenarien || szenarien.length === 0) {
@@ -68,13 +84,15 @@ function CashflowChart({ szenarien }) {
     return null;
   };
 
+  const chartHeight = useChartHeight(350, 250);
+
   return (
     <div className="w-full">
-      <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-        <span className="text-2xl">📈</span>
+      <h4 className="text-base md:text-lg font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
+        <span className="text-xl md:text-2xl">📈</span>
         <span className="text-gradient-neon">Cashflow-Entwicklung über 30 Jahre</span>
       </h4>
-      <ResponsiveContainer width="100%" height={350}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
         <ComposedChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <defs>
             <linearGradient id="colorKonservativ" x1="0" y1="0" x2="0" y2="1">
