@@ -183,13 +183,14 @@ def check_no_gos(data: 'PropertyData') -> Dict[str, Any]:
     No-Gos:
     1. Erbpacht / Erbbaurecht
     2. Fertighäuser Baujahr 1960-1990
-    3. Energieklasse G oder H
+    3. Energieklasse G oder H - NUR wenn KfW-Sanierung sich nicht lohnt!
 
     Returns:
-        Dict mit no_go (bool), gründe (List), warnung (str)
+        Dict mit no_go (bool), gründe (List), warnung (str), energie_analyse (dict)
     """
     no_gos = []
     warnings = []
+    energie_analyse = None
 
     # 1. Erbpacht prüfen
     if data.beschreibung and ('erbpacht' in data.beschreibung.lower() or
@@ -206,15 +207,78 @@ def check_no_gos(data: 'PropertyData') -> Dict[str, Any]:
             # Warnung bei Baujahr, falls unklar ob Fertighaus
             warnings.append(f"Baujahr {data.baujahr}: Prüfe ob Fertighaus (Problemzeit 1960-1990)")
 
-    # 3. Energieklasse G oder H
+    # 3. Energieklasse G oder H - MIT KfW-ANALYSE!
     if data.energieklasse and data.energieklasse.upper() in ['G', 'H']:
-        no_gos.append(f"Sehr schlechte Energieklasse: {data.energieklasse}")
+        wohnflaeche = data.wohnflaeche or 80  # Fallback
+
+        # Geschätzte Sanierungskosten pro m² (je nach Energieklasse)
+        # G: 300-500€/m², H: 400-700€/m² für Komplettsanierung
+        sanierung_kosten_pro_qm = 400 if data.energieklasse.upper() == 'G' else 550
+        geschaetzte_sanierungskosten = wohnflaeche * sanierung_kosten_pro_qm
+
+        # KfW 261 Förderung: Max. 150.000€ Kredit mit bis zu 45% Tilgungszuschuss
+        # Bei Sanierung auf EH 55: bis zu 25% Zuschuss + 20% bei WPB
+        kfw_kredit_max = min(150000, geschaetzte_sanierungskosten)
+        kfw_zuschuss_prozent = 25  # Konservativ: EH 55 ohne WPB
+        kfw_zuschuss = kfw_kredit_max * (kfw_zuschuss_prozent / 100)
+
+        # Effektive Sanierungskosten nach Förderung
+        effektive_kosten = geschaetzte_sanierungskosten - kfw_zuschuss
+
+        # Energiekostenersparnis pro Jahr (ca. 10-15€/m² bei G/H → A/B)
+        jaehrliche_ersparnis = wohnflaeche * 12  # ~12€/m² Ersparnis
+
+        # Amortisationszeit in Jahren
+        amortisation_jahre = effektive_kosten / jaehrliche_ersparnis if jaehrliche_ersparnis > 0 else 999
+
+        # Wertsteigerung durch Sanierung (ca. 10-20% des Kaufpreises)
+        wertsteigerung_geschaetzt = (data.kaufpreis or 0) * 0.15 if data.kaufpreis else 0
+
+        # ENTSCHEIDUNG: Lohnt sich KfW?
+        # Wenn Amortisation < 15 Jahre ODER Wertsteigerung > Kosten → KEIN No-Go!
+        lohnt_sich_kfw = amortisation_jahre < 15 or wertsteigerung_geschaetzt > effektive_kosten
+
+        energie_analyse = {
+            "energieklasse": data.energieklasse.upper(),
+            "wohnflaeche": wohnflaeche,
+            "geschaetzte_sanierungskosten": round(geschaetzte_sanierungskosten, 0),
+            "sanierung_kosten_pro_qm": sanierung_kosten_pro_qm,
+            "kfw_programm": "KfW 261 (Wohngebäude)",
+            "kfw_kredit_max": round(kfw_kredit_max, 0),
+            "kfw_zuschuss_prozent": kfw_zuschuss_prozent,
+            "kfw_zuschuss_betrag": round(kfw_zuschuss, 0),
+            "effektive_kosten_nach_foerderung": round(effektive_kosten, 0),
+            "jaehrliche_energieersparnis": round(jaehrliche_ersparnis, 0),
+            "amortisation_jahre": round(amortisation_jahre, 1),
+            "geschaetzte_wertsteigerung": round(wertsteigerung_geschaetzt, 0),
+            "lohnt_sich_sanierung": lohnt_sich_kfw,
+            "fazit": f"Sanierung {'LOHNENSWERT' if lohnt_sich_kfw else 'KRITISCH'}: "
+                     f"Effektive Kosten {round(effektive_kosten, 0):,}€ nach KfW-Förderung, "
+                     f"Amortisation in {round(amortisation_jahre, 1)} Jahren"
+        }
+
+        if lohnt_sich_kfw:
+            # Nur Warnung, kein No-Go!
+            warnings.append(
+                f"Energieklasse {data.energieklasse}: Sanierung empfohlen! "
+                f"KfW-Zuschuss: {round(kfw_zuschuss, 0):,}€ | "
+                f"Effektive Kosten: {round(effektive_kosten, 0):,}€ | "
+                f"Amortisation: {round(amortisation_jahre, 1)} Jahre"
+            )
+        else:
+            # Echtes No-Go: Sanierung lohnt sich nicht
+            no_gos.append(
+                f"Energieklasse {data.energieklasse}: Sanierung unwirtschaftlich! "
+                f"Kosten {round(effektive_kosten, 0):,}€ nach Förderung, "
+                f"Amortisation erst nach {round(amortisation_jahre, 1)} Jahren"
+            )
 
     return {
         "no_go": len(no_gos) > 0,
         "gründe": no_gos,
         "warnungen": warnings,
-        "ist_investierbar": len(no_gos) == 0
+        "ist_investierbar": len(no_gos) == 0,
+        "energie_analyse": energie_analyse
     }
 
 

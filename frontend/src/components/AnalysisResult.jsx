@@ -140,7 +140,7 @@ function CriterionBar({ criterion, weightDiff = null, showAdjusted = false }) {
     <div className={`mb-6 p-4 rounded-xl border transition-all ${
       hasWeightChange && showAdjusted
         ? weightDiff.direction === 'up'
-          ? 'bg-green-500/100/5 border-green-500/20 hover:border-green-500/40'
+          ? 'bg-green-500/5 border-green-500/20 hover:border-green-500/40'
           : 'bg-slate/5 border-slate/10 hover:border-slate/20'
         : 'bg-slate/5 border-slate/10 hover:border-accent/30'
     }`}>
@@ -153,7 +153,7 @@ function CriterionBar({ criterion, weightDiff = null, showAdjusted = false }) {
           {hasWeightChange && showAdjusted && (
             <span className={`text-xs px-1.5 py-0.5 rounded ${
               weightDiff.direction === 'up'
-                ? 'bg-green-500/100/20 text-green-400'
+                ? 'bg-green-500/20 text-green-400'
                 : 'bg-slate/20 text-text-secondary/60'
             }`}>
               {weightDiff.direction === 'up' ? '↑ Wichtiger' : '↓ Weniger wichtig'}
@@ -164,7 +164,7 @@ function CriterionBar({ criterion, weightDiff = null, showAdjusted = false }) {
           <span className={`text-xs px-2 py-1 rounded-full ${
             hasWeightChange && showAdjusted
               ? weightDiff.direction === 'up'
-                ? 'bg-green-500/100/20 text-green-400'
+                ? 'bg-green-500/20 text-green-400'
                 : 'bg-slate/10 text-text-secondary/60'
               : 'bg-slate/10 text-text-secondary/60'
           }`}>
@@ -201,10 +201,12 @@ const TABS = [
   { id: 'vergleich', label: 'Vergleich', icon: '\u{2696}\u{FE0F}' }
 ];
 
-function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwitchVerwendungszweck }) {
+function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwitchVerwendungszweck, onChangeEigenkapital }) {
   const [activeTab, setActiveTab] = useState('uebersicht');
   const [selectedScenario, setSelectedScenario] = useState(null);
   const [showPersonalized, setShowPersonalized] = useState(true);
+  const [eigenkapitalInput, setEigenkapitalInput] = useState(result.cashflow_analyse?.eigenkapital || 0);
+  const [showEigenkapitalEditor, setShowEigenkapitalEditor] = useState(false);
 
   // Dynamic Scoring Integration
   let userProfileContext;
@@ -314,12 +316,12 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
             {isProfileComplete && dynamicData.recommendation && (
               <div className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${
                 dynamicData.recommendation.action === 'invest'
-                  ? 'bg-green-500/100/10 border-green-500/30 text-green-400'
+                  ? 'bg-green-500/10 border-green-500/30 text-green-400'
                   : dynamicData.recommendation.action === 'consider'
-                    ? 'bg-amber-500/100/10 border-amber-500/30 text-amber-400'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
                     : dynamicData.recommendation.action === 'caution'
                       ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
-                      : 'bg-red-500/100/10 border-red-500/30 text-red-400'
+                      : 'bg-red-500/10 border-red-500/30 text-red-400'
               }`}>
                 <span className="text-lg">{dynamicData.recommendation.emoji}</span>
                 <span className="font-medium">{dynamicData.recommendation.text}</span>
@@ -430,12 +432,12 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                     key={index}
                     className={`p-4 rounded-xl flex items-start gap-3 ${
                       warning.type === 'critical'
-                        ? 'bg-red-500/100/10 border border-red-500/30'
+                        ? 'bg-red-500/10 border border-red-500/30'
                         : warning.type === 'warning'
-                          ? 'bg-amber-500/100/10 border border-amber-500/30'
+                          ? 'bg-amber-500/10 border border-amber-500/30'
                           : warning.type === 'positive'
-                            ? 'bg-green-500/100/10 border border-green-500/30'
-                            : 'bg-blue-500/100/10 border border-blue-500/30'
+                            ? 'bg-green-500/10 border border-green-500/30'
+                            : 'bg-blue-500/10 border border-blue-500/30'
                     }`}
                   >
                     <span className="text-2xl flex-shrink-0">{warning.icon}</span>
@@ -506,6 +508,91 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
             </div>
           )}
 
+          {/* Energie-Analyse (bei schlechter Energieklasse) */}
+          {result.no_go_check?.energie_analyse && (
+            <div className={`glass-card border border-white/10 rounded-3xl p-8 fade-in border-2 ${
+              result.no_go_check.energie_analyse.lohnt_sich_sanierung
+                ? 'border-neon-green/30'
+                : 'border-red-500/30'
+            }`}>
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
+                <span className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-2xl">
+                  ⚡
+                </span>
+                <span className={result.no_go_check.energie_analyse.lohnt_sich_sanierung ? 'text-neon-green' : 'text-red-400'}>
+                  Energieeffizienz-Analyse (Klasse {result.no_go_check.energie_analyse.energieklasse})
+                </span>
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  result.no_go_check.energie_analyse.lohnt_sich_sanierung
+                    ? 'bg-neon-green/20 text-neon-green'
+                    : 'bg-red-500/20 text-red-400'
+                }`}>
+                  {result.no_go_check.energie_analyse.lohnt_sich_sanierung ? 'Sanierung lohnt sich!' : 'Kritisch'}
+                </span>
+              </h3>
+
+              <div className="grid md:grid-cols-4 gap-4 mb-6">
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10 text-center">
+                  <p className="text-text-muted text-sm mb-1">Sanierungskosten</p>
+                  <p className="text-xl font-bold text-white">
+                    {formatCurrency(result.no_go_check.energie_analyse.geschaetzte_sanierungskosten)}
+                  </p>
+                  <p className="text-xs text-text-muted">{result.no_go_check.energie_analyse.sanierung_kosten_pro_qm} €/m²</p>
+                </div>
+                <div className="p-4 bg-neon-green/10 rounded-xl border border-neon-green/30 text-center">
+                  <p className="text-text-muted text-sm mb-1">KfW-Zuschuss</p>
+                  <p className="text-xl font-bold text-neon-green">
+                    -{formatCurrency(result.no_go_check.energie_analyse.kfw_zuschuss_betrag)}
+                  </p>
+                  <p className="text-xs text-neon-green">{result.no_go_check.energie_analyse.kfw_zuschuss_prozent}% Tilgungszuschuss</p>
+                </div>
+                <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/30 text-center">
+                  <p className="text-text-muted text-sm mb-1">Effektive Kosten</p>
+                  <p className="text-xl font-bold text-amber-400">
+                    {formatCurrency(result.no_go_check.energie_analyse.effektive_kosten_nach_foerderung)}
+                  </p>
+                  <p className="text-xs text-text-muted">nach Förderung</p>
+                </div>
+                <div className={`p-4 rounded-xl border text-center ${
+                  result.no_go_check.energie_analyse.amortisation_jahre < 15
+                    ? 'bg-neon-green/10 border-neon-green/30'
+                    : 'bg-red-500/10 border-red-500/30'
+                }`}>
+                  <p className="text-text-muted text-sm mb-1">Amortisation</p>
+                  <p className={`text-xl font-bold ${
+                    result.no_go_check.energie_analyse.amortisation_jahre < 15 ? 'text-neon-green' : 'text-red-400'
+                  }`}>
+                    {result.no_go_check.energie_analyse.amortisation_jahre} Jahre
+                  </p>
+                  <p className="text-xs text-text-muted">Energieersparnis: {formatCurrency(result.no_go_check.energie_analyse.jaehrliche_energieersparnis)}/Jahr</p>
+                </div>
+              </div>
+
+              <div className={`p-4 rounded-xl ${
+                result.no_go_check.energie_analyse.lohnt_sich_sanierung
+                  ? 'bg-neon-green/10 border border-neon-green/30'
+                  : 'bg-red-500/10 border border-red-500/30'
+              }`}>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl">{result.no_go_check.energie_analyse.lohnt_sich_sanierung ? '✅' : '⚠️'}</span>
+                  <div>
+                    <p className={`font-semibold mb-1 ${
+                      result.no_go_check.energie_analyse.lohnt_sich_sanierung ? 'text-neon-green' : 'text-red-400'
+                    }`}>
+                      {result.no_go_check.energie_analyse.fazit}
+                    </p>
+                    <p className="text-text-secondary text-sm">
+                      {result.no_go_check.energie_analyse.lohnt_sich_sanierung
+                        ? `Mit ${result.no_go_check.energie_analyse.kfw_programm} können Sie die Sanierungskosten deutlich reduzieren. Die geschätzte Wertsteigerung beträgt ${formatCurrency(result.no_go_check.energie_analyse.geschaetzte_wertsteigerung)}.`
+                        : 'Die Sanierungskosten übersteigen den erwarteten Nutzen. Prüfen Sie alternative Objekte oder verhandeln Sie den Kaufpreis deutlich nach unten.'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Break-Even Calculator (new) */}
           {result.breakeven_eigenkapital && result.verwendungszweck === 'kapitalanlage' && (
             <div className="fade-in-delay-1">
@@ -520,30 +607,80 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
           {/* Cashflow Analysis (for investment) */}
           {result.cashflow_analyse && (
             <div className="glass-card border border-white/10 rounded-3xl shadow-2xl p-10 fade-in-delay-1 card-hover">
-              <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                <span className="w-12 h-12 bg-gradient-gold rounded-xl flex items-center justify-center text-2xl">
-                  {'\u{1F4B0}'}
-                </span>
-                Cashflow-Analyse
-              </h3>
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <span className="w-12 h-12 bg-gradient-gold rounded-xl flex items-center justify-center text-2xl">
+                    {'\u{1F4B0}'}
+                  </span>
+                  Cashflow-Analyse
+                </h3>
+
+                {/* Eigenkapital Editor */}
+                <div className="flex items-center gap-3">
+                  {showEigenkapitalEditor ? (
+                    <div className="flex items-center gap-2 bg-white/5 rounded-xl p-2">
+                      <input
+                        type="number"
+                        value={eigenkapitalInput}
+                        onChange={(e) => setEigenkapitalInput(parseFloat(e.target.value) || 0)}
+                        className="w-32 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-right"
+                        step="5000"
+                        min="0"
+                      />
+                      <span className="text-text-muted">€</span>
+                      <button
+                        onClick={() => {
+                          if (onChangeEigenkapital) {
+                            onChangeEigenkapital(eigenkapitalInput);
+                          }
+                          setShowEigenkapitalEditor(false);
+                        }}
+                        className="px-3 py-2 bg-neon-green/20 text-neon-green rounded-lg hover:bg-neon-green/30 transition-colors"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEigenkapitalInput(result.cashflow_analyse?.eigenkapital || 0);
+                          setShowEigenkapitalEditor(false);
+                        }}
+                        className="px-3 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowEigenkapitalEditor(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/20 rounded-xl hover:bg-white/10 transition-colors group"
+                    >
+                      <span className="text-text-muted text-sm">Eigenkapital:</span>
+                      <span className="text-white font-bold">{formatCurrency(result.cashflow_analyse?.eigenkapital || 0)}</span>
+                      <svg className="w-4 h-4 text-neon-blue group-hover:text-neon-purple transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
 
               <div className="grid md:grid-cols-2 gap-10">
                 <div>
                   <h4 className="font-bold text-white mb-6 text-lg">Monatliche Berechnung</h4>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center py-3 px-4 bg-green-500/100/10 rounded-xl border border-green-200/30">
+                    <div className="flex justify-between items-center py-3 px-4 bg-green-500/10 rounded-xl border border-green-500/30">
                       <span className="text-text-secondary font-medium">Mieteinnahmen</span>
                       <span className="font-bold text-green-400 text-lg">
                         +{formatCurrency(result.cashflow_analyse.monatliche_miete)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-3 px-4 bg-red-500/100/10 rounded-xl border border-red-200/30">
+                    <div className="flex justify-between items-center py-3 px-4 bg-red-500/10 rounded-xl border border-red-500/30">
                       <span className="text-text-secondary font-medium">Kreditrate</span>
                       <span className="font-bold text-red-400 text-lg">
                         -{formatCurrency(result.cashflow_analyse.monatliche_rate)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-3 px-4 bg-red-500/100/10 rounded-xl border border-red-200/30">
+                    <div className="flex justify-between items-center py-3 px-4 bg-red-500/10 rounded-xl border border-red-500/30">
                       <span className="text-text-secondary font-medium">Nebenkosten/Hausgeld</span>
                       <span className="font-bold text-red-400 text-lg">
                         -{formatCurrency(result.cashflow_analyse.monatliche_nebenkosten)}
@@ -562,16 +699,16 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                 <div>
                   <h4 className="font-bold text-white mb-6 text-lg">Kennzahlen</h4>
                   <div className="space-y-4">
-                    <div className={`p-5 rounded-2xl shadow-md ${result.cashflow_analyse.selbsttragend ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300' : 'bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-300'}`}>
+                    <div className={`p-5 rounded-2xl shadow-md ${result.cashflow_analyse.selbsttragend ? 'bg-green-500/10 border-2 border-green-500/30' : 'bg-red-500/10 border-2 border-red-500/30'}`}>
                       <div className="flex items-center gap-3 mb-2">
                         {result.cashflow_analyse.selbsttragend ? (
-                          <div className="w-8 h-8 bg-green-500/100 rounded-lg flex items-center justify-center">
+                          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </div>
                         ) : (
-                          <div className="w-8 h-8 bg-red-500/100 rounded-lg flex items-center justify-center">
+                          <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -654,7 +791,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
 
           {/* Strengths and Weaknesses */}
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="glass-card border border-white/10 rounded-3xl shadow-xl p-8 fade-in-delay-3 card-hover border-2 border-green-200/30">
+            <div className="glass-card border border-white/10 rounded-3xl shadow-xl p-8 fade-in-delay-3 card-hover border-2 border-green-500/30">
               <h3 className="text-xl font-bold text-green-400 mb-6 flex items-center gap-3">
                 <span className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -665,7 +802,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
               </h3>
               <ul className="space-y-3">
                 {result.stärken.map((item, index) => (
-                  <li key={index} className="flex items-start gap-3 p-3 bg-green-500/100/10 rounded-xl">
+                  <li key={index} className="flex items-start gap-3 p-3 bg-green-500/10 rounded-xl">
                     <span className="text-green-500 text-lg font-bold flex-shrink-0">{'\u2713'}</span>
                     <span className="text-white leading-relaxed">{item}</span>
                   </li>
@@ -673,7 +810,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
               </ul>
             </div>
 
-            <div className="glass-card border border-white/10 rounded-3xl shadow-xl p-8 fade-in-delay-3 card-hover border-2 border-red-200/30">
+            <div className="glass-card border border-white/10 rounded-3xl shadow-xl p-8 fade-in-delay-3 card-hover border-2 border-red-500/30">
               <h3 className="text-xl font-bold text-red-400 mb-6 flex items-center gap-3">
                 <span className="w-10 h-10 bg-gradient-to-br from-red-400 to-rose-500 rounded-xl flex items-center justify-center shadow-lg">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -684,7 +821,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
               </h3>
               <ul className="space-y-3">
                 {result.schwächen.map((item, index) => (
-                  <li key={index} className="flex items-start gap-3 p-3 bg-red-500/100/10 rounded-xl">
+                  <li key={index} className="flex items-start gap-3 p-3 bg-red-500/10 rounded-xl">
                     <span className="text-red-500 text-lg font-bold flex-shrink-0">!</span>
                     <span className="text-white leading-relaxed">{item}</span>
                   </li>
@@ -749,7 +886,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                     result.kennzahlen.kaufpreisfaktor < 20
                       ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300'
                       : result.kennzahlen.kaufpreisfaktor < 25
-                        ? 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-300'
+                        ? 'bg-amber-500/10 border border-amber-500/30'
                         : 'bg-gradient-to-br from-red-50 to-orange-50 border-red-300'
                   }`}>
                     <p className="text-sm text-text-secondary/70 mb-2 font-medium">Kaufpreisfaktor</p>
@@ -827,9 +964,9 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
               </div>
 
               {result.marktdaten.prognose && (
-                <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200/50">
+                <div className="mt-6 p-6 bg-neon-blue/10 border border-neon-blue/30 rounded-2xl border-2 border-neon-blue/30">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-blue-500/100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 bg-neon-blue rounded-lg flex items-center justify-center flex-shrink-0">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                       </svg>
@@ -863,21 +1000,21 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                 Fairer Preis Analyse
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 text-center">
+                <div className="bg-neon-blue/10 border border-neon-blue/30 rounded-2xl p-6 text-center">
                   <p className="text-text-secondary text-sm mb-2">Aktueller Preis</p>
                   <p className="text-2xl font-bold text-white">{formatCurrency(result.fairer_preis.aktueller_preis)}</p>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 text-center">
+                <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-6 text-center">
                   <p className="text-text-secondary text-sm mb-2">Fairer Preis</p>
                   <p className="text-2xl font-bold text-green-400">{formatCurrency(result.fairer_preis.fairer_preis)}</p>
                 </div>
-                <div className={`rounded-2xl p-6 text-center ${result.fairer_preis.differenz_prozent > 0 ? 'bg-gradient-to-br from-red-50 to-red-100' : 'bg-gradient-to-br from-green-50 to-green-100'}`}>
+                <div className={`rounded-2xl p-6 text-center ${result.fairer_preis.differenz_prozent > 0 ? 'bg-red-500/10 border border-red-500/30' : 'bg-green-500/10 border border-green-500/30'}`}>
                   <p className="text-text-secondary text-sm mb-2">Differenz</p>
                   <p className={`text-2xl font-bold ${result.fairer_preis.differenz_prozent > 0 ? 'text-red-400' : 'text-green-400'}`}>
                     {result.fairer_preis.differenz_prozent > 0 ? '+' : ''}{result.fairer_preis.differenz_prozent}%
                   </p>
                 </div>
-                <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 text-center">
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 text-center">
                   <p className="text-text-secondary text-sm mb-2">Bewertung</p>
                   <p className="text-2xl font-bold text-amber-400 capitalize">{result.fairer_preis.bewertung}</p>
                 </div>
@@ -981,7 +1118,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                       </p>
                     )}
                     {foerderung.tipp && (
-                      <p className="text-xs text-blue-600 bg-blue-500/10 rounded-lg px-3 py-2 mt-2">
+                      <p className="text-xs text-neon-blue bg-blue-500/10 rounded-lg px-3 py-2 mt-2">
                         {'\u{1F4A1}'} {foerderung.tipp}
                       </p>
                     )}
@@ -1053,7 +1190,7 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
                 </div>
               </div>
               {result.leverage_effekt.warnung && (
-                <div className="mt-4 bg-red-500/10 border border-red-200 rounded-xl p-4">
+                <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4">
                   <p className="text-red-400 text-sm">{'\u{26A0}\u{FE0F}'} {result.leverage_effekt.warnung}</p>
                 </div>
               )}

@@ -133,6 +133,50 @@ function Analyze() {
     }
   }, [propertyData, lastFinanzierung, token]);
 
+  // NEU: Neu-Analyse mit geändertem Eigenkapital
+  const handleChangeEigenkapital = useCallback(async (neuesEigenkapital) => {
+    if (!propertyData || !lastVerwendungszweck) return;
+
+    setError(null);
+    setStep('analyzing');
+    setLoadingMessage(`Berechne mit ${neuesEigenkapital.toLocaleString('de-DE')}€ Eigenkapital...`);
+
+    // Update lastFinanzierung
+    const updatedFinanzierung = {
+      ...lastFinanzierung,
+      eigenkapital: neuesEigenkapital
+    };
+    setLastFinanzierung(updatedFinanzierung);
+
+    try {
+      const response = await fetch(`${API_BASE}/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          property_data: propertyData,
+          verwendungszweck: lastVerwendungszweck,
+          eigenkapital: neuesEigenkapital,
+          zinssatz: lastFinanzierung?.zinssatz || 3.75,
+          tilgung: lastFinanzierung?.tilgung || 1.25,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Fehler bei der Analyse');
+      }
+
+      const result = await response.json();
+      setAnalysisResult(result);
+      setStep('result');
+    } catch (err) {
+      setError(err.message);
+    }
+  }, [propertyData, lastVerwendungszweck, lastFinanzierung, token]);
+
   const handleReset = useCallback(() => {
     setStep('upload');
     setPropertyData(null);
@@ -259,6 +303,7 @@ function Analyze() {
               onNewAnalysis={handleReset}
               onEditData={handleBackToForm}
               onSwitchVerwendungszweck={handleSwitchVerwendungszweck}
+              onChangeEigenkapital={handleChangeEigenkapital}
             />
           )}
         </main>
