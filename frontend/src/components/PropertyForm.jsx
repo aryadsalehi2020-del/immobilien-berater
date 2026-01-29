@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { useUserProfile, INVESTMENT_GOALS } from '../contexts/UserProfileContext';
 
 function PropertyForm({ initialData, onAnalyze, onBack }) {
+  const { profile: investorProfile, isProfileComplete } = useUserProfile();
   const [formData, setFormData] = useState({
     kaufpreis: initialData?.kaufpreis || '',
     wohnflaeche: initialData?.wohnflaeche || '',
@@ -148,6 +151,65 @@ function PropertyForm({ initialData, onAnalyze, onBack }) {
               <p className="mt-3 text-xs text-neon-purple bg-neon-purple/10 px-3 py-2 rounded-lg">
                 💡 Bei Eigennutzung wird Wohnqualität, Lage und Zustand priorisiert
               </p>
+            )}
+          </div>
+
+          {/* Investoren-Profil / Personalisierung */}
+          <div className="mb-10 p-6 glass-card rounded-2xl border-2 border-neon-green/30">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">🎯</span>
+              <div>
+                <label className="text-lg font-bold text-white">Dein Investment-Ziel</label>
+                <p className="text-sm text-text-muted">Personalisiere die Bewertung nach deiner Strategie</p>
+              </div>
+            </div>
+
+            {isProfileComplete ? (
+              <div className="flex flex-col md:flex-row md:items-center gap-4 bg-neon-green/10 rounded-xl p-4 border border-neon-green/30">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{INVESTMENT_GOALS[investorProfile.goal]?.icon}</span>
+                  <div>
+                    <p className="text-neon-green font-bold text-lg">{INVESTMENT_GOALS[investorProfile.goal]?.label}</p>
+                    <p className="text-text-secondary text-sm">{INVESTMENT_GOALS[investorProfile.goal]?.description}</p>
+                  </div>
+                </div>
+                <div className="flex-1 flex flex-col md:flex-row md:items-center gap-3 md:justify-end">
+                  <span className="text-neon-green text-sm flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Scores werden personalisiert
+                  </span>
+                  <Link
+                    to="/profile"
+                    className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl font-medium hover:bg-white/20 transition-all text-sm flex items-center gap-2"
+                  >
+                    Ziel ändern
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <Link
+                to="/profile"
+                className="flex flex-col md:flex-row md:items-center gap-4 bg-accent/10 rounded-xl p-4 border border-accent/30 hover:bg-accent/20 transition-all group"
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <span className="text-3xl">💡</span>
+                  <div>
+                    <p className="text-accent font-bold">Noch kein Ziel definiert</p>
+                    <p className="text-text-secondary text-sm">Richte dein Profil ein für personalisierte Scores basierend auf deiner Strategie</p>
+                  </div>
+                </div>
+                <span className="px-4 py-2 bg-accent/20 border border-accent/30 text-accent rounded-xl font-medium group-hover:bg-accent/30 transition-all text-sm flex items-center gap-2">
+                  Jetzt einrichten
+                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </Link>
             )}
           </div>
 
