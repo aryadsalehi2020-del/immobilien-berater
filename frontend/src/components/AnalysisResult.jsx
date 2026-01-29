@@ -87,15 +87,15 @@ function ScoreCircle({ score, adjustedScore = null, showAdjusted = false }) {
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <div className="flex items-baseline justify-center gap-1">
+        <div className="flex items-baseline justify-center">
           <span className="text-5xl font-black leading-none" style={{ color: getScoreColor(displayScore) }}>
             {Math.round(displayScore)}
           </span>
-          <span className="text-lg text-text-secondary/70 font-medium">/100</span>
+          <span className="text-base text-text-secondary/70 font-medium ml-1">/100</span>
         </div>
-        {showAdjusted && adjustedScore !== null && scoreDiff !== 0 && (
+        {showAdjusted && adjustedScore !== null && Math.round(scoreDiff) !== 0 && (
           <span className={`text-xs font-bold mt-1 ${scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
-            ({scoreDiff > 0 ? '+' : ''}{scoreDiff} personalisiert)
+            ({scoreDiff > 0 ? '+' : ''}{Math.round(scoreDiff)})
           </span>
         )}
         <span className="text-sm font-bold text-accent mt-3 px-3 py-1 bg-accent/10 rounded-full">
