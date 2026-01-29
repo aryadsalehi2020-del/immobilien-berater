@@ -42,66 +42,61 @@ function ScoreCircle({ score, adjustedScore = null, showAdjusted = false }) {
 
   // Angepasste Labels: +10 positiver
   const getScoreLabel = (score) => {
-    if (score >= 75) return 'Exzellent';     // war 80
-    if (score >= 60) return 'Sehr gut';       // war 65
-    if (score >= 45) return 'Gut';            // war 50
-    if (score >= 30) return 'Akzeptabel';     // war 35
+    if (score >= 75) return 'Exzellent';
+    if (score >= 60) return 'Sehr gut';
+    if (score >= 45) return 'Gut';
+    if (score >= 30) return 'Akzeptabel';
     return 'Kritisch';
   };
 
-  const scoreDiff = adjustedScore !== null ? adjustedScore - score : 0;
-
   return (
-    <div className="relative w-48 h-48 mx-auto">
-      {/* Outer glow ring */}
-      <div className="absolute inset-0 rounded-full animate-glow opacity-30"
-           style={{ background: `radial-gradient(circle, ${getScoreColor(displayScore)}40, transparent)` }}></div>
+    <div className="flex flex-col items-center">
+      <div className="relative w-48 h-48">
+        {/* Outer glow ring */}
+        <div className="absolute inset-0 rounded-full animate-glow opacity-30"
+             style={{ background: `radial-gradient(circle, ${getScoreColor(displayScore)}40, transparent)` }}></div>
 
-      <svg className="w-full h-full transform -rotate-90">
-        {/* Background circle */}
-        <circle
-          cx="96"
-          cy="96"
-          r={radius}
-          fill="none"
-          stroke="rgba(100, 116, 139, 0.2)"
-          strokeWidth="12"
-        />
-        {/* Score circle with gradient */}
-        <circle
-          cx="96"
-          cy="96"
-          r={radius}
-          fill="none"
-          stroke={getScoreColor(displayScore)}
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="score-circle"
-          style={{
-            '--score-offset': offset,
-            filter: `drop-shadow(0 0 8px ${getScoreColor(displayScore)}80)`
-          }}
-        />
-      </svg>
+        <svg className="w-full h-full transform -rotate-90">
+          {/* Background circle */}
+          <circle
+            cx="96"
+            cy="96"
+            r={radius}
+            fill="none"
+            stroke="rgba(100, 116, 139, 0.2)"
+            strokeWidth="12"
+          />
+          {/* Score circle with gradient */}
+          <circle
+            cx="96"
+            cy="96"
+            r={radius}
+            fill="none"
+            stroke={getScoreColor(displayScore)}
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            className="score-circle"
+            style={{
+              '--score-offset': offset,
+              filter: `drop-shadow(0 0 8px ${getScoreColor(displayScore)}80)`
+            }}
+          />
+        </svg>
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <div className="flex items-baseline justify-center">
-          <span className="text-5xl font-black leading-none" style={{ color: getScoreColor(displayScore) }}>
+        {/* Score number - centered in circle */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-5xl font-black" style={{ color: getScoreColor(displayScore) }}>
             {Math.round(displayScore)}
           </span>
-          <span className="text-base text-text-secondary/70 font-medium ml-1">/100</span>
         </div>
-        {showAdjusted && adjustedScore !== null && Math.round(scoreDiff) !== 0 && (
-          <span className={`text-xs font-bold mt-1 ${scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
-            ({scoreDiff > 0 ? '+' : ''}{Math.round(scoreDiff)})
-          </span>
-        )}
-        <span className="text-sm font-bold text-accent mt-3 px-3 py-1 bg-accent/10 rounded-full">
-          {getScoreLabel(displayScore)}
-        </span>
       </div>
+
+      {/* Label below circle */}
+      <span className="text-sm font-bold text-accent mt-4 px-4 py-1.5 bg-accent/10 rounded-full">
+        {getScoreLabel(displayScore)}
+      </span>
     </div>
   );
 }
