@@ -517,6 +517,8 @@ class AnalysisResult(BaseModel):
     kennzahlen: Optional[dict] = None  # Preis/m², Markt-Vergleich, etc.
     # NEU: Mietschätzung bei freien Immobilien
     mietschaetzung: Optional[dict] = None  # Info wenn Miete geschätzt wurde
+    # NEU: Kaufnebenkosten
+    kaufnebenkosten: Optional[dict] = None  # Aufschlüsselung der Kaufnebenkosten
 
 
 def get_anthropic_client():
@@ -850,6 +852,59 @@ async def search_market_data(stadt: str, stadtteil: Optional[str] = None, objekt
     Sucht AKTUELLE Preise für Stadt/Stadtteil/Objekttyp
     """
     return await fetch_live_market_data(stadt, stadtteil, objekttyp or "Eigentumswohnung")
+
+
+def calculate_kaufnebenkosten(kaufpreis: float, bundesland: str = None, mit_makler: bool = True) -> dict:
+    """
+    Berechnet die Kaufnebenkosten einer Immobilie.
+
+    Kaufnebenkosten bestehen aus:
+    - Grunderwerbsteuer: 3.5% - 6.5% je nach Bundesland
+    - Notar & Grundbuch: ~1.5-2%
+    - Makler: 0% - 7.14% (wenn Makler involviert)
+    """
+    # Grunderwerbsteuer nach Bundesland (Stand 2024)
+    grunderwerbsteuer_saetze = {
+        "baden-württemberg": 5.0, "bayern": 3.5, "berlin": 6.0, "brandenburg": 6.5,
+        "bremen": 5.0, "hamburg": 5.5, "hessen": 6.0, "mecklenburg-vorpommern": 6.0,
+        "niedersachsen": 5.0, "nordrhein-westfalen": 6.5, "rheinland-pfalz": 5.0,
+        "saarland": 6.5, "sachsen": 5.5, "sachsen-anhalt": 5.0, "schleswig-holstein": 6.5,
+        "thüringen": 5.0
+    }
+
+    # Standard: 5.5% wenn Bundesland nicht bekannt
+    grunderwerbsteuer_prozent = 5.5
+    if bundesland:
+        bundesland_lower = bundesland.lower().strip()
+        grunderwerbsteuer_prozent = grunderwerbsteuer_saetze.get(bundesland_lower, 5.5)
+
+    # Notar & Grundbuch: ~2%
+    notar_grundbuch_prozent = 2.0
+
+    # Makler: ~3.57% (hälfte der üblichen 7.14%)
+    makler_prozent = 3.57 if mit_makler else 0.0
+
+    # Berechnungen
+    grunderwerbsteuer = kaufpreis * (grunderwerbsteuer_prozent / 100)
+    notar_grundbuch = kaufpreis * (notar_grundbuch_prozent / 100)
+    makler = kaufpreis * (makler_prozent / 100)
+
+    gesamt = grunderwerbsteuer + notar_grundbuch + makler
+    gesamt_prozent = grunderwerbsteuer_prozent + notar_grundbuch_prozent + makler_prozent
+
+    return {
+        "kaufpreis": round(kaufpreis, 2),
+        "grunderwerbsteuer": round(grunderwerbsteuer, 2),
+        "grunderwerbsteuer_prozent": grunderwerbsteuer_prozent,
+        "notar_grundbuch": round(notar_grundbuch, 2),
+        "notar_grundbuch_prozent": notar_grundbuch_prozent,
+        "makler": round(makler, 2),
+        "makler_prozent": makler_prozent,
+        "gesamt": round(gesamt, 2),
+        "gesamt_prozent": round(gesamt_prozent, 2),
+        "gesamtkosten": round(kaufpreis + gesamt, 2),
+        "bundesland": bundesland or "Durchschnitt"
+    }
 
 
 def calculate_cashflow(
@@ -2047,6 +2102,17 @@ Antworte NUR mit dem JSON."""
         # Erweitere Zusammenfassung mit Empfehlung
         zusammenfassung_erweitert = f"{empfehlung_text}\n\n{ai_analysis['zusammenfassung']}"
 
+        # Kaufnebenkosten berechnen
+        kaufnebenkosten_result = None
+        if data.kaufpreis:
+            # Prüfe ob Makler involviert (aus Provision oder Verkäufertyp)
+            mit_makler = bool(data.provision) or (data.verkaufertyp and data.verkaufertyp.lower() == "makler")
+            kaufnebenkosten_result = calculate_kaufnebenkosten(
+                kaufpreis=data.kaufpreis,
+                bundesland=None,  # TODO: aus Stadt ableiten
+                mit_makler=mit_makler
+            )
+
         # V3.0: Kennzahlen mit Live-Marktdaten-Vergleich
         kennzahlen = None
         if data.kaufpreis and data.wohnflaeche:
@@ -2096,7 +2162,9 @@ Antworte NUR mit dem JSON."""
             # V3.0: Live-Marktdaten Kennzahlen
             kennzahlen=kennzahlen,
             # NEU: Mietschätzung-Info bei freien Immobilien
-            mietschaetzung=mietschaetzung_info
+            mietschaetzung=mietschaetzung_info,
+            # NEU: Kaufnebenkosten
+            kaufnebenkosten=kaufnebenkosten_result
         )
 
         # Speichere Analyse in Datenbank

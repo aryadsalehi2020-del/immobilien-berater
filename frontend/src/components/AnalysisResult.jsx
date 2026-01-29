@@ -590,6 +590,53 @@ function AnalysisResult({ result, propertyData, onNewAnalysis, onEditData, onSwi
             </div>
           )}
 
+          {/* Kaufnebenkosten Übersicht */}
+          {result.kaufnebenkosten && (
+            <div className="glass-card border border-white/10 rounded-3xl p-8 fade-in card-hover">
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="w-12 h-12 bg-neon-blue/20 rounded-xl flex items-center justify-center text-2xl">
+                  🧾
+                </span>
+                <span>Kaufnebenkosten</span>
+              </h3>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Linke Seite: Aufschlüsselung */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                    <span className="text-text-secondary">Kaufpreis</span>
+                    <span className="font-bold text-white">{formatCurrency(result.kaufnebenkosten.kaufpreis)}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                    <span className="text-text-secondary">Grunderwerbsteuer ({result.kaufnebenkosten.grunderwerbsteuer_prozent}%)</span>
+                    <span className="font-bold text-red-400">+{formatCurrency(result.kaufnebenkosten.grunderwerbsteuer)}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                    <span className="text-text-secondary">Notar & Grundbuch ({result.kaufnebenkosten.notar_grundbuch_prozent}%)</span>
+                    <span className="font-bold text-red-400">+{formatCurrency(result.kaufnebenkosten.notar_grundbuch)}</span>
+                  </div>
+                  {result.kaufnebenkosten.makler > 0 && (
+                    <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl">
+                      <span className="text-text-secondary">Makler ({result.kaufnebenkosten.makler_prozent}%)</span>
+                      <span className="font-bold text-red-400">+{formatCurrency(result.kaufnebenkosten.makler)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rechte Seite: Zusammenfassung */}
+                <div className="flex flex-col justify-center">
+                  <div className="p-6 bg-neon-blue/10 border-2 border-neon-blue/30 rounded-2xl text-center">
+                    <p className="text-text-muted text-sm mb-2">Gesamtinvestition</p>
+                    <p className="text-3xl font-black text-neon-blue">{formatCurrency(result.kaufnebenkosten.gesamtkosten)}</p>
+                    <p className="text-sm text-text-secondary mt-2">
+                      Kaufpreis + {formatCurrency(result.kaufnebenkosten.gesamt)} Nebenkosten ({result.kaufnebenkosten.gesamt_prozent}%)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Break-Even Calculator (new) */}
           {result.breakeven_eigenkapital && result.verwendungszweck === 'kapitalanlage' && (
             <div className="fade-in-delay-1">

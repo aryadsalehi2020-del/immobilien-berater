@@ -28,25 +28,25 @@ function ScenarioComparison({ szenarien, onSelectScenario }) {
 
   const scenarioColors = {
     'Konservativ': {
-      bg: 'from-orange-50 to-amber-50',
-      border: 'border-orange-200',
-      text: 'text-orange-700',
-      accent: 'text-orange-600',
-      ring: 'ring-orange-400'
+      bg: 'from-orange-500/10 to-amber-500/10',
+      border: 'border-orange-500/30',
+      text: 'text-orange-400',
+      accent: 'text-orange-400',
+      ring: 'ring-orange-500/50'
     },
     'Realistisch': {
-      bg: 'from-blue-50 to-indigo-50',
-      border: 'border-blue-200',
-      text: 'text-blue-700',
-      accent: 'text-blue-600',
-      ring: 'ring-blue-400'
+      bg: 'from-neon-blue/10 to-indigo-500/10',
+      border: 'border-neon-blue/30',
+      text: 'text-neon-blue',
+      accent: 'text-neon-blue',
+      ring: 'ring-neon-blue/50'
     },
     'Optimistisch': {
-      bg: 'from-green-50 to-emerald-50',
-      border: 'border-green-200',
-      text: 'text-green-700',
-      accent: 'text-green-600',
-      ring: 'ring-green-400'
+      bg: 'from-green-500/10 to-emerald-500/10',
+      border: 'border-green-500/30',
+      text: 'text-green-400',
+      accent: 'text-green-400',
+      ring: 'ring-green-500/50'
     }
   };
 
@@ -59,7 +59,7 @@ function ScenarioComparison({ szenarien, onSelectScenario }) {
 
   return (
     <div>
-      <h4 className="text-lg font-bold text-primary mb-6 flex items-center gap-2">
+      <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
         <span className="text-2xl">🎭</span>
         Szenario-Vergleich
       </h4>
@@ -95,7 +95,7 @@ function ScenarioComparison({ szenarien, onSelectScenario }) {
                 <span className="text-2xl">{scenarioIcons[szenario.name]}</span>
                 <div>
                   <h5 className={`font-bold ${colors.text}`}>{szenario.name}</h5>
-                  <p className="text-xs text-slate/60">{szenario.beschreibung}</p>
+                  <p className="text-xs text-text-muted">{szenario.beschreibung}</p>
                 </div>
               </div>
 
@@ -103,8 +103,8 @@ function ScenarioComparison({ szenarien, onSelectScenario }) {
               <div className="space-y-3">
                 {/* Monthly Cashflow */}
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate/70">Cashflow/Monat</span>
-                  <span className={`font-bold ${cashflow?.monatlicher_cashflow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="text-sm text-text-secondary">Cashflow/Monat</span>
+                  <span className={`font-bold ${cashflow?.monatlicher_cashflow >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {cashflow?.monatlicher_cashflow >= 0 ? '+' : ''}
                     {formatCurrency(cashflow?.monatlicher_cashflow || 0)}
                   </span>
@@ -112,42 +112,46 @@ function ScenarioComparison({ szenarien, onSelectScenario }) {
 
                 {/* Annual Cashflow */}
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate/70">Cashflow/Jahr</span>
-                  <span className={`font-bold ${cashflow?.jaehrlicher_cashflow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className="text-sm text-text-secondary">Cashflow/Jahr</span>
+                  <span className={`font-bold ${cashflow?.jaehrlicher_cashflow >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     {cashflow?.jaehrlicher_cashflow >= 0 ? '+' : ''}
                     {formatCurrency(cashflow?.jaehrlicher_cashflow || 0)}
                   </span>
                 </div>
 
-                <hr className="border-slate/20" />
+                <hr className="border-white/10" />
 
                 {/* Assumptions */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate/60">Zinssatz</span>
+                    <span className="text-text-muted">Zinssatz</span>
                     <span className={colors.accent}>{szenario.annahmen?.zinssatz}%</span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate/60">Mietsteigerung</span>
+                    <span className="text-text-muted">Tilgung</span>
+                    <span className={colors.accent}>{szenario.annahmen?.tilgung}%</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-text-muted">Mietsteigerung</span>
                     <span className={colors.accent}>{szenario.annahmen?.mietsteigerung_prozent}%/Jahr</span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate/60">Wertsteigerung</span>
+                    <span className="text-text-muted">Wertsteigerung</span>
                     <span className={colors.accent}>{szenario.annahmen?.wertsteigerung_prozent}%/Jahr</span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-slate/60">Leerstand</span>
+                    <span className="text-text-muted">Leerstand</span>
                     <span className={colors.accent}>{szenario.annahmen?.leerstand_prozent}%</span>
                   </div>
                 </div>
 
-                <hr className="border-slate/20" />
+                <hr className="border-white/10" />
 
                 {/* 30-Year Projection */}
                 <div className="pt-1">
-                  <p className="text-xs text-slate/50 mb-2">Nach 30 Jahren:</p>
+                  <p className="text-xs text-text-muted mb-2">Nach 30 Jahren:</p>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate/70">Vermögen</span>
+                    <span className="text-xs text-text-secondary">Vermögen</span>
                     <span className={`font-bold text-sm ${colors.text}`}>
                       {formatCurrency(tilgungsplan?.zusammenfassung?.gesamtvermoegen_nach_laufzeit || 0)}
                     </span>
@@ -156,8 +160,8 @@ function ScenarioComparison({ szenarien, onSelectScenario }) {
               </div>
 
               {/* Self-Sustaining Badge */}
-              <div className={`mt-4 p-2 rounded-lg ${cashflow?.selbsttragend ? 'bg-green-100' : 'bg-red-100'}`}>
-                <p className={`text-xs font-medium text-center ${cashflow?.selbsttragend ? 'text-green-700' : 'text-red-700'}`}>
+              <div className={`mt-4 p-2 rounded-lg ${cashflow?.selbsttragend ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                <p className={`text-xs font-medium text-center ${cashflow?.selbsttragend ? 'text-green-400' : 'text-red-400'}`}>
                   {cashflow?.selbsttragend ? '✓ Selbsttragend' : '✗ Zuzahlung erforderlich'}
                 </p>
               </div>
@@ -167,10 +171,10 @@ function ScenarioComparison({ szenarien, onSelectScenario }) {
       </div>
 
       {/* Legend */}
-      <div className="mt-6 p-4 bg-slate/5 rounded-xl">
-        <p className="text-xs text-slate/70">
-          <span className="font-bold">Tipp:</span> Klicken Sie auf ein Szenario, um es in den Charts oben anzuzeigen.
-          Das <span className="text-blue-600 font-medium">realistische Szenario</span> basiert auf Ihren aktuellen Parametern.
+      <div className="mt-6 p-4 bg-white/5 rounded-xl">
+        <p className="text-xs text-text-secondary">
+          <span className="font-bold text-white">Tipp:</span> Klicken Sie auf ein Szenario, um es in den Charts oben anzuzeigen.
+          Das <span className="text-neon-blue font-medium">realistische Szenario</span> basiert auf Ihren aktuellen Parametern.
         </p>
       </div>
     </div>
