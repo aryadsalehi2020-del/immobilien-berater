@@ -110,7 +110,7 @@ function LoadingState({ message }) {
         setCurrentFactIndex((prev) => (prev + 1) % IMMOBILIEN_FAKTEN.length);
         setFadeState('in');
       }, 300);
-    }, 5000);
+    }, 7000); // 7 Sekunden - mehr Zeit zum Lesen
 
     return () => clearInterval(interval);
   }, []);

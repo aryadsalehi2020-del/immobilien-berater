@@ -2036,11 +2036,6 @@ Antworte NUR mit dem JSON."""
         )
 
         # Speichere Analyse in Datenbank
-        # Ermittle die verwendete Miete (Original oder geschätzt)
-        verwendete_miete = data.aktuelle_miete
-        if mietschaetzung_info and mietschaetzung_info.get("ist_geschaetzt"):
-            verwendete_miete = mietschaetzung_info.get("geschaetzte_miete_monat", 0)
-
         db_analysis = Analysis(
             user_id=current_user.id,
             property_data=data.dict(),
@@ -2051,7 +2046,6 @@ Antworte NUR mit dem JSON."""
             tilgung=request.tilgung or 1.25,
             kaufpreis=data.kaufpreis,
             wohnflaeche=data.wohnflaeche,
-            kaltmiete=verwendete_miete,  # NEU: Speichere verwendete Miete (inkl. Schätzung)
             stadt=data.stadt,
             stadtteil=data.stadtteil,
             gesamtscore=gesamtscore,
