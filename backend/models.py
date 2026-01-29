@@ -63,6 +63,7 @@ class Analysis(Base):
     # Quick-Access Felder für Suche/Filter
     kaufpreis = Column(Float, nullable=True)
     wohnflaeche = Column(Float, nullable=True)
+    kaltmiete = Column(Float, nullable=True)  # NEU: Inkl. geschätzter Miete
     stadt = Column(String, nullable=True)
     stadtteil = Column(String, nullable=True)
     gesamtscore = Column(Float, nullable=True)

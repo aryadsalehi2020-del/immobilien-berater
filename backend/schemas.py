@@ -89,6 +89,7 @@ class AnalysisResponse(BaseModel):
     tilgung: float
     kaufpreis: Optional[float]
     wohnflaeche: Optional[float]
+    kaltmiete: Optional[float]  # NEU: Inkl. geschätzter Miete
     stadt: Optional[str]
     stadtteil: Optional[str]
     gesamtscore: Optional[float]
@@ -107,6 +108,7 @@ class AnalysisListItem(BaseModel):
     verwendungszweck: str
     kaufpreis: Optional[float]
     wohnflaeche: Optional[float]
+    kaltmiete: Optional[float]  # NEU: Inkl. geschätzter Miete
     stadt: Optional[str]
     stadtteil: Optional[str]
     gesamtscore: Optional[float]

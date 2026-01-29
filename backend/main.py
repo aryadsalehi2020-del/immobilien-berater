@@ -451,6 +451,8 @@ class AnalysisResult(BaseModel):
     quick_check_result: Optional[dict] = None  # Schnell-Check
     # V3.0: Live-Marktdaten Vergleich
     kennzahlen: Optional[dict] = None  # Preis/m², Markt-Vergleich, etc.
+    # NEU: Mietschätzung bei freien Immobilien
+    mietschaetzung: Optional[dict] = None  # Info wenn Miete geschätzt wurde
 
 
 def get_anthropic_client():
@@ -1550,13 +1552,30 @@ async def analyze_property(
     # 4. Investment-Metriken berechnen (nur bei Kapitalanlage)
     investment_metriken = None
     cashflow_analyse = None
+    mietschaetzung_info = None  # NEU: Tracking ob Miete geschätzt wurde
 
     if zweck == "kapitalanlage" and data.kaufpreis:
         miete = data.aktuelle_miete or 0
+        ist_geschaetzte_miete = False
 
-        # Schätze Miete falls nicht vorhanden
+        # Schätze Miete falls nicht vorhanden (frei/leerstehend)
         if miete == 0 and data.wohnflaeche and marktdaten:
-            miete = data.wohnflaeche * marktdaten.get("miete_qm_durchschnitt", 10)
+            geschaetzte_miete_qm = marktdaten.get("miete_qm_durchschnitt", 10)
+            miete = data.wohnflaeche * geschaetzte_miete_qm
+            ist_geschaetzte_miete = True
+
+            # Erstelle Info-Objekt für geschätzte Miete
+            mietschaetzung_info = {
+                "ist_geschaetzt": True,
+                "geschaetzte_miete_monat": round(miete, 2),
+                "geschaetzte_miete_qm": round(geschaetzte_miete_qm, 2),
+                "wohnflaeche": data.wohnflaeche,
+                "marktdaten_quelle": marktdaten.get("recherche_methode", "unbekannt"),
+                "standort": marktdaten.get("standort", data.stadt),
+                "hinweis": f"Die Immobilie ist frei/nicht vermietet. Die Miete wurde auf Basis aktueller Marktdaten für {data.stadt} geschätzt: {round(geschaetzte_miete_qm, 2)} €/m² × {data.wohnflaeche} m² = {round(miete, 2)} €/Monat",
+                "empfehlung": "Prüfen Sie die ortsübliche Vergleichsmiete und passen Sie ggf. die Schätzung an."
+            }
+            print(f"💡 Miete geschätzt für freie Immobilie: {round(miete, 2)} €/Monat ({round(geschaetzte_miete_qm, 2)} €/m²)")
 
         # Kaufpreisfaktor & Bruttorendite
         if miete > 0:
@@ -2011,10 +2030,17 @@ Antworte NUR mit dem JSON."""
             leverage_effekt=leverage_result,
             quick_check_result=quick_check_result,
             # V3.0: Live-Marktdaten Kennzahlen
-            kennzahlen=kennzahlen
+            kennzahlen=kennzahlen,
+            # NEU: Mietschätzung-Info bei freien Immobilien
+            mietschaetzung=mietschaetzung_info
         )
 
         # Speichere Analyse in Datenbank
+        # Ermittle die verwendete Miete (Original oder geschätzt)
+        verwendete_miete = data.aktuelle_miete
+        if mietschaetzung_info and mietschaetzung_info.get("ist_geschaetzt"):
+            verwendete_miete = mietschaetzung_info.get("geschaetzte_miete_monat", 0)
+
         db_analysis = Analysis(
             user_id=current_user.id,
             property_data=data.dict(),
@@ -2025,6 +2051,7 @@ Antworte NUR mit dem JSON."""
             tilgung=request.tilgung or 1.25,
             kaufpreis=data.kaufpreis,
             wohnflaeche=data.wohnflaeche,
+            kaltmiete=verwendete_miete,  # NEU: Speichere verwendete Miete (inkl. Schätzung)
             stadt=data.stadt,
             stadtteil=data.stadtteil,
             gesamtscore=gesamtscore,
