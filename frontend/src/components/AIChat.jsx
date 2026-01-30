@@ -65,7 +65,7 @@ function AIChat({ analysisContext, isProjectSpecific = false }) {
     }
     return {
       role: 'assistant',
-      content: 'Hallo! Ich bin Ihr **Immobilien-Experte** - Ihr Vorteil gegenüber 95% der Makler! 🏠\n\nIch helfe Ihnen bei **allem rund um Immobilien:**\n- Finanzierung & Eigenkapital-Strategien\n- KfW-Förderungen & Zuschüsse maximieren\n- Steuern, AfA & Abschreibungen\n- Rendite-Analyse & Cashflow-Berechnung\n- Mietrecht, WEG & Due Diligence\n- **Live-Marktpreise** für jede Stadt\n\nStellen Sie mir jede Frage - oder wählen Sie ein Thema unten!'
+      content: 'Hallo! Ich bin Ihr **Immobilien-Experte** - Ihr Vorteil gegenüber 95% der Makler! 🏠\n\nIch helfe Ihnen bei **allem rund um Immobilien:**\n- Finanzierung & Eigenkapital-Strategien\n- KfW-Förderungen & Zuschüsse maximieren\n- Steuern, AfA & Abschreibungen\n- Rendite-Analyse & Cashflow-Berechnung\n- Mietrecht, WEG & Due Diligence\n- **Live-Marktpreise** für jede Stadt\n\nStellen Sie mir jede Frage - oder wählen Sie ein Thema oben!'
     };
   };
 
