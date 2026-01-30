@@ -104,40 +104,6 @@ function Profile() {
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 fade-in fade-in-delay-1">
-          <div className="glass-card rounded-xl p-5 border border-neon-blue/20">
-            <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Direktes Eigenkapital</p>
-            <p className="text-2xl font-bold text-neon-blue text-glow-blue">
-              {formatCurrency(parseFloat(profile.eigenkapital) || 0)}
-            </p>
-          </div>
-          <div className="glass-card rounded-xl p-5 border border-neon-purple/20">
-            <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Inkl. EK-Ersatz</p>
-            <p className="text-2xl font-bold text-neon-purple text-glow-purple">
-              {formatCurrency(gesamtEK())}
-            </p>
-            {gesamtEK() > (parseFloat(profile.eigenkapital) || 0) && (
-              <p className="text-xs text-neon-green mt-1">
-                +{formatCurrency(gesamtEK() - (parseFloat(profile.eigenkapital) || 0))} Ersatz
-              </p>
-            )}
-          </div>
-          <div className="glass-card rounded-xl p-5 border border-neon-green/20">
-            <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Jahreseinkommen</p>
-            <p className="text-2xl font-bold text-neon-green" style={{ textShadow: '0 0 10px rgba(34, 197, 94, 0.5)' }}>
-              {formatCurrency(parseFloat(profile.jahreseinkommen) || 0)}
-            </p>
-          </div>
-          <div className="glass-card rounded-xl p-5 border border-accent/20">
-            <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Familiensituation</p>
-            <p className="text-2xl font-bold text-accent">
-              {profile.kinder > 0 ? `${profile.kinder} Kind${profile.kinder > 1 ? 'er' : ''}` : 'Keine Kinder'}
-            </p>
-            {profile.verheiratet && <p className="text-xs text-text-muted mt-1">Verheiratet</p>}
-          </div>
-        </div>
-
         {/* Tab Navigation */}
         <div className="glass-card rounded-2xl p-2 border border-white/10 fade-in fade-in-delay-2">
           <div className="flex gap-2 overflow-x-auto">
