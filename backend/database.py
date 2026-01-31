@@ -2,7 +2,7 @@
 Datenbank-Konfiguration für SQLAlchemy
 """
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
@@ -30,6 +30,23 @@ def get_db():
         db.close()
 
 
+def run_migrations():
+    """Führt notwendige Migrationen durch"""
+    with engine.connect() as conn:
+        # Prüfe und füge usage_limit_usd zur users Tabelle hinzu
+        try:
+            conn.execute(text("SELECT usage_limit_usd FROM users LIMIT 1"))
+        except Exception:
+            try:
+                conn.execute(text("ALTER TABLE users ADD COLUMN usage_limit_usd FLOAT DEFAULT 5.0"))
+                conn.commit()
+                print("Migration: usage_limit_usd Spalte hinzugefügt")
+            except Exception as e:
+                print(f"Migration usage_limit_usd fehlgeschlagen: {e}")
+
+
 def init_db():
     """Initialisiert die Datenbank-Tabellen"""
     Base.metadata.create_all(bind=engine)
+    # Führe Migrationen für existierende Tabellen durch
+    run_migrations()
