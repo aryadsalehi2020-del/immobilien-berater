@@ -64,22 +64,14 @@ app = FastAPI(title="AmlakI API", version="3.0.0")
 def startup_event():
     init_db()
 
-# CORS - Erlaubt Frontend-URLs
-cors_origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:3000",
-    "https://immobilien-berater-frontend.onrender.com",
-    "https://immobilien-berater.onrender.com",
-]
-
+# CORS - Erlaubt alle Origins (JWT wird über Header gesendet, nicht Cookies)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
