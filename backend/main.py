@@ -89,12 +89,16 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username bereits vergeben")
 
+    # Erster User wird automatisch Admin
+    is_first_user = db.query(User).count() == 0
+
     # Erstelle neuen User
     db_user = User(
         email=user.email,
         username=user.username,
         full_name=user.full_name,
-        hashed_password=get_password_hash(user.password)
+        hashed_password=get_password_hash(user.password),
+        is_superuser=is_first_user  # Erster User ist Admin
     )
     db.add(db_user)
     db.commit()
@@ -2306,3 +2310,234 @@ async def health_check():
         "status": "healthy",
         "api_key_configured": bool(api_key)
     }
+
+
+@app.post("/admin/make-first-admin")
+async def make_first_admin(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Macht den aktuellen User zum Admin - NUR wenn noch kein Admin existiert"""
+    # Prüfe ob bereits ein Admin existiert
+    existing_admin = db.query(User).filter(User.is_superuser == True).first()
+    if existing_admin:
+        raise HTTPException(
+            status_code=400,
+            detail="Es existiert bereits ein Admin. Bitte wende dich an den bestehenden Admin."
+        )
+
+    # Mache aktuellen User zum Admin
+    current_user.is_superuser = True
+    db.commit()
+    db.refresh(current_user)
+
+    return {"message": "Du bist jetzt Admin!", "is_superuser": True}
+
+
+# ========================================
+# ADMIN ENDPOINTS
+# ========================================
+
+from schemas import AdminUserResponse, AdminUserUpdate, AdminStatsResponse
+from datetime import timedelta
+
+async def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    """Prüft ob User Admin/Superuser ist"""
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin-Rechte erforderlich"
+        )
+    return current_user
+
+
+@app.get("/admin/stats", response_model=AdminStatsResponse)
+async def get_admin_stats(
+    admin: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Admin-Statistiken abrufen"""
+    now = datetime.utcnow()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=7)
+
+    total_users = db.query(User).count()
+    active_users = db.query(User).filter(User.is_active == True).count()
+    blocked_users = db.query(User).filter(User.is_active == False).count()
+    total_analyses = db.query(Analysis).count()
+
+    users_today = db.query(User).filter(User.created_at >= today_start).count()
+    users_this_week = db.query(User).filter(User.created_at >= week_start).count()
+    analyses_today = db.query(Analysis).filter(Analysis.created_at >= today_start).count()
+    analyses_this_week = db.query(Analysis).filter(Analysis.created_at >= week_start).count()
+
+    return AdminStatsResponse(
+        total_users=total_users,
+        active_users=active_users,
+        blocked_users=blocked_users,
+        total_analyses=total_analyses,
+        users_today=users_today,
+        users_this_week=users_this_week,
+        analyses_today=analyses_today,
+        analyses_this_week=analyses_this_week
+    )
+
+
+@app.get("/admin/users", response_model=List[AdminUserResponse])
+async def get_all_users(
+    admin: User = Depends(get_admin_user),
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100
+):
+    """Alle User abrufen (nur Admin)"""
+    users = db.query(User).offset(skip).limit(limit).all()
+
+    result = []
+    for user in users:
+        # Zähle Analysen
+        analyses_count = db.query(Analysis).filter(Analysis.user_id == user.id).count()
+
+        # Letzte Aktivität (letzte Analyse)
+        last_analysis = db.query(Analysis).filter(
+            Analysis.user_id == user.id
+        ).order_by(Analysis.updated_at.desc()).first()
+
+        last_activity = last_analysis.updated_at if last_analysis else user.created_at
+
+        result.append(AdminUserResponse(
+            id=user.id,
+            email=user.email,
+            username=user.username,
+            full_name=user.full_name,
+            is_active=user.is_active,
+            is_superuser=user.is_superuser,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+            analyses_count=analyses_count,
+            last_activity=last_activity
+        ))
+
+    return result
+
+
+@app.get("/admin/users/{user_id}", response_model=AdminUserResponse)
+async def get_user_details(
+    user_id: int,
+    admin: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Einzelnen User abrufen (nur Admin)"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User nicht gefunden")
+
+    analyses_count = db.query(Analysis).filter(Analysis.user_id == user.id).count()
+    last_analysis = db.query(Analysis).filter(
+        Analysis.user_id == user.id
+    ).order_by(Analysis.updated_at.desc()).first()
+    last_activity = last_analysis.updated_at if last_analysis else user.created_at
+
+    return AdminUserResponse(
+        id=user.id,
+        email=user.email,
+        username=user.username,
+        full_name=user.full_name,
+        is_active=user.is_active,
+        is_superuser=user.is_superuser,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+        analyses_count=analyses_count,
+        last_activity=last_activity
+    )
+
+
+@app.patch("/admin/users/{user_id}", response_model=AdminUserResponse)
+async def update_user_admin(
+    user_id: int,
+    user_update: AdminUserUpdate,
+    admin: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """User bearbeiten (nur Admin) - blocken, aktivieren, etc."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User nicht gefunden")
+
+    # Verhindere, dass Admin sich selbst deaktiviert
+    if user.id == admin.id and user_update.is_active == False:
+        raise HTTPException(status_code=400, detail="Du kannst dich nicht selbst deaktivieren")
+
+    # Update Felder
+    if user_update.is_active is not None:
+        user.is_active = user_update.is_active
+    if user_update.is_superuser is not None:
+        user.is_superuser = user_update.is_superuser
+    if user_update.full_name is not None:
+        user.full_name = user_update.full_name
+    if user_update.email is not None:
+        # Prüfe ob E-Mail schon existiert
+        existing = db.query(User).filter(User.email == user_update.email, User.id != user_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="E-Mail bereits vergeben")
+        user.email = user_update.email
+
+    user.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(user)
+
+    analyses_count = db.query(Analysis).filter(Analysis.user_id == user.id).count()
+    last_analysis = db.query(Analysis).filter(
+        Analysis.user_id == user.id
+    ).order_by(Analysis.updated_at.desc()).first()
+    last_activity = last_analysis.updated_at if last_analysis else user.created_at
+
+    return AdminUserResponse(
+        id=user.id,
+        email=user.email,
+        username=user.username,
+        full_name=user.full_name,
+        is_active=user.is_active,
+        is_superuser=user.is_superuser,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+        analyses_count=analyses_count,
+        last_activity=last_activity
+    )
+
+
+@app.delete("/admin/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user_admin(
+    user_id: int,
+    admin: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """User löschen (nur Admin)"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User nicht gefunden")
+
+    # Verhindere, dass Admin sich selbst löscht
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Du kannst dich nicht selbst löschen")
+
+    # Lösche User (Analysen werden durch cascade gelöscht)
+    db.delete(user)
+    db.commit()
+
+    return None
+
+
+@app.get("/admin/users/{user_id}/analyses", response_model=List[AnalysisListItem])
+async def get_user_analyses_admin(
+    user_id: int,
+    admin: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Alle Analysen eines Users abrufen (nur Admin)"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User nicht gefunden")
+
+    analyses = db.query(Analysis).filter(Analysis.user_id == user_id).order_by(Analysis.created_at.desc()).all()
+    return analyses

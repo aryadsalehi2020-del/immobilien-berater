@@ -28,6 +28,7 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: int
     is_active: bool
+    is_superuser: bool = False
     created_at: datetime
     default_verwendungszweck: str
     default_zinssatz: float
@@ -210,3 +211,44 @@ class SensitivityResult(BaseModel):
     aktueller_ek_index: int
     tilgung: float
     referenz: dict  # SensitivityReferenz as dict
+
+
+# ========================================
+# Admin Schemas
+# ========================================
+
+class AdminUserResponse(BaseModel):
+    """User-Ansicht für Admin"""
+    id: int
+    email: str
+    username: str
+    full_name: Optional[str]
+    is_active: bool
+    is_superuser: bool
+    created_at: datetime
+    updated_at: Optional[datetime]
+    analyses_count: int = 0
+    last_activity: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AdminUserUpdate(BaseModel):
+    """Admin kann User bearbeiten"""
+    is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+
+class AdminStatsResponse(BaseModel):
+    """Allgemeine Admin-Statistiken"""
+    total_users: int
+    active_users: int
+    blocked_users: int
+    total_analyses: int
+    users_today: int
+    users_this_week: int
+    analyses_today: int
+    analyses_this_week: int

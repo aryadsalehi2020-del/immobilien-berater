@@ -13,6 +13,7 @@ import LibraryDetail from './pages/LibraryDetail';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Tools from './pages/Tools';
+import Admin from './pages/Admin';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -143,6 +144,16 @@ function App() {
               <ProtectedRoute>
                 <DashboardLayout>
                   <Tools />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Admin />
                 </DashboardLayout>
               </ProtectedRoute>
             }
