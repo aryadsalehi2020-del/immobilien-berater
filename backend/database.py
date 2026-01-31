@@ -15,10 +15,20 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./amlaki.db")
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
-)
+# Connection args basierend auf Datenbanktyp
+if "sqlite" in DATABASE_URL:
+    connect_args = {"check_same_thread": False}
+    engine = create_engine(DATABASE_URL, connect_args=connect_args)
+else:
+    # PostgreSQL mit Supabase Pooler - braucht spezielle Einstellungen
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=300,
+        connect_args={
+            "options": "-c statement_timeout=60000"
+        }
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
