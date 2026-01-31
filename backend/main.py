@@ -615,6 +615,22 @@ def debug_database(db: Session = Depends(get_db)):
         return {"status": "error", "error": str(e), "type": type(e).__name__}
 
 
+@app.post("/debug/init-db")
+def debug_init_database():
+    """Manually initialize database tables"""
+    try:
+        from database import engine, Base, run_migrations
+        Base.metadata.create_all(bind=engine)
+        run_migrations()
+        return {
+            "status": "ok",
+            "message": "Tables created successfully",
+            "tables": list(Base.metadata.tables.keys())
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e), "type": type(e).__name__}
+
+
 # ========================================
 # LIBRARY ENDPOINTS (gespeicherte Analysen)
 # ========================================
