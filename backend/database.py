@@ -11,6 +11,10 @@ import os
 # Für Production würde man PostgreSQL verwenden
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./amlaki.db")
 
+# Render verwendet postgres:// statt postgresql:// - SQLAlchemy braucht postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
@@ -47,6 +51,12 @@ def run_migrations():
 
 def init_db():
     """Initialisiert die Datenbank-Tabellen"""
+    # Importiere Models hier um sicherzustellen dass alle Tabellen registriert sind
+    from models import User, Analysis, UsageLog
+
+    # Erstelle alle Tabellen
     Base.metadata.create_all(bind=engine)
+    print(f"Database initialized with tables: {list(Base.metadata.tables.keys())}")
+
     # Führe Migrationen für existierende Tabellen durch
     run_migrations()
