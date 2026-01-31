@@ -2340,7 +2340,7 @@ async def make_first_admin(
 # ========================================
 
 from schemas import AdminUserResponse, AdminUserUpdate, AdminStatsResponse
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 async def get_admin_user(current_user: User = Depends(get_current_active_user)) -> User:
     """Prüft ob User Admin/Superuser ist"""
