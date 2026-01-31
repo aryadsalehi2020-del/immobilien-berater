@@ -2314,7 +2314,7 @@ async def health_check():
 
 @app.post("/admin/make-first-admin")
 async def make_first_admin(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Macht den aktuellen User zum Admin - NUR wenn noch kein Admin existiert"""
@@ -2341,7 +2341,7 @@ async def make_first_admin(
 from schemas import AdminUserResponse, AdminUserUpdate, AdminStatsResponse
 from datetime import timedelta
 
-async def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+async def get_admin_user(current_user: User = Depends(get_current_active_user)) -> User:
     """Prüft ob User Admin/Superuser ist"""
     if not current_user.is_superuser:
         raise HTTPException(
