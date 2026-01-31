@@ -1,819 +1,689 @@
 /**
- * DESIGN PREVIEW - Neue Design-Komponenten
+ * DESIGN PREVIEW V2 - Premium Design System
  *
- * Diese Datei zeigt das neue Design-System OHNE die App zu verändern.
- * Inspiriert von: Slite, ChatGPT, Setrex, Orrivo
- *
- * Route: /design-preview (muss in App.jsx hinzugefügt werden)
+ * Basierend auf echter Analyse von:
+ * - Slite: Soft off-white (moon-dust), gradient accents, 42px rounded buttons, 100px section spacing
+ * - Setrex: Deep navy backgrounds, vibrant blue CTAs, animated elements, soft shadows
+ * - Orrivo: Cream backgrounds, earth tones, Outfit font, luxury through restraint
  */
 
 import React, { useState } from 'react';
 
 // ============================================
-// DESIGN TOKENS (CSS-in-JS für Preview)
+// DESIGN TOKENS - Based on Real Analysis
 // ============================================
-const tokens = {
-  colors: {
-    // Backgrounds - Warm & Clean
-    bgPrimary: '#ffffff',
-    bgSecondary: '#f8f9fa',
-    bgTertiary: '#f1f3f5',
-    bgAccent: '#f8f7f4',
 
-    // Text - Readable & Warm
-    textPrimary: '#1a1a2e',
-    textSecondary: '#4a5568',
-    textMuted: '#718096',
+const DesignPreview = () => {
+  const [activeTab, setActiveTab] = useState('light');
+  const [inputFocused, setInputFocused] = useState(null);
 
-    // Accent - Deep Indigo (nicht Neon!)
-    accentPrimary: '#5046e5',
-    accentSecondary: '#6366f1',
-    accentLight: '#eef2ff',
-
-    // Status
-    success: '#059669',
-    successLight: '#ecfdf5',
-    warning: '#d97706',
-    warningLight: '#fffbeb',
-    error: '#dc2626',
-    errorLight: '#fef2f2',
-
-    // Borders
-    borderLight: '#e5e7eb',
-    borderDefault: '#d1d5db',
-  },
-  shadows: {
-    sm: '0 1px 2px rgba(0, 0, 0, 0.04)',
-    md: '0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02)',
-    lg: '0 10px 15px rgba(0, 0, 0, 0.03), 0 4px 6px rgba(0, 0, 0, 0.02)',
-  },
-  radius: {
-    sm: '6px',
-    md: '8px',
-    lg: '12px',
-  },
-  spacing: {
-    1: '0.25rem',
-    2: '0.5rem',
-    3: '0.75rem',
-    4: '1rem',
-    5: '1.25rem',
-    6: '1.5rem',
-    8: '2rem',
-    10: '2.5rem',
-    12: '3rem',
-    16: '4rem',
-  }
-};
-
-// ============================================
-// BASE STYLES
-// ============================================
-const baseStyles = {
-  page: {
-    minHeight: '100vh',
-    backgroundColor: tokens.colors.bgSecondary,
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-    color: tokens.colors.textPrimary,
-    padding: tokens.spacing[8],
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  section: {
-    marginBottom: tokens.spacing[12],
-  },
-  sectionTitle: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    color: tokens.colors.textMuted,
-    marginBottom: tokens.spacing[4],
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: tokens.spacing[6],
-  }
-};
-
-// ============================================
-// TYPOGRAPHY PREVIEW
-// ============================================
-const TypographyPreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Typography</div>
-    <div style={{
-      backgroundColor: tokens.colors.bgPrimary,
-      padding: tokens.spacing[8],
-      borderRadius: tokens.radius.lg,
-      border: `1px solid ${tokens.colors.borderLight}`,
-    }}>
-      <h1 style={{
-        fontSize: '3rem',
-        fontWeight: 700,
-        lineHeight: 1.2,
-        color: tokens.colors.textPrimary,
-        marginBottom: tokens.spacing[4],
-        fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
-      }}>
-        Headline 1 - Premium Design
-      </h1>
-      <h2 style={{
-        fontSize: '2.25rem',
-        fontWeight: 600,
-        lineHeight: 1.25,
-        color: tokens.colors.textPrimary,
-        marginBottom: tokens.spacing[4],
-      }}>
-        Headline 2 - Clean & Modern
-      </h2>
-      <h3 style={{
-        fontSize: '1.5rem',
-        fontWeight: 600,
-        lineHeight: 1.3,
-        color: tokens.colors.textPrimary,
-        marginBottom: tokens.spacing[4],
-      }}>
-        Headline 3 - Subtitles
-      </h3>
-      <p style={{
-        fontSize: '1rem',
-        lineHeight: 1.6,
-        color: tokens.colors.textSecondary,
-        marginBottom: tokens.spacing[3],
-        maxWidth: '65ch',
-      }}>
-        Body Text - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        Ut enim ad minim veniam, quis nostrud exercitation.
-      </p>
-      <p style={{
-        fontSize: '0.875rem',
-        lineHeight: 1.5,
-        color: tokens.colors.textMuted,
-      }}>
-        Small Text / Caption - Zusätzliche Informationen und Hinweise
-      </p>
-    </div>
-  </div>
-);
-
-// ============================================
-// COLOR PALETTE PREVIEW
-// ============================================
-const ColorSwatch = ({ name, color, textColor = '#fff' }) => (
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacing[2],
-  }}>
-    <div style={{
-      width: '100%',
-      height: '80px',
-      backgroundColor: color,
-      borderRadius: tokens.radius.md,
-      border: `1px solid ${tokens.colors.borderLight}`,
-      display: 'flex',
-      alignItems: 'flex-end',
-      padding: tokens.spacing[3],
-    }}>
-      <span style={{
-        color: textColor,
-        fontSize: '0.75rem',
-        fontWeight: 500,
-        textShadow: textColor === '#fff' ? '0 1px 2px rgba(0,0,0,0.2)' : 'none'
-      }}>
-        {color}
-      </span>
-    </div>
-    <span style={{
-      fontSize: '0.75rem',
-      color: tokens.colors.textSecondary,
-      fontWeight: 500,
-    }}>
-      {name}
-    </span>
-  </div>
-);
-
-const ColorPalettePreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Color Palette</div>
-    <div style={{
-      backgroundColor: tokens.colors.bgPrimary,
-      padding: tokens.spacing[8],
-      borderRadius: tokens.radius.lg,
-      border: `1px solid ${tokens.colors.borderLight}`,
-    }}>
-      <div style={{ marginBottom: tokens.spacing[6] }}>
-        <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: tokens.spacing[3], color: tokens.colors.textSecondary }}>
-          Backgrounds
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: tokens.spacing[4] }}>
-          <ColorSwatch name="Primary" color={tokens.colors.bgPrimary} textColor="#666" />
-          <ColorSwatch name="Secondary" color={tokens.colors.bgSecondary} textColor="#666" />
-          <ColorSwatch name="Tertiary" color={tokens.colors.bgTertiary} textColor="#666" />
-          <ColorSwatch name="Accent" color={tokens.colors.bgAccent} textColor="#666" />
-        </div>
-      </div>
-
-      <div style={{ marginBottom: tokens.spacing[6] }}>
-        <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: tokens.spacing[3], color: tokens.colors.textSecondary }}>
-          Text Colors
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: tokens.spacing[4] }}>
-          <ColorSwatch name="Primary" color={tokens.colors.textPrimary} />
-          <ColorSwatch name="Secondary" color={tokens.colors.textSecondary} />
-          <ColorSwatch name="Muted" color={tokens.colors.textMuted} />
-        </div>
-      </div>
-
-      <div style={{ marginBottom: tokens.spacing[6] }}>
-        <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: tokens.spacing[3], color: tokens.colors.textSecondary }}>
-          Accent Colors
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: tokens.spacing[4] }}>
-          <ColorSwatch name="Primary" color={tokens.colors.accentPrimary} />
-          <ColorSwatch name="Secondary" color={tokens.colors.accentSecondary} />
-          <ColorSwatch name="Light" color={tokens.colors.accentLight} textColor="#5046e5" />
-        </div>
-      </div>
-
-      <div>
-        <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: tokens.spacing[3], color: tokens.colors.textSecondary }}>
-          Status Colors
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: tokens.spacing[4] }}>
-          <ColorSwatch name="Success" color={tokens.colors.success} />
-          <ColorSwatch name="Warning" color={tokens.colors.warning} />
-          <ColorSwatch name="Error" color={tokens.colors.error} />
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// ============================================
-// BUTTON PREVIEW
-// ============================================
-const Button = ({ variant = 'primary', size = 'md', children, ...props }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const baseStyle = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: tokens.spacing[2],
-    fontWeight: 500,
-    borderRadius: tokens.radius.md,
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    border: 'none',
-    fontFamily: 'inherit',
+  // Light Theme (Slite + Orrivo inspired)
+  const lightTheme = {
+    bg: '#FAFAFA',
+    bgCard: '#FFFFFF',
+    bgAccent: '#F5F3EF', // Warm cream (Orrivo)
+    text: '#0F172A',
+    textSecondary: '#475569',
+    textMuted: '#94A3B8',
+    accent: '#6366F1', // Indigo
+    accentHover: '#4F46E5',
+    border: '#E2E8F0',
+    success: '#10B981',
+    successBg: '#ECFDF5',
   };
 
-  const sizes = {
-    sm: { padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`, fontSize: '0.875rem' },
-    md: { padding: `${tokens.spacing[3]} ${tokens.spacing[6]}`, fontSize: '0.875rem' },
-    lg: { padding: `${tokens.spacing[4]} ${tokens.spacing[8]}`, fontSize: '1rem' },
+  // Dark Theme (Setrex inspired)
+  const darkTheme = {
+    bg: '#0B1120',
+    bgCard: '#131C31',
+    bgAccent: '#1E293B',
+    text: '#F8FAFC',
+    textSecondary: '#CBD5E1',
+    textMuted: '#64748B',
+    accent: '#38BDF8', // Vibrant blue (Setrex)
+    accentHover: '#0EA5E9',
+    border: '#1E293B',
+    success: '#34D399',
+    successBg: 'rgba(52, 211, 153, 0.1)',
   };
 
-  const variants = {
-    primary: {
-      backgroundColor: isHovered ? tokens.colors.accentSecondary : tokens.colors.accentPrimary,
-      color: '#ffffff',
-    },
-    secondary: {
-      backgroundColor: isHovered ? tokens.colors.bgSecondary : 'transparent',
-      color: tokens.colors.textPrimary,
-      border: `1px solid ${tokens.colors.borderDefault}`,
-    },
-    ghost: {
-      backgroundColor: isHovered ? tokens.colors.bgSecondary : 'transparent',
-      color: tokens.colors.textSecondary,
-    },
-    success: {
-      backgroundColor: isHovered ? '#047857' : tokens.colors.success,
-      color: '#ffffff',
-    },
-    danger: {
-      backgroundColor: isHovered ? '#b91c1c' : tokens.colors.error,
-      color: '#ffffff',
-    },
-  };
+  const theme = activeTab === 'light' ? lightTheme : darkTheme;
 
   return (
-    <button
-      style={{ ...baseStyle, ...sizes[size], ...variants[variant] }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
-
-const ButtonPreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Buttons</div>
     <div style={{
-      backgroundColor: tokens.colors.bgPrimary,
-      padding: tokens.spacing[8],
-      borderRadius: tokens.radius.lg,
-      border: `1px solid ${tokens.colors.borderLight}`,
+      minHeight: '100vh',
+      backgroundColor: theme.bg,
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      color: theme.text,
+      transition: 'all 0.3s ease',
     }}>
-      <div style={{ marginBottom: tokens.spacing[6] }}>
-        <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: tokens.spacing[4], color: tokens.colors.textSecondary }}>
-          Variants
-        </p>
-        <div style={{ display: 'flex', gap: tokens.spacing[4], flexWrap: 'wrap' }}>
-          <Button variant="primary">Primary Button</Button>
-          <Button variant="secondary">Secondary Button</Button>
-          <Button variant="ghost">Ghost Button</Button>
-          <Button variant="success">Success</Button>
-          <Button variant="danger">Danger</Button>
-        </div>
-      </div>
-
-      <div>
-        <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: tokens.spacing[4], color: tokens.colors.textSecondary }}>
-          Sizes
-        </p>
-        <div style={{ display: 'flex', gap: tokens.spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
-          <Button variant="primary" size="sm">Small</Button>
-          <Button variant="primary" size="md">Medium</Button>
-          <Button variant="primary" size="lg">Large</Button>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// ============================================
-// INPUT PREVIEW
-// ============================================
-const Input = ({ label, placeholder, error, ...props }) => {
-  const [isFocused, setIsFocused] = useState(false);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
-      {label && (
-        <label style={{
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          color: tokens.colors.textPrimary,
-        }}>
-          {label}
-        </label>
-      )}
-      <input
-        style={{
-          width: '100%',
-          padding: `${tokens.spacing[3]} ${tokens.spacing[4]}`,
-          borderRadius: tokens.radius.md,
-          border: `1px solid ${error ? tokens.colors.error : isFocused ? tokens.colors.accentPrimary : tokens.colors.borderDefault}`,
-          fontSize: '1rem',
-          fontFamily: 'inherit',
-          backgroundColor: tokens.colors.bgPrimary,
-          color: tokens.colors.textPrimary,
-          outline: 'none',
-          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-          boxShadow: isFocused ? `0 0 0 3px ${tokens.colors.accentLight}` : 'none',
-        }}
-        placeholder={placeholder}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        {...props}
-      />
-      {error && (
-        <span style={{ fontSize: '0.75rem', color: tokens.colors.error }}>
-          {error}
-        </span>
-      )}
-    </div>
-  );
-};
-
-const InputPreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Inputs</div>
-    <div style={{
-      backgroundColor: tokens.colors.bgPrimary,
-      padding: tokens.spacing[8],
-      borderRadius: tokens.radius.lg,
-      border: `1px solid ${tokens.colors.borderLight}`,
-    }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: tokens.spacing[6] }}>
-        <Input label="Email" placeholder="name@beispiel.de" type="email" />
-        <Input label="Passwort" placeholder="********" type="password" />
-        <Input label="Mit Fehler" placeholder="Ungültige Eingabe" error="Dieses Feld ist erforderlich" />
-      </div>
-    </div>
-  </div>
-);
-
-// ============================================
-// CARD PREVIEW
-// ============================================
-const Card = ({ children, hover = true }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    <div
-      style={{
-        backgroundColor: tokens.colors.bgPrimary,
-        borderRadius: tokens.radius.lg,
-        border: `1px solid ${tokens.colors.borderLight}`,
-        padding: tokens.spacing[6],
-        boxShadow: isHovered && hover ? tokens.shadows.md : tokens.shadows.sm,
-        transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-        transform: isHovered && hover ? 'translateY(-2px)' : 'none',
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {children}
-    </div>
-  );
-};
-
-const CardPreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Cards</div>
-    <div style={baseStyles.grid}>
-      <Card>
+      {/* Navigation Bar */}
+      <nav style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        backgroundColor: activeTab === 'light' ? 'rgba(255,255,255,0.8)' : 'rgba(11,17,32,0.8)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: `1px solid ${theme.border}`,
+        padding: '16px 40px',
+      }}>
         <div style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: tokens.radius.md,
-          backgroundColor: tokens.colors.accentLight,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: tokens.spacing[4],
-          color: tokens.colors.accentPrimary,
-          fontSize: '1.25rem',
-        }}>
-          📊
-        </div>
-        <h3 style={{
-          fontSize: '1.125rem',
-          fontWeight: 600,
-          marginBottom: tokens.spacing[2],
-          color: tokens.colors.textPrimary,
-        }}>
-          Analyse-Karte
-        </h3>
-        <p style={{
-          fontSize: '0.875rem',
-          color: tokens.colors.textSecondary,
-          lineHeight: 1.5,
-        }}>
-          Subtile Schatten, saubere Kanten, professionelles Erscheinungsbild ohne Glassmorphism.
-        </p>
-      </Card>
-
-      <Card>
-        <div style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: tokens.spacing[4],
-        }}>
-          <div>
-            <p style={{
-              fontSize: '0.75rem',
-              color: tokens.colors.textMuted,
-              marginBottom: tokens.spacing[1],
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}>
-              Kaufpreis
-            </p>
-            <p style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: tokens.colors.textPrimary,
-            }}>
-              450.000 €
-            </p>
-          </div>
-          <span style={{
-            backgroundColor: tokens.colors.successLight,
-            color: tokens.colors.success,
-            padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-            borderRadius: '9999px',
-            fontSize: '0.75rem',
-            fontWeight: 500,
-          }}>
-            +4,2% Rendite
-          </span>
-        </div>
-        <div style={{
-          display: 'flex',
-          gap: tokens.spacing[6],
-          paddingTop: tokens.spacing[4],
-          borderTop: `1px solid ${tokens.colors.borderLight}`,
-        }}>
-          <div>
-            <p style={{ fontSize: '0.75rem', color: tokens.colors.textMuted }}>Wohnfläche</p>
-            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: tokens.colors.textPrimary }}>85 m²</p>
-          </div>
-          <div>
-            <p style={{ fontSize: '0.75rem', color: tokens.colors.textMuted }}>Zimmer</p>
-            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: tokens.colors.textPrimary }}>3</p>
-          </div>
-          <div>
-            <p style={{ fontSize: '0.75rem', color: tokens.colors.textMuted }}>Baujahr</p>
-            <p style={{ fontSize: '0.875rem', fontWeight: 500, color: tokens.colors.textPrimary }}>1995</p>
-          </div>
-        </div>
-      </Card>
-
-      <Card>
-        <div style={{
-          display: 'flex',
           alignItems: 'center',
-          gap: tokens.spacing[4],
-          marginBottom: tokens.spacing[4],
         }}>
           <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '50%',
-            backgroundColor: tokens.colors.bgSecondary,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.25rem',
-          }}>
-            🏠
-          </div>
-          <div>
-            <h3 style={{
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: tokens.colors.textPrimary,
-            }}>
-              Frankfurt-Bockenheim
-            </h3>
-            <p style={{
-              fontSize: '0.875rem',
-              color: tokens.colors.textMuted,
-            }}>
-              3-Zimmer-Wohnung
-            </p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: tokens.spacing[3] }}>
-          <Button variant="primary" size="sm">Details</Button>
-          <Button variant="secondary" size="sm">Speichern</Button>
-        </div>
-      </Card>
-    </div>
-  </div>
-);
-
-// ============================================
-// STAT CARD (Setrex-inspired)
-// ============================================
-const StatCard = ({ label, value, change, changeType = 'positive' }) => (
-  <Card>
-    <p style={{
-      fontSize: '0.75rem',
-      color: tokens.colors.textMuted,
-      marginBottom: tokens.spacing[2],
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-    }}>
-      {label}
-    </p>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: tokens.spacing[3] }}>
-      <span style={{
-        fontSize: '2rem',
-        fontWeight: 700,
-        color: tokens.colors.textPrimary,
-      }}>
-        {value}
-      </span>
-      {change && (
-        <span style={{
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          color: changeType === 'positive' ? tokens.colors.success : tokens.colors.error,
-        }}>
-          {changeType === 'positive' ? '↑' : '↓'} {change}
-        </span>
-      )}
-    </div>
-  </Card>
-);
-
-const StatsPreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Statistics Cards</div>
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: tokens.spacing[4]
-    }}>
-      <StatCard label="Bruttorendite" value="4,8%" change="0,3%" changeType="positive" />
-      <StatCard label="Cashflow/Monat" value="+127 €" change="12 €" changeType="positive" />
-      <StatCard label="Kaufpreisfaktor" value="22,4" />
-      <StatCard label="Eigenkapitalrendite" value="8,2%" change="1,1%" changeType="positive" />
-    </div>
-  </div>
-);
-
-// ============================================
-// COMPARISON: OLD vs NEW
-// ============================================
-const ComparisonPreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Vergleich: Alt vs. Neu</div>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: tokens.spacing[6] }}>
-      {/* OLD STYLE - What to avoid */}
-      <div>
-        <p style={{
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          marginBottom: tokens.spacing[4],
-          color: tokens.colors.error
-        }}>
-          ❌ Alter Stil (vermeiden)
-        </p>
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(59, 37, 96, 0.9) 100%)',
-          backdropFilter: 'blur(20px)',
-          borderRadius: '24px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '24px',
-          boxShadow: '0 0 40px rgba(102, 126, 234, 0.3)',
-        }}>
-          <h3 style={{
             fontSize: '1.25rem',
             fontWeight: 700,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            letterSpacing: '-0.025em',
+          }}>
+            ImmoBerater
+          </div>
+
+          {/* Theme Toggle */}
+          <div style={{
+            display: 'flex',
+            gap: '4px',
+            padding: '4px',
+            backgroundColor: theme.bgAccent,
+            borderRadius: '12px',
+          }}>
+            {['light', 'dark'].map((t) => (
+              <button
+                key={t}
+                onClick={() => setActiveTab(t)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  fontFamily: 'inherit',
+                  backgroundColor: activeTab === t ? (t === 'light' ? '#fff' : '#0EA5E9') : 'transparent',
+                  color: activeTab === t ? (t === 'light' ? theme.text : '#fff') : theme.textMuted,
+                  boxShadow: activeTab === t ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {t === 'light' ? '☀️ Light' : '🌙 Dark'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 40px' }}>
+
+        {/* Hero Section - Slite Style */}
+        <section style={{
+          padding: '100px 0',
+          textAlign: 'center',
+        }}>
+          <div style={{
+            display: 'inline-block',
+            padding: '8px 16px',
+            backgroundColor: theme.bgAccent,
+            borderRadius: '100px',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            color: theme.textSecondary,
+            marginBottom: '24px',
+          }}>
+            ✨ Neues Premium Design System
+          </div>
+
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+            fontWeight: 700,
+            lineHeight: 1.1,
+            letterSpacing: '-0.03em',
+            marginBottom: '24px',
+            background: activeTab === 'dark'
+              ? 'linear-gradient(135deg, #fff 0%, #38BDF8 100%)'
+              : 'linear-gradient(135deg, #0F172A 0%, #6366F1 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            marginBottom: '16px',
+            backgroundClip: 'text',
           }}>
-            Neon Glassmorphism Card
-          </h3>
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', marginBottom: '16px' }}>
-            Übertriebene Effekte, schwer lesbar, generisch.
-          </p>
-          <button style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            border: 'none',
-            borderRadius: '12px',
-            padding: '12px 24px',
-            color: 'white',
-            fontWeight: 600,
-            boxShadow: '0 0 20px rgba(102, 126, 234, 0.5)',
-          }}>
-            Neon Button
-          </button>
-        </div>
-      </div>
-
-      {/* NEW STYLE */}
-      <div>
-        <p style={{
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          marginBottom: tokens.spacing[4],
-          color: tokens.colors.success
-        }}>
-          ✓ Neuer Stil (professionell)
-        </p>
-        <Card hover={false}>
-          <h3 style={{
-            fontSize: '1.125rem',
-            fontWeight: 600,
-            color: tokens.colors.textPrimary,
-            marginBottom: tokens.spacing[3],
-          }}>
-            Clean Premium Card
-          </h3>
-          <p style={{
-            color: tokens.colors.textSecondary,
-            fontSize: '0.875rem',
-            marginBottom: tokens.spacing[4],
-            lineHeight: 1.5,
-          }}>
-            Subtile Schatten, warme Farben, lesbar und professionell.
-          </p>
-          <Button variant="primary">Clean Button</Button>
-        </Card>
-      </div>
-    </div>
-  </div>
-);
-
-// ============================================
-// BADGE/TAG PREVIEW
-// ============================================
-const Badge = ({ children, variant = 'default' }) => {
-  const variants = {
-    default: { bg: tokens.colors.bgSecondary, color: tokens.colors.textSecondary },
-    success: { bg: tokens.colors.successLight, color: tokens.colors.success },
-    warning: { bg: tokens.colors.warningLight, color: tokens.colors.warning },
-    error: { bg: tokens.colors.errorLight, color: tokens.colors.error },
-    accent: { bg: tokens.colors.accentLight, color: tokens.colors.accentPrimary },
-  };
-
-  return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-      borderRadius: '9999px',
-      fontSize: '0.75rem',
-      fontWeight: 500,
-      backgroundColor: variants[variant].bg,
-      color: variants[variant].color,
-    }}>
-      {children}
-    </span>
-  );
-};
-
-const BadgePreview = () => (
-  <div style={baseStyles.section}>
-    <div style={baseStyles.sectionTitle}>Badges / Tags</div>
-    <div style={{
-      backgroundColor: tokens.colors.bgPrimary,
-      padding: tokens.spacing[6],
-      borderRadius: tokens.radius.lg,
-      border: `1px solid ${tokens.colors.borderLight}`,
-      display: 'flex',
-      gap: tokens.spacing[3],
-      flexWrap: 'wrap',
-    }}>
-      <Badge>Default</Badge>
-      <Badge variant="success">Empfehlenswert</Badge>
-      <Badge variant="warning">Prüfen</Badge>
-      <Badge variant="error">Risiko</Badge>
-      <Badge variant="accent">Neu</Badge>
-    </div>
-  </div>
-);
-
-// ============================================
-// MAIN PREVIEW PAGE
-// ============================================
-const DesignPreview = () => {
-  return (
-    <div style={baseStyles.page}>
-      <div style={baseStyles.container}>
-        {/* Header */}
-        <div style={{
-          marginBottom: tokens.spacing[12],
-          textAlign: 'center',
-        }}>
-          <h1 style={{
-            fontSize: '2.5rem',
-            fontWeight: 700,
-            color: tokens.colors.textPrimary,
-            marginBottom: tokens.spacing[4],
-          }}>
-            Design System Preview
+            Immobilien intelligent<br />analysieren
           </h1>
+
           <p style={{
-            fontSize: '1.125rem',
-            color: tokens.colors.textSecondary,
+            fontSize: '1.25rem',
+            color: theme.textSecondary,
             maxWidth: '600px',
-            margin: '0 auto',
+            margin: '0 auto 40px',
+            lineHeight: 1.6,
           }}>
-            Neues, professionelles Design inspiriert von Slite, ChatGPT, Setrex und Orrivo.
-            Kein Glassmorphism, keine Neon-Farben, keine übertriebenen Animationen.
+            Professionelle Immobilienanalyse mit KI-Unterstützung.
+            Rendite berechnen, Risiken erkennen, fundiert entscheiden.
           </p>
-        </div>
 
-        <ComparisonPreview />
-        <ColorPalettePreview />
-        <TypographyPreview />
-        <ButtonPreview />
-        <InputPreview />
-        <CardPreview />
-        <StatsPreview />
-        <BadgePreview />
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button style={{
+              padding: '16px 32px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: theme.accent,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: `0 4px 14px ${theme.accent}40`,
+            }}>
+              Jetzt starten →
+            </button>
+            <button style={{
+              padding: '16px 32px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: 'transparent',
+              color: theme.text,
+              border: `2px solid ${theme.border}`,
+              borderRadius: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}>
+              Demo ansehen
+            </button>
+          </div>
+        </section>
 
-        {/* Footer Note */}
-        <div style={{
-          textAlign: 'center',
-          padding: tokens.spacing[8],
-          color: tokens.colors.textMuted,
-          fontSize: '0.875rem',
+        {/* Stats Section - Setrex Style */}
+        <section style={{
+          padding: '60px 0',
+          borderTop: `1px solid ${theme.border}`,
+          borderBottom: `1px solid ${theme.border}`,
         }}>
-          <p>Diese Preview-Seite zeigt das neue Design-System.</p>
-          <p>Die bestehende App wurde NICHT verändert.</p>
-        </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '40px',
+          }}>
+            {[
+              { value: '4.200+', label: 'Analysen erstellt' },
+              { value: '98%', label: 'Zufriedenheit' },
+              { value: '< 30s', label: 'Analysezeit' },
+              { value: '24/7', label: 'Verfügbar' },
+            ].map((stat, i) => (
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{
+                  fontSize: '3rem',
+                  fontWeight: 700,
+                  letterSpacing: '-0.03em',
+                  color: theme.accent,
+                  marginBottom: '8px',
+                }}>
+                  {stat.value}
+                </div>
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: theme.textMuted,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                }}>
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Cards Section */}
+        <section style={{ padding: '100px 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              marginBottom: '16px',
+            }}>
+              Komponenten
+            </h2>
+            <p style={{ color: theme.textSecondary, fontSize: '1.125rem' }}>
+              Premium UI-Elemente für die App
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+            gap: '24px',
+          }}>
+            {/* Property Card */}
+            <div style={{
+              backgroundColor: theme.bgCard,
+              borderRadius: '16px',
+              border: `1px solid ${theme.border}`,
+              overflow: 'hidden',
+              transition: 'all 0.3s ease',
+            }}>
+              <div style={{
+                height: '200px',
+                background: activeTab === 'dark'
+                  ? 'linear-gradient(135deg, #1E293B 0%, #334155 100%)'
+                  : 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '4rem',
+              }}>
+                🏠
+              </div>
+              <div style={{ padding: '24px' }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: '16px',
+                }}>
+                  <div>
+                    <h3 style={{
+                      fontSize: '1.25rem',
+                      fontWeight: 600,
+                      marginBottom: '4px',
+                    }}>
+                      Frankfurt-Bockenheim
+                    </h3>
+                    <p style={{ color: theme.textMuted, fontSize: '0.875rem' }}>
+                      3-Zimmer-Wohnung • 85 m²
+                    </p>
+                  </div>
+                  <span style={{
+                    padding: '6px 12px',
+                    backgroundColor: theme.successBg,
+                    color: theme.success,
+                    borderRadius: '100px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                  }}>
+                    +4,2% Rendite
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: '1.75rem',
+                  fontWeight: 700,
+                  marginBottom: '20px',
+                }}>
+                  450.000 €
+                </div>
+                <div style={{
+                  display: 'flex',
+                  gap: '24px',
+                  paddingTop: '20px',
+                  borderTop: `1px solid ${theme.border}`,
+                }}>
+                  {[
+                    { label: 'Cashflow', value: '+127 €/M' },
+                    { label: 'Faktor', value: '22,4' },
+                    { label: 'Score', value: '78/100' },
+                  ].map((item, i) => (
+                    <div key={i}>
+                      <div style={{ fontSize: '0.75rem', color: theme.textMuted, marginBottom: '4px' }}>
+                        {item.label}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>
+                        {item.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Analysis Card */}
+            <div style={{
+              backgroundColor: theme.bgCard,
+              borderRadius: '16px',
+              border: `1px solid ${theme.border}`,
+              padding: '32px',
+            }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '12px',
+                background: `linear-gradient(135deg, ${theme.accent}20 0%, ${theme.accent}10 100%)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '24px',
+                fontSize: '1.5rem',
+              }}>
+                📊
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                marginBottom: '12px',
+              }}>
+                Schnell-Analyse
+              </h3>
+              <p style={{
+                color: theme.textSecondary,
+                fontSize: '0.9375rem',
+                lineHeight: 1.6,
+                marginBottom: '24px',
+              }}>
+                Gib Kaufpreis, Miete und Hausgeld ein – erhalte sofort
+                Rendite, Cashflow und Bewertung.
+              </p>
+              <button style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                fontFamily: 'inherit',
+                backgroundColor: theme.accent,
+                color: '#fff',
+                border: 'none',
+                borderRadius: '10px',
+                cursor: 'pointer',
+              }}>
+                Analyse starten
+                <span style={{ fontSize: '1.125rem' }}>→</span>
+              </button>
+            </div>
+
+            {/* Stats Card */}
+            <div style={{
+              backgroundColor: theme.bgCard,
+              borderRadius: '16px',
+              border: `1px solid ${theme.border}`,
+              padding: '32px',
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '32px',
+              }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>
+                  Monatsübersicht
+                </h3>
+                <span style={{
+                  fontSize: '0.75rem',
+                  color: theme.textMuted,
+                  padding: '6px 12px',
+                  backgroundColor: theme.bgAccent,
+                  borderRadius: '6px',
+                }}>
+                  Januar 2026
+                </span>
+              </div>
+
+              {[
+                { label: 'Bruttorendite', value: '4,8%', color: theme.success },
+                { label: 'Eigenkapitalrendite', value: '12,4%', color: theme.accent },
+                { label: 'Monatl. Cashflow', value: '+245 €', color: theme.success },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '16px 0',
+                  borderBottom: i < 2 ? `1px solid ${theme.border}` : 'none',
+                }}>
+                  <span style={{ color: theme.textSecondary, fontSize: '0.9375rem' }}>
+                    {item.label}
+                  </span>
+                  <span style={{
+                    fontSize: '1.125rem',
+                    fontWeight: 700,
+                    color: item.color,
+                  }}>
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Form Elements */}
+        <section style={{ padding: '100px 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              marginBottom: '16px',
+            }}>
+              Formular-Elemente
+            </h2>
+          </div>
+
+          <div style={{
+            maxWidth: '500px',
+            margin: '0 auto',
+            backgroundColor: theme.bgCard,
+            borderRadius: '20px',
+            border: `1px solid ${theme.border}`,
+            padding: '40px',
+          }}>
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: 600,
+              marginBottom: '8px',
+            }}>
+              Schnell-Rechner
+            </h3>
+            <p style={{
+              color: theme.textSecondary,
+              marginBottom: '32px',
+              fontSize: '0.9375rem',
+            }}>
+              Berechne Rendite und Cashflow in Sekunden
+            </p>
+
+            {[
+              { label: 'Kaufpreis', placeholder: '450.000 €', id: 'price' },
+              { label: 'Monatliche Kaltmiete', placeholder: '1.200 €', id: 'rent' },
+              { label: 'Hausgeld', placeholder: '350 €', id: 'hausgeld' },
+            ].map((field) => (
+              <div key={field.id} style={{ marginBottom: '20px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  marginBottom: '8px',
+                  color: theme.text,
+                }}>
+                  {field.label}
+                </label>
+                <input
+                  type="text"
+                  placeholder={field.placeholder}
+                  onFocus={() => setInputFocused(field.id)}
+                  onBlur={() => setInputFocused(null)}
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    fontSize: '1rem',
+                    fontFamily: 'inherit',
+                    backgroundColor: theme.bgAccent,
+                    border: `2px solid ${inputFocused === field.id ? theme.accent : 'transparent'}`,
+                    borderRadius: '10px',
+                    color: theme.text,
+                    outline: 'none',
+                    transition: 'all 0.2s ease',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            ))}
+
+            <button style={{
+              width: '100%',
+              padding: '16px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: theme.accent,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              marginTop: '12px',
+              transition: 'all 0.2s ease',
+              boxShadow: `0 4px 14px ${theme.accent}40`,
+            }}>
+              Berechnen →
+            </button>
+          </div>
+        </section>
+
+        {/* Buttons Section */}
+        <section style={{ padding: '60px 0 100px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{
+              fontSize: '2rem',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              marginBottom: '16px',
+            }}>
+              Button-Varianten
+            </h2>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '16px',
+            justifyContent: 'center',
+            marginBottom: '40px',
+          }}>
+            {/* Primary */}
+            <button style={{
+              padding: '14px 28px',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: theme.accent,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              boxShadow: `0 4px 14px ${theme.accent}40`,
+            }}>
+              Primary Button
+            </button>
+
+            {/* Secondary */}
+            <button style={{
+              padding: '14px 28px',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: 'transparent',
+              color: theme.text,
+              border: `2px solid ${theme.border}`,
+              borderRadius: '10px',
+              cursor: 'pointer',
+            }}>
+              Secondary
+            </button>
+
+            {/* Ghost */}
+            <button style={{
+              padding: '14px 28px',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: 'transparent',
+              color: theme.accent,
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+            }}>
+              Ghost Button →
+            </button>
+
+            {/* Success */}
+            <button style={{
+              padding: '14px 28px',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: theme.success,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+            }}>
+              Speichern ✓
+            </button>
+
+            {/* Pill Button (Slite style) */}
+            <button style={{
+              padding: '14px 28px',
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              backgroundColor: 'transparent',
+              color: theme.text,
+              border: `1px solid ${theme.text}`,
+              borderRadius: '100px',
+              cursor: 'pointer',
+            }}>
+              Pill Style
+            </button>
+          </div>
+
+          {/* Badges */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px',
+            justifyContent: 'center',
+          }}>
+            {[
+              { label: 'Empfehlenswert', bg: theme.successBg, color: theme.success },
+              { label: 'Prüfen', bg: `${theme.accent}15`, color: theme.accent },
+              { label: 'Risiko', bg: '#FEE2E2', color: '#DC2626' },
+              { label: 'Neu', bg: theme.bgAccent, color: theme.textSecondary },
+            ].map((badge, i) => (
+              <span key={i} style={{
+                padding: '8px 16px',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                backgroundColor: badge.bg,
+                color: badge.color,
+                borderRadius: '100px',
+              }}>
+                {badge.label}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer style={{
+          padding: '40px 0',
+          borderTop: `1px solid ${theme.border}`,
+          textAlign: 'center',
+        }}>
+          <p style={{
+            color: theme.textMuted,
+            fontSize: '0.875rem',
+          }}>
+            Design Preview v2 • Basierend auf Slite, Setrex, Orrivo
+          </p>
+          <p style={{
+            color: theme.textMuted,
+            fontSize: '0.875rem',
+            marginTop: '8px',
+          }}>
+            Bestehende App wurde NICHT verändert
+          </p>
+        </footer>
       </div>
     </div>
   );
