@@ -2298,7 +2298,7 @@ Bei Preisfragen: IMMER konkrete Zahlen aus den Live-Daten!"""
         raise HTTPException(status_code=500, detail=f"Chat-Fehler: {str(e)}")
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     """Health Check Endpoint"""
     api_key = os.getenv("ANTHROPIC_API_KEY")
