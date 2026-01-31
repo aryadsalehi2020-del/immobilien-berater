@@ -11,6 +11,8 @@ function Admin() {
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editingLimit, setEditingLimit] = useState(null); // {userId, value}
+
 
   // Prüfe ob User Admin ist
   if (!user?.is_superuser) {
@@ -119,6 +121,32 @@ function Admin() {
 
       await fetchData();
       setSelectedUser(null);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const updateLimit = async (userId, newLimit) => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ usage_limit_usd: parseFloat(newLimit) })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || 'Fehler beim Ändern des Limits');
+      }
+
+      await fetchData();
+      setEditingLimit(null);
     } catch (err) {
       alert(err.message);
     } finally {
@@ -346,9 +374,40 @@ function Admin() {
                       <div className={`text-sm font-mono ${u.total_cost_usd >= u.usage_limit_usd ? 'text-red-400' : 'text-neon-green'}`}>
                         ${u.total_cost_usd?.toFixed(3) || '0.000'}
                       </div>
-                      <div className="text-xs text-text-muted">
-                        / ${u.usage_limit_usd?.toFixed(2) || '5.00'}
-                      </div>
+                      {editingLimit?.userId === u.id ? (
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-xs text-text-muted">$</span>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="0"
+                            value={editingLimit.value}
+                            onChange={(e) => setEditingLimit({ userId: u.id, value: e.target.value })}
+                            className="w-16 px-1 py-0.5 bg-surface border border-neon-blue/50 rounded text-xs text-white text-center"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => updateLimit(u.id, editingLimit.value)}
+                            disabled={actionLoading}
+                            className="px-1.5 py-0.5 bg-neon-green/20 text-neon-green rounded text-xs hover:bg-neon-green/30"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => setEditingLimit(null)}
+                            className="px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setEditingLimit({ userId: u.id, value: u.usage_limit_usd || 5 })}
+                          className="text-xs text-text-muted hover:text-neon-blue transition-colors"
+                        >
+                          Limit: ${u.usage_limit_usd?.toFixed(2) || '5.00'} ✏️
+                        </button>
+                      )}
                     </td>
                     <td className="p-4 text-text-muted text-sm">{formatDate(u.created_at)}</td>
                     <td className="p-4 text-center">
