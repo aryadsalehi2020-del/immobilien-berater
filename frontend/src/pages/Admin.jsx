@@ -275,6 +275,9 @@ function Admin() {
                 <div className="text-xs text-text-muted mb-3">
                   <p>Registriert: {formatDate(u.created_at)}</p>
                   <p>Letzte Aktivität: {formatRelativeTime(u.last_activity)}</p>
+                  <p className={u.total_cost_usd >= u.usage_limit_usd ? 'text-red-400' : 'text-neon-green'}>
+                    Verbrauch: ${u.total_cost_usd?.toFixed(3) || '0.000'} / ${u.usage_limit_usd?.toFixed(2) || '5.00'}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -308,8 +311,8 @@ function Admin() {
                   <th className="text-left p-4 text-text-muted text-xs uppercase tracking-wider">User</th>
                   <th className="text-left p-4 text-text-muted text-xs uppercase tracking-wider">E-Mail</th>
                   <th className="text-center p-4 text-text-muted text-xs uppercase tracking-wider">Analysen</th>
+                  <th className="text-center p-4 text-text-muted text-xs uppercase tracking-wider">Verbrauch</th>
                   <th className="text-left p-4 text-text-muted text-xs uppercase tracking-wider">Registriert</th>
-                  <th className="text-left p-4 text-text-muted text-xs uppercase tracking-wider">Letzte Aktivität</th>
                   <th className="text-center p-4 text-text-muted text-xs uppercase tracking-wider">Status</th>
                   <th className="text-center p-4 text-text-muted text-xs uppercase tracking-wider">Aktionen</th>
                 </tr>
@@ -339,8 +342,15 @@ function Admin() {
                     <td className="p-4 text-center">
                       <span className="text-neon-blue font-bold">{u.analyses_count}</span>
                     </td>
+                    <td className="p-4 text-center">
+                      <div className={`text-sm font-mono ${u.total_cost_usd >= u.usage_limit_usd ? 'text-red-400' : 'text-neon-green'}`}>
+                        ${u.total_cost_usd?.toFixed(3) || '0.000'}
+                      </div>
+                      <div className="text-xs text-text-muted">
+                        / ${u.usage_limit_usd?.toFixed(2) || '5.00'}
+                      </div>
+                    </td>
                     <td className="p-4 text-text-muted text-sm">{formatDate(u.created_at)}</td>
-                    <td className="p-4 text-text-muted text-sm">{formatRelativeTime(u.last_activity)}</td>
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         {u.is_superuser && (

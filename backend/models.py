@@ -27,8 +27,12 @@ class User(Base):
     default_zinssatz = Column(Float, default=3.75)
     default_tilgung = Column(Float, default=1.25)
 
-    # Relationship
+    # Usage Limits
+    usage_limit_usd = Column(Float, default=5.0)  # $5 default limit
+
+    # Relationships
     analyses = relationship("Analysis", back_populates="owner", cascade="all, delete-orphan")
+    usage_logs = relationship("UsageLog", back_populates="user", cascade="all, delete-orphan")
 
 
 class Analysis(Base):
@@ -69,3 +73,25 @@ class Analysis(Base):
 
     # Relationship
     owner = relationship("User", back_populates="analyses")
+
+
+class UsageLog(Base):
+    """Token-Verbrauch pro API-Call"""
+    __tablename__ = "usage_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # API-Call Details
+    action_type = Column(String, nullable=False)  # 'chat', 'analyze', 'pdf_extract', etc.
+
+    # Token-Verbrauch
+    input_tokens = Column(Integer, default=0)
+    output_tokens = Column(Integer, default=0)
+
+    # Kosten (berechnet)
+    cost_usd = Column(Float, default=0.0)
+
+    # Relationship
+    user = relationship("User", back_populates="usage_logs")

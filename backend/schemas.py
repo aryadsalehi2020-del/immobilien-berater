@@ -229,6 +229,10 @@ class AdminUserResponse(BaseModel):
     updated_at: Optional[datetime]
     analyses_count: int = 0
     last_activity: Optional[datetime] = None
+    # Usage Tracking
+    usage_limit_usd: float = 5.0
+    total_cost_usd: float = 0.0
+    total_requests: int = 0
 
     class Config:
         from_attributes = True
@@ -240,6 +244,7 @@ class AdminUserUpdate(BaseModel):
     is_superuser: Optional[bool] = None
     full_name: Optional[str] = None
     email: Optional[EmailStr] = None
+    usage_limit_usd: Optional[float] = None  # Limit ändern
 
 
 class AdminStatsResponse(BaseModel):

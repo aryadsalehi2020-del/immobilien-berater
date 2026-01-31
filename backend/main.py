@@ -35,7 +35,7 @@ from knowledge_base import (
     DEALBREAKER
 )
 from database import get_db, init_db
-from models import User, Analysis
+from models import User, Analysis, UsageLog
 from auth import (
     get_password_hash,
     authenticate_user,
@@ -73,6 +73,57 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+
+# ========================================
+# USAGE TRACKING & LIMITS
+# ========================================
+
+# Claude Sonnet 4 Preise (pro 1M Tokens)
+INPUT_PRICE_PER_1M = 3.0   # $3 pro 1M input tokens
+OUTPUT_PRICE_PER_1M = 15.0  # $15 pro 1M output tokens
+
+def calculate_cost(input_tokens: int, output_tokens: int) -> float:
+    """Berechnet Kosten in USD"""
+    input_cost = (input_tokens / 1_000_000) * INPUT_PRICE_PER_1M
+    output_cost = (output_tokens / 1_000_000) * OUTPUT_PRICE_PER_1M
+    return input_cost + output_cost
+
+def get_user_total_usage(db: Session, user_id: int) -> dict:
+    """Holt Gesamtverbrauch eines Users"""
+    logs = db.query(UsageLog).filter(UsageLog.user_id == user_id).all()
+    total_input = sum(log.input_tokens for log in logs)
+    total_output = sum(log.output_tokens for log in logs)
+    total_cost = sum(log.cost_usd for log in logs)
+    return {
+        "total_input_tokens": total_input,
+        "total_output_tokens": total_output,
+        "total_cost_usd": total_cost,
+        "total_requests": len(logs)
+    }
+
+def check_usage_limit(db: Session, user: User) -> bool:
+    """Prüft ob User sein Limit überschritten hat. Returns True wenn OK."""
+    if user.is_superuser:
+        return True  # Admins haben kein Limit
+
+    usage = get_user_total_usage(db, user.id)
+    limit = user.usage_limit_usd if user.usage_limit_usd else 5.0
+    return usage["total_cost_usd"] < limit
+
+def log_usage(db: Session, user_id: int, action_type: str, input_tokens: int, output_tokens: int):
+    """Speichert einen Usage-Log"""
+    cost = calculate_cost(input_tokens, output_tokens)
+    log = UsageLog(
+        user_id=user_id,
+        action_type=action_type,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        cost_usd=cost
+    )
+    db.add(log)
+    db.commit()
+    return log
 
 
 # ========================================
@@ -1634,6 +1685,14 @@ async def analyze_property(
     - Warnsignal-Erkennung
     - Gewichtete Score-Berechnung
     """
+    # Prüfe Usage-Limit
+    if not check_usage_limit(db, current_user):
+        usage = get_user_total_usage(db, current_user.id)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Nutzungslimit erreicht! Du hast ${usage['total_cost_usd']:.2f} von ${current_user.usage_limit_usd:.2f} verbraucht. Kontaktiere den Admin für mehr."
+        )
+
     data = request.property_data
     zweck = request.verwendungszweck
 
@@ -2050,7 +2109,16 @@ Antworte NUR mit dem JSON."""
             system=system_prompt,
             messages=[{"role": "user", "content": analyse_prompt}]
         )
-        
+
+        # Log Usage
+        log_usage(
+            db=db,
+            user_id=current_user.id,
+            action_type="analyze",
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens
+        )
+
         json_text = response.content[0].text.strip()
         if json_text.startswith("```"):
             json_text = json_text.split("```")[1]
@@ -2222,7 +2290,8 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 async def chat_with_ai(
     request: ChatRequest,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
 ):
     """
     V3.0 Chat-Endpoint mit Live-Marktdaten-Recherche
@@ -2232,6 +2301,14 @@ async def chat_with_ai(
     - Live-Marktdaten für spezifische Standorte recherchieren
     - Auf Basis von Analyse-Kontext antworten
     """
+    # Prüfe Usage-Limit
+    if not check_usage_limit(db, current_user):
+        usage = get_user_total_usage(db, current_user.id)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Nutzungslimit erreicht! Du hast ${usage['total_cost_usd']:.2f} von ${current_user.usage_limit_usd:.2f} verbraucht. Kontaktiere den Admin für mehr."
+        )
+
     client = get_anthropic_client()
 
     # Prüfe ob eine Stadt/Standort in der Nachricht erwähnt wird
@@ -2293,12 +2370,23 @@ Bei Preisfragen: IMMER konkrete Zahlen aus den Live-Daten!"""
             messages=[{"role": "user", "content": request.message}]
         )
 
+        # Log Usage
+        log_usage(
+            db=db,
+            user_id=current_user.id,
+            action_type="chat",
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens
+        )
+
         return ChatResponse(
             response=response.content[0].text,
             marktdaten_verwendet=live_marktdaten is not None,
             recherche_standort=standort
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chat-Fehler: {str(e)}")
 
@@ -2406,6 +2494,9 @@ async def get_all_users(
 
         last_activity = last_analysis.updated_at if last_analysis else user.created_at
 
+        # Usage-Daten
+        usage = get_user_total_usage(db, user.id)
+
         result.append(AdminUserResponse(
             id=user.id,
             email=user.email,
@@ -2416,7 +2507,10 @@ async def get_all_users(
             created_at=user.created_at,
             updated_at=user.updated_at,
             analyses_count=analyses_count,
-            last_activity=last_activity
+            last_activity=last_activity,
+            usage_limit_usd=user.usage_limit_usd or 5.0,
+            total_cost_usd=usage["total_cost_usd"],
+            total_requests=usage["total_requests"]
         ))
 
     return result
@@ -2439,6 +2533,9 @@ async def get_user_details(
     ).order_by(Analysis.updated_at.desc()).first()
     last_activity = last_analysis.updated_at if last_analysis else user.created_at
 
+    # Usage-Daten
+    usage = get_user_total_usage(db, user.id)
+
     return AdminUserResponse(
         id=user.id,
         email=user.email,
@@ -2449,7 +2546,10 @@ async def get_user_details(
         created_at=user.created_at,
         updated_at=user.updated_at,
         analyses_count=analyses_count,
-        last_activity=last_activity
+        last_activity=last_activity,
+        usage_limit_usd=user.usage_limit_usd or 5.0,
+        total_cost_usd=usage["total_cost_usd"],
+        total_requests=usage["total_requests"]
     )
 
 
@@ -2482,6 +2582,8 @@ async def update_user_admin(
         if existing:
             raise HTTPException(status_code=400, detail="E-Mail bereits vergeben")
         user.email = user_update.email
+    if user_update.usage_limit_usd is not None:
+        user.usage_limit_usd = user_update.usage_limit_usd
 
     user.updated_at = datetime.utcnow()
     db.commit()
@@ -2493,6 +2595,9 @@ async def update_user_admin(
     ).order_by(Analysis.updated_at.desc()).first()
     last_activity = last_analysis.updated_at if last_analysis else user.created_at
 
+    # Usage-Daten
+    usage = get_user_total_usage(db, user.id)
+
     return AdminUserResponse(
         id=user.id,
         email=user.email,
@@ -2503,7 +2608,10 @@ async def update_user_admin(
         created_at=user.created_at,
         updated_at=user.updated_at,
         analyses_count=analyses_count,
-        last_activity=last_activity
+        last_activity=last_activity,
+        usage_limit_usd=user.usage_limit_usd or 5.0,
+        total_cost_usd=usage["total_cost_usd"],
+        total_requests=usage["total_requests"]
     )
 
 
