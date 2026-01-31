@@ -5,6 +5,7 @@ Datenbank-Konfiguration für SQLAlchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 import os
 import time
 
@@ -21,16 +22,12 @@ if "sqlite" in DATABASE_URL:
     connect_args = {"check_same_thread": False}
     engine = create_engine(DATABASE_URL, connect_args=connect_args)
 else:
-    # PostgreSQL mit Supabase Pooler - braucht spezielle Einstellungen
+    # PostgreSQL mit Supabase Pooler
+    # NullPool weil Supabase bereits Connection Pooling macht (PgBouncer)
     engine = create_engine(
         DATABASE_URL,
-        pool_pre_ping=True,
-        pool_recycle=300,
-        pool_size=5,
-        max_overflow=10,
-        pool_timeout=30,
+        poolclass=NullPool,
         connect_args={
-            "options": "-c statement_timeout=60000",
             "connect_timeout": 30
         }
     )
