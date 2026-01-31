@@ -34,7 +34,7 @@ from knowledge_base import (
     MARKTDATEN,
     DEALBREAKER
 )
-from database import get_db, init_db
+from database import get_db, init_db, Base
 from models import User, Analysis, UsageLog
 from auth import (
     get_password_hash,
@@ -588,6 +588,31 @@ def get_anthropic_client():
 @app.get("/")
 async def root():
     return {"message": "AmlakI API läuft", "version": "2.0.0"}
+
+
+@app.get("/debug/db")
+def debug_database(db: Session = Depends(get_db)):
+    """Debug endpoint to test database"""
+    try:
+        # Test database connection
+        user_count = db.query(User).count()
+        analysis_count = db.query(Analysis).count()
+        usage_log_count = db.query(UsageLog).count()
+
+        # Check if usage_limit_usd column exists
+        test_user = db.query(User).first()
+        has_limit_column = hasattr(test_user, 'usage_limit_usd') if test_user else True
+
+        return {
+            "status": "ok",
+            "user_count": user_count,
+            "analysis_count": analysis_count,
+            "usage_log_count": usage_log_count,
+            "has_limit_column": has_limit_column,
+            "tables": list(Base.metadata.tables.keys())
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e), "type": type(e).__name__}
 
 
 # ========================================
