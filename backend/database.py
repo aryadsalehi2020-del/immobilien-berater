@@ -13,9 +13,11 @@ import time
 # Für Production würde man PostgreSQL verwenden
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./amlaki.db")
 
-# Render verwendet postgres:// statt postgresql:// - SQLAlchemy braucht postgresql://
+# Render/Supabase verwendet postgres:// - wir brauchen postgresql+psycopg://
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and "+psycopg" not in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 # Connection args basierend auf Datenbanktyp
 if "sqlite" in DATABASE_URL:
