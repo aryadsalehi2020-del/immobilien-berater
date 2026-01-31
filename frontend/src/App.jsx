@@ -7,6 +7,7 @@ import { UserProfileProvider } from './contexts/UserProfileContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import DesignPreview from './pages/DesignPreview';
 import Analyze from './pages/Analyze';
 import Library from './pages/Library';
 import LibraryDetail from './pages/LibraryDetail';
@@ -76,6 +77,7 @@ function App() {
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/design-preview" element={<DesignPreview />} />
 
           {/* Protected Routes with Sidebar */}
           <Route
